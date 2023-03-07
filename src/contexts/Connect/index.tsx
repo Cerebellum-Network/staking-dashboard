@@ -252,7 +252,7 @@ export const ConnectProvider = ({
       const id = e?.id ?? undefined;
 
       // whether extension is locally stored (previously connected)
-      const isLocal = extensionIsLocal(id ?? 0);
+      const isLocal = extensionIsLocal(id ?? '0');
 
       if (!id || !isLocal) {
         updateInitialisedExtensions(
@@ -351,9 +351,11 @@ export const ConnectProvider = ({
                 const activeExtensionAccount =
                   getActiveExtensionAccount(newAccounts);
 
+                const removedActiveAccount =
+                  meta.removedActiveAccount as unknown as ImportedAccount;
                 if (
-                  activeExtensionAccount !== meta.removedActiveAccount &&
-                  meta.removedActiveAccount !== null
+                  activeExtensionAccount !== removedActiveAccount &&
+                  removedActiveAccount !== null
                 )
                   connectActiveExtensionAccount(
                     activeExtensionAccount,
