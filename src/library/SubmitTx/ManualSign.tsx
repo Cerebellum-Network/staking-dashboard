@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import type { SubmitProps } from './types';
 
 export const ManualSign = ({
+  uid,
   onSubmit,
   submitting,
   valid,
@@ -39,9 +40,9 @@ export const ManualSign = ({
     handleNewStatusCode,
     isPaired,
     getStatusCodes,
-    getTransport,
     getDefaultMessage,
     setDefaultMessage,
+    handleUnmount,
   } = useLedgerHardware();
   const { activeAccount, accountHasSigner, getAccount } = useConnect();
   const { txFeesValid, setTxSignature, getTxSignature } = useTxMeta();
@@ -72,10 +73,18 @@ export const ManualSign = ({
     const { ack, statusCode, body } = response;
 
     if (statusCode === 'SignedPayload') {
-      handleNewStatusCode(ack, statusCode);
-      setTxSignature(body);
+      if (uid !== body.uid) {
+        setDefaultMessage(t('wrongTransaction'));
+        resetStatusCodes();
+        setTxSignature(null);
+      } else {
+        handleNewStatusCode(ack, statusCode);
+        setTxSignature(body.sig);
+        resetStatusCodes();
+      }
       setIsExecuting(false);
-      resetStatusCodes();
+    } else {
+      handleNewStatusCode(ack, statusCode);
     }
   };
 
@@ -102,12 +111,7 @@ export const ManualSign = ({
   useEffect(() => {
     return () => {
       isMounted.current = false;
-      resetStatusCodes();
-      setIsExecuting(false);
-      setDefaultMessage(null);
-      if (getTransport()?.device?.opened) {
-        getTransport().device.close();
-      }
+      handleUnmount();
     };
   }, []);
 
