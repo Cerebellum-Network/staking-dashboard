@@ -34,6 +34,7 @@ export const ItemWrapper = styled(motion.div)`
 export const ItemInnerWrapper = styled.div<{ inactive?: boolean }>`
   display: flex;
   flex-flow: row wrap;
+  align-items: center;
 
   > section {
     height: 100%;
@@ -43,12 +44,6 @@ export const ItemInnerWrapper = styled.div<{ inactive?: boolean }>`
       flex-flow: row wrap;
       align-items: center;
       padding-top: 0.1rem;
-      .lpf {
-        fill: var(--network-color-primary);
-      }
-      .lps {
-        stroke: var(--network-color-primary);
-      }
     }
 
     &:nth-child(2) {

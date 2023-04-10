@@ -8,7 +8,7 @@ import BigNumber from 'bignumber.js';
  * Global Constants
  */
 export const AppVersion = '1.0.6';
-export const UriPrefix = '/polkadot-staking-dashboard';
+export const BaseURL = '/polkadot-staking-dashboard';
 export const DappName = 'Polkadot Staking Dashboard';
 export const PolkadotUrl = 'https://polkadot.network/staking/';
 export const DefaultNetwork = 'polkadot';
