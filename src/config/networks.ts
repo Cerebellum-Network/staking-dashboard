@@ -57,6 +57,12 @@ const cereTestnet = {
 // By default, includeTestnet is true or undefined unless REACT_APP_INCLUDE_TESTNET is explicitly set to 'false'
 const includeTestnet = process.env.REACT_APP_INCLUDE_TESTNET !== 'false';
 
+console.log(
+  'process.env.REACT_APP_INCLUDE_TESTNET',
+  process.env.REACT_APP_INCLUDE_TESTNET,
+  typeof process.env.REACT_APP_INCLUDE_TESTNET
+);
+
 /*
  * Network Configuration
  */
