@@ -53,6 +53,12 @@ const cereTestnet = {
   endpoint: 'wss://archive.testnet.cere.network/ws',
 };
 
+const cereDevnet = {
+  ...cereMainnet,
+  name: 'Cere Devnet',
+  endpoint: 'wss://archive.devnet.cere.network/ws',
+};
+
 // Determine if the testnet should be included based on the REACT_APP_INCLUDE_TESTNET environment variable
 // By default, includeTestnet is true or undefined unless REACT_APP_INCLUDE_TESTNET is explicitly set to 'false'
 const includeTestnet = process.env.REACT_APP_INCLUDE_TESTNET !== 'false';
@@ -63,4 +69,5 @@ const includeTestnet = process.env.REACT_APP_INCLUDE_TESTNET !== 'false';
 export const NETWORKS: Networks = {
   cereMainnet,
   ...(includeTestnet ? { cereTestnet } : {}),
+  cereDevnet,
 };

@@ -10,6 +10,7 @@ import {
   faThumbtack,
   faComment,
   faBraille,
+  faChartSimple,
 } from '@fortawesome/free-solid-svg-icons';
 import Overview from 'pages/Overview';
 import Stake from 'pages/Stake';
@@ -19,6 +20,7 @@ import Favourites from 'pages/Favourites';
 import Payouts from 'pages/Payouts';
 import { URI_PREFIX } from 'consts';
 import { PageCategories, PagesConfig } from 'types';
+import DDCStake from '../pages/DDCStake';
 
 export const PAGE_CATEGORIES: PageCategories = [
   {
@@ -51,6 +53,14 @@ export const PAGES_CONFIG: PagesConfig = [
     hash: '/stake',
     Entry: Stake,
     icon: faChartLine,
+  },
+  {
+    category: 2,
+    title: 'DDC Stake',
+    uri: `${URI_PREFIX}/ddc-stake`,
+    hash: '/ddc-stake',
+    Entry: DDCStake,
+    icon: faChartSimple,
   },
   {
     category: 2,

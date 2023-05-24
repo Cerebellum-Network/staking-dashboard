@@ -28,6 +28,8 @@ import { ValidatorsProvider } from './contexts/Validators';
 import { UIProvider } from './contexts/UI';
 import { useTheme } from './contexts/Themes';
 import { SessionEraProvider } from './contexts/SessionEra';
+import { DDCStakeProvider } from './contexts/DDCStakeUI';
+import { DDCStakingProvider } from './contexts/DDCStaking';
 
 export const WrappedRouter = () => (
   <Wrapper>
@@ -68,7 +70,9 @@ export const Providers = withProviders(
   PaletteProvider,
   NotificationsProvider,
   ExtrinsicsProvider,
-  SessionEraProvider
+  SessionEraProvider,
+  DDCStakeProvider,
+  DDCStakingProvider
 )(ThemedRouter);
 
 export default Providers;
