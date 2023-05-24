@@ -30,6 +30,7 @@ import { useTheme } from './contexts/Themes';
 import { SessionEraProvider } from './contexts/SessionEra';
 import { DDCStakeProvider } from './contexts/DDCStakeUI';
 import { DDCStakingProvider } from './contexts/DDCStaking';
+import { DDCBalancesProvider } from './contexts/DDCBalances';
 
 export const WrappedRouter = () => (
   <Wrapper>
@@ -72,7 +73,8 @@ export const Providers = withProviders(
   ExtrinsicsProvider,
   SessionEraProvider,
   DDCStakeProvider,
-  DDCStakingProvider
+  DDCStakingProvider,
+  DDCBalancesProvider
 )(ThemedRouter);
 
 export default Providers;
