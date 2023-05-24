@@ -39,26 +39,14 @@ export const Setup = ({ title }: any) => {
       </PageRowWrapper>
       <PageRowWrapper className="page-padding" noVerticalSpacer>
         <CardWrapper>
-          <Element name="payee" style={{ position: 'absolute' }} />
-          <Payee section={2} />
-        </CardWrapper>
-      </PageRowWrapper>
-      <PageRowWrapper className="page-padding" noVerticalSpacer>
-        <CardWrapper>
-          <Element name="nominate" style={{ position: 'absolute' }} />
-          <ChooseNominators section={3} />
-        </CardWrapper>
-      </PageRowWrapper>
-      <PageRowWrapper className="page-padding" noVerticalSpacer>
-        <CardWrapper>
           <Element name="bond" style={{ position: 'absolute' }} />
-          <Bond section={4} />
+          <Bond section={2} />
         </CardWrapper>
       </PageRowWrapper>
       <PageRowWrapper className="page-padding" noVerticalSpacer>
         <CardWrapper>
           <Element name="summary" style={{ position: 'absolute' }} />
-          <Summary section={5} />
+          <Summary section={3} />
         </CardWrapper>
       </PageRowWrapper>
     </>
