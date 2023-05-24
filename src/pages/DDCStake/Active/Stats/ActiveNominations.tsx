@@ -1,11 +1,11 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useStaking } from 'contexts/Staking';
+import { useDDCStaking } from 'contexts/DDCStaking';
 import { Pie } from 'library/StatBoxList/Pie';
 
 export const ActiveNominationsStatBox = () => {
-  const { getNominationsStatus } = useStaking();
+  const { getNominationsStatus } = useDDCStaking();
   const nominationStatuses = getNominationsStatus();
 
   const total = Object.values(nominationStatuses).length;

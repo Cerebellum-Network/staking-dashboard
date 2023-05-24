@@ -10,7 +10,7 @@ import { useModal } from 'contexts/Modal';
 import { useBalances } from 'contexts/Balances';
 import { useConnect } from 'contexts/Connect';
 import { useDDCStake } from 'contexts/DDCStakeUI';
-import { useStaking } from 'contexts/Staking';
+import { useDDCStaking } from 'contexts/DDCStaking';
 import { CardHeaderWrapper } from 'library/Graphs/Wrappers';
 import { faStopCircle } from '@fortawesome/free-solid-svg-icons';
 import { useActivePool } from 'contexts/Pools/ActivePool';
@@ -19,7 +19,7 @@ import { Wrapper } from './Wrapper';
 export const Nominations = ({ bondType }: { bondType: 'pool' | 'stake' }) => {
   const { openModalWith } = useModal();
   const { isReady } = useApi();
-  const { inSetup } = useStaking();
+  const { inSetup } = useDDCStaking();
   const { isSyncing } = useDDCStake();
   const { activeAccount, isReadOnlyAccount } = useConnect();
   const { getAccountNominations } = useBalances();

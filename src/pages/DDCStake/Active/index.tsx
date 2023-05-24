@@ -8,7 +8,7 @@ import {
 } from 'Wrappers';
 import { CardWrapper, CardHeaderWrapper } from 'library/Graphs/Wrappers';
 import { StatBoxList } from 'library/StatBoxList';
-import { useStaking } from 'contexts/Staking';
+import { useDDCStaking } from 'contexts/DDCStaking';
 import { useBalances } from 'contexts/Balances';
 import { useConnect } from 'contexts/Connect';
 import { Button } from 'library/Button';
@@ -34,7 +34,7 @@ export const Active = ({ title }: any) => {
   const { openModalWith } = useModal();
   const { activeAccount } = useConnect();
   const { isSyncing } = useDDCStake();
-  const { targets, setTargets, inSetup } = useStaking();
+  const { targets, setTargets, inSetup } = useDDCStaking();
   const { getAccountNominations } = useBalances();
   const nominations = getAccountNominations(activeAccount);
 

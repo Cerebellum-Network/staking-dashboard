@@ -165,8 +165,6 @@ export const DDCStakeProvider = ({
 
   const PROGRESS_DEFAULT = {
     controller: null,
-    payee: null,
-    nominations: [],
     bond: 0,
     section: 1,
   };
@@ -180,7 +178,7 @@ export const DDCStakeProvider = ({
     const _setup = connectAccounts.map((item) => {
       // if there is existing config for an account, use that.
       const localSetup = localStorage.getItem(
-        `${network.name.toLowerCase()}_stake_setup_${item.address}`
+        `${network.name.toLowerCase()}_ddc_stake_setup_${item.address}`
       );
 
       // otherwise use the default values.
@@ -212,12 +210,10 @@ export const DDCStakeProvider = ({
 
   const getSetupProgressPercent = (address: string) => {
     const setupProgress = getSetupProgress(address);
-    const p = 25;
+    const p = 50;
     let progress = 0;
     if (setupProgress.bond > 0) progress += p;
     if (setupProgress.controller !== null) progress += p;
-    if (setupProgress.nominations.length) progress += p;
-    if (setupProgress.payee !== null) progress += p;
 
     return progress;
   };
@@ -230,7 +226,7 @@ export const DDCStakeProvider = ({
 
     // update local storage setup
     localStorage.setItem(
-      `${network.name.toLowerCase()}_stake_setup_${activeAccount}`,
+      `${network.name.toLowerCase()}_ddc_stake_setup_${activeAccount}`,
       JSON.stringify(progress)
     );
 
@@ -271,7 +267,7 @@ export const DDCStakeProvider = ({
 
     // update local storage
     localStorage.setItem(
-      `${network.name.toLowerCase()}_stake_setup_${activeAccount}`,
+      `${network.name.toLowerCase()}_ddc_stake_setup_${activeAccount}`,
       JSON.stringify(_accountSetup.progress)
     );
 

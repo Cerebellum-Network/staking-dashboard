@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useApi } from 'contexts/Api';
-import { useStaking } from 'contexts/Staking';
+import { useDDCStaking } from 'contexts/DDCStaking';
 import { Number } from 'library/StatBoxList/Number';
 
 export const MinimumActiveBondStatBox = () => {
   const { network } = useApi();
-  const { eraStakers } = useStaking();
+  const { eraStakers } = useDDCStaking();
   const { minActiveBond } = eraStakers;
 
   const params = {

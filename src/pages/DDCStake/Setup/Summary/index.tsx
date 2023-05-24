@@ -35,11 +35,6 @@ export const Summary = (props: SummaryProps) => {
       Id: activeAccount,
     };
     const bondToSubmit = bond * 10 ** units;
-    const targetsToSubmit = nominations.map((item: any) => {
-      return {
-        Id: item.address,
-      };
-    });
     const controllerToSubmit = {
       Id: controller,
     };
@@ -48,7 +43,10 @@ export const Summary = (props: SummaryProps) => {
     const _txs = [
       api.tx.ddcStaking.bond(stashToSubmit, bondToSubmit),
       api.tx.ddcStaking.setController(controllerToSubmit),
+      // api.tx.ddcStaking.store(controllerToSubmit) -- for DDC Node.
+      // api.tx.ddcStaking.serve(controllerToSubmit, {foo: true}),
     ];
+
     return api.tx.utility.batch(_txs);
   };
 
@@ -77,26 +75,6 @@ export const Summary = (props: SummaryProps) => {
               &nbsp; Controller:
             </div>
             <div>{controller}</div>
-          </section>
-          <section>
-            <div>
-              <FontAwesomeIcon
-                icon={faCheckCircle as IconProp}
-                transform="grow-1"
-              />{' '}
-              &nbsp; Reward Destination:
-            </div>
-            <div>{payee}</div>
-          </section>
-          <section>
-            <div>
-              <FontAwesomeIcon
-                icon={faCheckCircle as IconProp}
-                transform="grow-1"
-              />{' '}
-              &nbsp; Nominations:
-            </div>
-            <div>{nominations.length}</div>
           </section>
           <section>
             <div>

@@ -5,7 +5,7 @@ import { CardWrapper, CardHeaderWrapper } from 'library/Graphs/Wrappers';
 import { Button } from 'library/Button';
 import { useBalances } from 'contexts/Balances';
 import { useConnect } from 'contexts/Connect';
-import { useStaking } from 'contexts/Staking';
+import { useDDCStaking } from 'contexts/DDCStaking';
 import { PageRowWrapper } from 'Wrappers';
 import { useModal } from 'contexts/Modal';
 import { useDDCStake } from 'contexts/DDCStakeUI';
@@ -13,7 +13,7 @@ import { useDDCStake } from 'contexts/DDCStakeUI';
 export const ControllerNotImported = () => {
   const { openModalWith } = useModal();
   const { isSyncing } = useDDCStake();
-  const { getControllerNotImported } = useStaking();
+  const { getControllerNotImported } = useDDCStaking();
   const { activeAccount, isReadOnlyAccount } = useConnect();
   const { getBondedAccount } = useBalances();
   const controller = getBondedAccount(activeAccount);

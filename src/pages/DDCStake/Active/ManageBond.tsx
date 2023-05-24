@@ -6,8 +6,7 @@ import { planckBnToUnit, humanNumber } from 'Utils';
 import BondedGraph from 'library/Graphs/Bonded';
 import { useApi } from 'contexts/Api';
 import { useConnect } from 'contexts/Connect';
-import { useBalances } from 'contexts/Balances';
-import { useStaking } from 'contexts/Staking';
+import { useDDCStaking } from 'contexts/DDCStaking';
 import { Button, ButtonRow } from 'library/Button';
 import { OpenAssistantIcon } from 'library/OpenAssistantIcon';
 import { useModal } from 'contexts/Modal';
@@ -15,14 +14,15 @@ import { useDDCStake } from 'contexts/DDCStakeUI';
 import { CardHeaderWrapper } from 'library/Graphs/Wrappers';
 import { BondOptions } from 'contexts/Balances/types';
 import BN from 'bn.js';
+import { useDDCBalances } from 'contexts/DDCBalances';
 
 export const ManageBond = () => {
   const { network } = useApi();
   const { units } = network;
   const { openModalWith } = useModal();
   const { activeAccount, isReadOnlyAccount } = useConnect();
-  const { getLedgerForStash, getBondOptions } = useBalances();
-  const { inSetup } = useStaking();
+  const { getLedgerForStash, getBondOptions } = useDDCBalances();
+  const { inSetup } = useDDCStaking();
   const { isSyncing } = useDDCStake();
   const ledger = getLedgerForStash(activeAccount);
   const { active }: { active: BN } = ledger;

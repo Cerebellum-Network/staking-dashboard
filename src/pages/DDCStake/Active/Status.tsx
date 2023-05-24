@@ -10,7 +10,6 @@ import { faCircle } from '@fortawesome/free-regular-svg-icons';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { Separator } from 'Wrappers';
 import { CardWrapper } from 'library/Graphs/Wrappers';
-import { useStaking } from 'contexts/Staking';
 import { useBalances } from 'contexts/Balances';
 import { useConnect } from 'contexts/Connect';
 import { useModal } from 'contexts/Modal';
@@ -18,6 +17,7 @@ import { PAYEE_STATUS } from 'consts';
 import { useDDCStake } from 'contexts/DDCStakeUI';
 import { useApi } from 'contexts/Api';
 import Stat from 'library/Stat';
+import { useDDCStaking } from 'contexts/DDCStaking';
 
 export const Status = ({ height }: { height: number }) => {
   const { isReady } = useApi();
@@ -25,7 +25,7 @@ export const Status = ({ height }: { height: number }) => {
   const { openModalWith } = useModal();
   const { activeAccount, isReadOnlyAccount } = useConnect();
   const { isSyncing } = useDDCStake();
-  const { getNominationsStatus, staking, inSetup } = useStaking();
+  const { getNominationsStatus, staking, inSetup } = useDDCStaking();
   const { getAccountNominations } = useBalances();
   const { payee } = staking;
   const nominations = getAccountNominations(activeAccount);

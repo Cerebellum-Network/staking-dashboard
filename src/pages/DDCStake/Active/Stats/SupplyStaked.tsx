@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BN from 'bn.js';
-import { useStaking } from 'contexts/Staking';
+import { useDDCStaking } from 'contexts/DDCStaking';
 import { useApi } from 'contexts/Api';
 import { useNetworkMetrics } from 'contexts/Network';
 import { Pie } from 'library/StatBoxList/Pie';
@@ -13,7 +13,7 @@ export const SupplyStakedStatBox = () => {
   const { units } = network;
   const { metrics } = useNetworkMetrics();
   const { totalIssuance } = metrics;
-  const { staking } = useStaking();
+  const { staking } = useDDCStaking();
 
   const { lastTotalStake } = staking;
 

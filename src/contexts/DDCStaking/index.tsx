@@ -22,9 +22,9 @@ import {
 } from './types';
 import { useApi } from '../Api';
 import { useNetworkMetrics } from '../Network';
-import { useBalances } from '../Balances';
 import { useConnect } from '../Connect';
 import * as defaults from './defaults';
+import { useDDCBalances } from '../DDCBalances';
 
 export const DDCStakingContext =
   React.createContext<DDCStakingContextInterface>(
@@ -52,9 +52,8 @@ export const DDCStakingProvider = ({
     getBondedAccount,
     getLedgerForStash,
     getAccountNominations,
-  } = useBalances();
+  } = useDDCBalances();
   const { units } = network;
-  const { maxNominatorRewardedPerValidator } = consts;
 
   // store staking metrics in state
   const [stakingMetrics, setStakingMetrics] = useState<DDCStakingMetrics>(
@@ -368,10 +367,7 @@ export const DDCStakingProvider = ({
    * is nominating, or is yet to start.
    */
   const inSetup = () => {
-    return (
-      !activeAccount ||
-      (!hasController() && !isBonding() && !isNominating() && !isUnlocking())
-    );
+    return !activeAccount || (!hasController() && !isBonding());
   };
 
   return (
