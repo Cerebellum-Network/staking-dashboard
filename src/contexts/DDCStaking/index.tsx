@@ -100,13 +100,6 @@ export const DDCStakingProvider = ({
     };
   }, [isReady, metrics.activeEra]);
 
-  // handle syncing with eraStakers
-  useEffect(() => {
-    if (isReady) {
-      fetchEraStakers();
-    }
-  }, [isReady, metrics.activeEra.index, activeAccount]);
-
   useEffect(() => {
     if (activeAccount) {
       // calculates minimum bond of the user's chosen nominated validators.
@@ -251,40 +244,6 @@ export const DDCStakingProvider = ({
         unsub,
       });
     }
-  };
-
-  /*
-   * Fetches the active nominator set.
-   * The top 256 nominators get rewarded. Nominators may have their bond  spread
-   * among multiple nominees.
-   * the minimum nominator bond is calculated by summing a particular bond of a nominator.
-   */
-  const fetchEraStakers = async () => {
-    if (!isReady || metrics.activeEra.index === 0 || !api) {
-      return;
-    }
-    const _exposures = await api.query.ddcStaking.erasStakers.entries(
-      metrics.activeEra.index
-    );
-
-    // flag eraStakers is recyncing
-    setStateWithRef(true, setErasStakersSyncing, erasStakersSyncingRef);
-
-    // humanise exposures to send to worker
-    const exposures = _exposures.map(([_keys, _val]: AnyApi) => {
-      return {
-        keys: _keys.toHuman(),
-        val: _val.toHuman(),
-      };
-    });
-
-    // worker to calculate stats
-    worker.postMessage({
-      activeAccount,
-      units: network.units,
-      exposures,
-      maxNominatorRewardedPerValidator,
-    });
   };
 
   /*
