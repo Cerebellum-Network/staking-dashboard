@@ -63,11 +63,13 @@ const cereDevnet = {
 // By default, includeTestnet is true or undefined unless REACT_APP_INCLUDE_TESTNET is explicitly set to 'false'
 const includeTestnet = process.env.REACT_APP_INCLUDE_TESTNET !== 'false';
 
+const includeDevnet = process.env.REACT_APP_INCLUDE_DEVNET !== 'false';
+
 /*
  * Network Configuration
  */
 export const NETWORKS: Networks = {
   cereMainnet,
   ...(includeTestnet ? { cereTestnet } : {}),
-  cereDevnet,
+  ...(includeDevnet ? { cereDevnet } : {}),
 };
