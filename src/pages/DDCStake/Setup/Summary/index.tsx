@@ -127,7 +127,7 @@ export const Summary = (props: SummaryProps) => {
           <Button
             onClick={() => submitTx()}
             disabled={submitting || !accountHasSigner(activeAccount)}
-            title="Start Staking"
+            title="Start DDC Staking"
             primary
           />
         </div>
