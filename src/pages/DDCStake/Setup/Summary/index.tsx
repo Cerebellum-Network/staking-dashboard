@@ -46,9 +46,8 @@ export const Summary = (props: SummaryProps) => {
 
     // construct a batch of transactions
     const _txs = [
-      api.tx.staking.bond(stashToSubmit, bondToSubmit, payee),
-      api.tx.staking.nominate(targetsToSubmit),
-      api.tx.staking.setController(controllerToSubmit),
+      api.tx.ddcStaking.bond(stashToSubmit, bondToSubmit),
+      api.tx.ddcStaking.setController(controllerToSubmit),
     ];
     return api.tx.utility.batch(_txs);
   };
