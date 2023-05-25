@@ -39,12 +39,28 @@ export const Summary = (props: SummaryProps) => {
       Id: controller,
     };
 
+    const role = 'edge' as 'storage' | 'edge';
+
+    let stakingCallName;
+    let prefs;
+    switch (role) {
+      case 'storage':
+        stakingCallName = 'store';
+        prefs = { foo: true };
+        break;
+      case 'edge':
+        stakingCallName = 'serve';
+        prefs = { foo: true };
+        break;
+      default:
+        throw new Error(`Invalid role ${role}`);
+    }
+
     // construct a batch of transactions
     const _txs = [
       api.tx.ddcStaking.bond(stashToSubmit, bondToSubmit),
       api.tx.ddcStaking.setController(controllerToSubmit),
-      // api.tx.ddcStaking.store(controllerToSubmit) -- for DDC Node.
-      // api.tx.ddcStaking.serve(controllerToSubmit, {foo: true}),
+      api.tx.ddcStaking[stakingCallName](prefs),
     ];
 
     return api.tx.utility.batch(_txs);
