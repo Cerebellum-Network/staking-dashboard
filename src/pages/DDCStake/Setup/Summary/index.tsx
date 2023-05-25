@@ -19,12 +19,12 @@ import { Header } from '../Header';
 export const Summary = (props: SummaryProps) => {
   const { section } = props;
 
-  const { api, network } = useApi();
+  const { api } = useApi();
   const { activeAccount, accountHasSigner } = useConnect();
   const { getSetupProgress } = useDDCStake();
   const setup = getSetupProgress(activeAccount);
 
-  const { controller, bond, nominations, payee } = setup;
+  const { controller } = setup;
 
   const txs = () => {
     if (!activeAccount || !api) {
@@ -89,18 +89,6 @@ export const Summary = (props: SummaryProps) => {
               &nbsp; Controller:
             </div>
             <div>{controller}</div>
-          </section>
-          <section>
-            <div>
-              <FontAwesomeIcon
-                icon={faCheckCircle as IconProp}
-                transform="grow-1"
-              />{' '}
-              &nbsp; Bond Amount:
-            </div>
-            <div>
-              {humanNumber(bond)} {network.unit}
-            </div>
           </section>
           <section>
             <div>Estimated Tx Fee:</div>

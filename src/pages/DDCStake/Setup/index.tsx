@@ -37,14 +37,8 @@ export const Setup = ({ title }: any) => {
       </PageRowWrapper>
       <PageRowWrapper className="page-padding" noVerticalSpacer>
         <CardWrapper>
-          <Element name="bond" style={{ position: 'absolute' }} />
-          <Bond section={2} />
-        </CardWrapper>
-      </PageRowWrapper>
-      <PageRowWrapper className="page-padding" noVerticalSpacer>
-        <CardWrapper>
           <Element name="summary" style={{ position: 'absolute' }} />
-          <Summary section={3} />
+          <Summary section={2} />
         </CardWrapper>
       </PageRowWrapper>
     </>
