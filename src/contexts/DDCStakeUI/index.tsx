@@ -7,10 +7,10 @@ import { SERVICES, SIDE_MENU_STICKY_THRESHOLD } from 'consts';
 import { localStorageOrDefault, setStateWithRef } from 'Utils';
 import { ImportedAccount } from 'contexts/Connect/types';
 import { MaybeAccount } from 'types';
+import { useDDCBalances } from 'contexts/DDCBalances';
 import { useConnect } from '../Connect';
 import { useNetworkMetrics } from '../Network';
 import { useDDCStaking } from '../DDCStaking';
-import { useBalances } from '../Balances';
 import { useApi } from '../Api';
 import { defaultDDCStakeContext } from './defaults';
 import { DDCStakeInterface } from './types';
@@ -30,7 +30,7 @@ export const DDCStakeProvider = ({
   const { accounts: connectAccounts, activeAccount } = useConnect();
   const { staking, eraStakers, inSetup } = useDDCStaking();
   const { metrics } = useNetworkMetrics();
-  const { accounts } = useBalances();
+  const { accounts } = useDDCBalances();
 
   // set whether app is syncing
   const [isSyncing, setIsSyncing] = useState(false);

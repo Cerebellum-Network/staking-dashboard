@@ -6,38 +6,16 @@ import {
   RowPrimaryWrapper,
   RowSecondaryWrapper,
 } from 'Wrappers';
-import { CardWrapper, CardHeaderWrapper } from 'library/Graphs/Wrappers';
-import { StatBoxList } from 'library/StatBoxList';
-import { useDDCStaking } from 'contexts/DDCStaking';
-import { useBalances } from 'contexts/Balances';
-import { useConnect } from 'contexts/Connect';
-import { Button } from 'library/Button';
+import { CardWrapper } from 'library/Graphs/Wrappers';
 import { PageTitle } from 'library/PageTitle';
-import { OpenAssistantIcon } from 'library/OpenAssistantIcon';
-import { useModal } from 'contexts/Modal';
-import { useDDCStake } from 'contexts/DDCStakeUI';
-import { faChevronCircleRight } from '@fortawesome/free-solid-svg-icons';
 import {
   SECTION_FULL_WIDTH_THRESHOLD,
   SIDE_MENU_STICKY_THRESHOLD,
 } from 'consts';
-import { Nominations } from './Nominations';
 import { ManageBond } from './ManageBond';
-import { GenerateNominations } from '../GenerateNominations';
-import ActiveNominationsStatBox from './Stats/ActiveNominations';
-import InacctiveNominationsStatBox from './Stats/InactiveNominations';
-import MinimumActiveBondStatBox from './Stats/MinimumActiveBond';
-import { ControllerNotImported } from './ControllerNotImported';
 import { Status } from './Status';
 
 export const Active = ({ title }: any) => {
-  const { openModalWith } = useModal();
-  const { activeAccount } = useConnect();
-  const { isSyncing } = useDDCStake();
-  const { targets, setTargets, inSetup } = useDDCStaking();
-  const { getAccountNominations } = useBalances();
-  const nominations = getAccountNominations(activeAccount);
-
   const ROW_HEIGHT = 290;
 
   return (

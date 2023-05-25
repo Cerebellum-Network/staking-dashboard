@@ -10,7 +10,6 @@ import { faCircle } from '@fortawesome/free-regular-svg-icons';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { Separator } from 'Wrappers';
 import { CardWrapper } from 'library/Graphs/Wrappers';
-import { useBalances } from 'contexts/Balances';
 import { useConnect } from 'contexts/Connect';
 import { useModal } from 'contexts/Modal';
 import { PAYEE_STATUS } from 'consts';
@@ -25,17 +24,8 @@ export const Status = ({ height }: { height: number }) => {
   const { openModalWith } = useModal();
   const { activeAccount, isReadOnlyAccount } = useConnect();
   const { isSyncing } = useDDCStake();
-  const { getNominationsStatus, staking, inSetup } = useDDCStaking();
-  const { getAccountNominations } = useBalances();
+  const { staking, inSetup } = useDDCStaking();
   const { payee } = staking;
-  const nominations = getAccountNominations(activeAccount);
-
-  // get nomination status
-  const nominationStatuses = getNominationsStatus();
-
-  const active = Object.values(nominationStatuses).filter(
-    (_v) => _v === 'active'
-  ).length;
 
   const payeeStatus = PAYEE_STATUS.find((item) => item.key === payee);
 
@@ -51,15 +41,7 @@ export const Status = ({ height }: { height: number }) => {
       <Stat
         label="Status"
         assistant={['stake', 'Staking Status']}
-        stat={
-          inSetup() || isSyncing
-            ? 'Not Staking'
-            : !nominations.length
-            ? 'Inactive: Not Nominating'
-            : active
-            ? 'Actively Nominating with Bonded Funds'
-            : 'Waiting for Active Nominations'
-        }
+        stat={inSetup() || isSyncing ? 'Not Staking' : 'Staking'}
         buttons={
           !inSetup()
             ? []

@@ -67,7 +67,6 @@ export interface DDCBalancesContextInterface {
   getLedgerForController: (address: MaybeAccount) => BalanceLedger | null;
   getAccountLocks: (address: MaybeAccount) => Array<Lock>;
   getBondedAccount: (address: MaybeAccount) => string | null;
-  getAccountNominations: (address: MaybeAccount) => Targets;
   getBondOptions: (address: MaybeAccount | null) => BondOptions;
   isController: (address: MaybeAccount) => boolean;
   accounts: Array<BalancesAccount>;

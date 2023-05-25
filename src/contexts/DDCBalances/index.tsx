@@ -173,9 +173,8 @@ export const DDCBalancesProvider = ({
         [api.query.system.account, address],
         [api.query.balances.locks, address],
         [api.query.ddcStaking.bonded, address],
-        [api.query.ddcStaking.nominators, address],
       ],
-      async ([{ data }, locks, bonded, nominations]): Promise<void> => {
+      async ([{ data }, locks, bonded]): Promise<void> => {
         const _account: BalancesAccount = {
           address,
         };
@@ -211,19 +210,6 @@ export const DDCBalancesProvider = ({
           _bonded === null ? null : (_bonded.toHuman() as string | null);
         _account.bonded = _bonded;
 
-        // set account nominations
-        let _nominations = nominations.unwrapOr(null);
-        if (_nominations === null) {
-          _nominations = defaults.nominations;
-        } else {
-          _nominations = {
-            targets: _nominations.targets.toHuman(),
-            submittedIn: _nominations.submittedIn.toHuman(),
-          };
-        }
-
-        _account.nominations = _nominations;
-
         // update account in context state
         let _accounts = Object.values(accountsRef.current);
         // remove stale account if it's already in list
@@ -255,7 +241,7 @@ export const DDCBalancesProvider = ({
         // fallback to default ledger if not present
         if (_ledger !== null) {
           const { stash, total, active, unlocking } = _ledger;
-
+          console.log('_ledger values are', _ledger);
           // format unlocking chunks
           const _unlocking = [];
           for (const u of unlocking.toHuman()) {
@@ -379,23 +365,6 @@ export const DDCBalancesProvider = ({
     return bonded;
   };
 
-  // get an account's nominations
-  const getAccountNominations = (address: MaybeAccount) => {
-    const account = accountsRef.current.find(
-      (a: BalancesAccount) => a.address === address
-    );
-    if (account === undefined) {
-      return [];
-    }
-    const nominations = account.nominations;
-    if (nominations === undefined) {
-      return [];
-    }
-
-    const targets = nominations.targets ?? [];
-    return targets;
-  };
-
   // get an account
   const getAccount = (address: MaybeAccount) => {
     const account = accountsRef.current.find(
@@ -473,7 +442,6 @@ export const DDCBalancesProvider = ({
         getLedgerForController,
         getAccountLocks,
         getBondedAccount,
-        getAccountNominations,
         getBondOptions,
         isController,
         minReserve,

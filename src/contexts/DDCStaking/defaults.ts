@@ -3,14 +3,13 @@
 
 import BN from 'bn.js';
 import {
-  StakingMetrics,
-  EraStakers,
-  StakingTargets,
-  NominationStatuses,
-  StakingContextInterface,
-} from 'contexts/Staking/types';
+  DDCStakingMetrics,
+  DDCEraStakers,
+  DDCStakingTargets,
+  DDCStakingContextInterface,
+} from './types';
 
-export const ddcStakingMetrics: StakingMetrics = {
+export const ddcStakingMetrics: DDCStakingMetrics = {
   totalNominators: new BN(0),
   totalValidators: new BN(0),
   lastReward: new BN(0),
@@ -24,9 +23,8 @@ export const ddcStakingMetrics: StakingMetrics = {
   unsub: null,
 };
 
-export const eraStakers: EraStakers = {
+export const eraStakers: DDCEraStakers = {
   stakers: [],
-  nominators: undefined,
   totalActiveNominators: 0,
   activeValidators: 0,
   minActiveBond: 0,
@@ -34,21 +32,17 @@ export const eraStakers: EraStakers = {
   ownStake: 0,
 };
 
-export const targets: StakingTargets = {
+export const targets: DDCStakingTargets = {
   nominations: [],
 };
 
-export const ddcNominationStatus: NominationStatuses = {};
-
-export const defaultDDCStakingContext: StakingContextInterface = {
-  getNominationsStatus: () => ddcNominationStatus,
+export const defaultDDCStakingContext: DDCStakingContextInterface = {
   // eslint-disable-next-line
   setTargets: (t) => {},
   hasController: () => false,
   // eslint-disable-next-line
   getControllerNotImported: (a) => null,
   isBonding: () => false,
-  isNominating: () => false,
   inSetup: () => true,
   staking: ddcStakingMetrics,
   eraStakers,

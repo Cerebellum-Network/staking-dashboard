@@ -6,9 +6,8 @@ import {
   BalanceLedger,
   Balance,
   BondOptions,
-  Nominations,
-  BalancesContextInterface,
-} from 'contexts/Balances/types';
+  DDCBalancesContextInterface,
+} from './types';
 
 export const balance: Balance = {
   free: new BN(0),
@@ -35,12 +34,7 @@ export const bondOptions: BondOptions = {
   totalUnlockChuncks: 0,
 };
 
-export const nominations: Nominations = {
-  targets: [],
-  submittedIn: 0,
-};
-
-export const defaultBalancesContext: BalancesContextInterface = {
+export const defaultBalancesContext: DDCBalancesContextInterface = {
   // eslint-disable-next-line
   getAccount: (address) => null,
   // eslint-disable-next-line
@@ -53,8 +47,6 @@ export const defaultBalancesContext: BalancesContextInterface = {
   getAccountLocks: (address) => [],
   // eslint-disable-next-line
   getBondedAccount: (address) => null,
-  // eslint-disable-next-line
-  getAccountNominations: (address) => [],
   // eslint-disable-next-line
   getBondOptions: (address) => bondOptions,
   // eslint-disable-next-line

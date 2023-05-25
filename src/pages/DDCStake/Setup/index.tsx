@@ -8,10 +8,8 @@ import { CardWrapper } from 'library/Graphs/Wrappers';
 import { PageTitle } from 'library/PageTitle';
 import { Button } from 'library/Button';
 import { useDDCStake } from 'contexts/DDCStakeUI';
-import { ChooseNominators } from './ChooseNominators';
 import { SetController } from './SetController';
 import { Bond } from './Bond';
-import { Payee } from './Payee';
 import { Summary } from './Summary';
 
 export const Setup = ({ title }: any) => {

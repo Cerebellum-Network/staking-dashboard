@@ -20,7 +20,6 @@ export interface DDCStakingMetrics {
 
 export interface DDCEraStakers {
   stakers: Array<any>;
-  nominators: Array<any> | undefined;
   totalActiveNominators: number;
   activeValidators: number;
   minActiveBond: number;
@@ -35,12 +34,10 @@ export interface DDCStakingTargets {
 }
 
 export interface DDCStakingContextInterface {
-  getNominationsStatus: () => any;
   setTargets: (t: any) => any;
   hasController: () => boolean;
   getControllerNotImported: (a: MaybeAccount) => any;
   isBonding: () => boolean;
-  isNominating: () => boolean;
   inSetup: () => any;
   staking: DDCStakingMetrics;
   eraStakers: DDCEraStakers;
