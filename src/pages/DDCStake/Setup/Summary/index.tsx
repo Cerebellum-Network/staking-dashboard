@@ -20,7 +20,6 @@ export const Summary = (props: SummaryProps) => {
   const { section } = props;
 
   const { api, network } = useApi();
-  const { units } = network;
   const { activeAccount, accountHasSigner } = useConnect();
   const { getSetupProgress } = useDDCStake();
   const setup = getSetupProgress(activeAccount);
@@ -34,7 +33,6 @@ export const Summary = (props: SummaryProps) => {
     const stashToSubmit = {
       Id: activeAccount,
     };
-    const bondToSubmit = bond * 10 ** units;
     const controllerToSubmit = {
       Id: controller,
     };
@@ -58,7 +56,7 @@ export const Summary = (props: SummaryProps) => {
 
     // construct a batch of transactions
     const _txs = [
-      api.tx.ddcStaking.bond(stashToSubmit, bondToSubmit),
+      api.tx.ddcStaking.bond(stashToSubmit),
       api.tx.ddcStaking.setController(controllerToSubmit),
       api.tx.ddcStaking[stakingCallName](prefs),
     ];
