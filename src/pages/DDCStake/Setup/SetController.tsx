@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useConnect } from 'contexts/Connect';
 import { useDDCStake } from 'contexts/DDCStakeUI';
 import { AccountSelect } from 'library/Form/AccountSelect';
-import { getEligibleControllers } from 'library/Form/Utils/getEligibleControllers';
+import { ddcGetEligibleControllers } from 'library/Form/Utils/ddcGetEligibleControllers';
 import { InputItem } from 'library/Form/types';
 import { Header } from './Header';
 import { Footer } from './Footer';
@@ -27,7 +27,7 @@ export const SetController = (props: SetControllerProps) => {
   );
 
   // get eligible controllers for input
-  const items = getEligibleControllers();
+  const items = ddcGetEligibleControllers();
 
   // update selected value on account switch
   useEffect(() => {
