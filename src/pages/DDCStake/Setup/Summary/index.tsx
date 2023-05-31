@@ -37,7 +37,7 @@ export const Summary = (props: SummaryProps) => {
       Id: controller,
     };
 
-    const role = 'edge' as 'storage' | 'edge';
+    const role = 'storage' as 'storage' | 'edge';
 
     let stakingCallName;
     let prefs;
