@@ -5,10 +5,10 @@ import { ReactComponent as CereLogoSvg } from 'img/cere_logo.svg';
 import { ReactComponent as CereIconSvg } from 'img/cere_icon.svg';
 
 const cereMainnet = {
-  name: 'Cere Mainnet',
+  name: 'Cere',
   colors: {
     primary: {
-      light: 'rgb(183, 174, 255)',
+      light: '#1D1B20',
       dark: 'rgb(183, 174, 255)',
     },
     secondary: {
