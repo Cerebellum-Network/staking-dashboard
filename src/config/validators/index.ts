@@ -12,9 +12,9 @@ export const VALIDATOR_COMMUNITY = [
     name: 'CERE',
     Thumbnail: Cere,
     bio: `Official Validators from Cere Network, the world's first Decentralized Data Cloud platform.`,
-    email: 'team@cere.network',
+    email: 'community@cere.io',
     website: 'https://cere.network',
-    twitter: '@CereNetwork',
+    twitter: '@cereofficial',
     validators: {
       cere: [
         '6S4mrsCrqWoBAYrp2PKQNh7CYcCtyEtYpx5J626Kj5vszSyy',
