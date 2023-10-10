@@ -6,6 +6,8 @@
  * import { ReactComponent as ValidatorEntityName } from './thumbnails/validatorEntityName.svg';
  */
 import { ReactComponent as Cere } from './thumbnails/cere.svg';
+import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
+import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -39,6 +41,16 @@ export const VALIDATOR_COMMUNITY = [
       cere: [
         '6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv',
       ],
+    },  
+  {
+    name: 'Xameyz',
+    Thumbnail: XameyzIdentity,
+    bio: `Just a humble validator on a humble decentralized network.`,
+    email: 'xameyz.crypto@yahoo.com',
+    website: '',
+    twitter: '@xameyz',
+    validators: {
+      cere: ['6TYC5go4hQ85NxmGK8c658cmJozxeohKfp6YbDGC5r1HJ6nZ'],
     },
   },
 ];
