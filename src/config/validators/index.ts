@@ -6,6 +6,9 @@
  * import { ReactComponent as ValidatorEntityName } from './thumbnails/validatorEntityName.svg';
  */
 import { ReactComponent as Cere } from './thumbnails/cere.svg';
+import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
+import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
+import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -26,6 +29,39 @@ export const VALIDATOR_COMMUNITY = [
         '6PwAv2L43zGPEwHTb1L7LyCWv7yq2Hc4dSVYHvvi1kscCR91',
         '6Qshjra42mLDtc9ouHzUz1bMmYXg2qasmW2xSLgendRdsYED',
       ],
+    },
+  },
+  {
+    name: 'Xameyz',
+    Thumbnail: XameyzIdentity,
+    bio: `Just a humble validator on a humble decentralized network.`,
+    email: 'xameyz.crypto@yahoo.com',
+    website: '',
+    twitter: '@xameyz',
+    validators: {
+      cere: ['6TYC5go4hQ85NxmGK8c658cmJozxeohKfp6YbDGC5r1HJ6nZ'],
+    },
+  },
+  {
+    name: 'AnyValid',
+    Thumbnail: AnyValid,
+    bio: `Professional Proof-of-Stake Networks Validation Services`,
+    email: 'mail@anyvalid.com',
+    website: 'https://anyvalid.com',
+    twitter: '@anyvalid',
+    validators: {
+      cere: ['6UDVCKB9opndqcRAxTpTvKFTFXUwvE36aYnp1bNyVV3Cfh16'],
+    },
+  },
+  {
+    name: 'SerGo',
+    Thumbnail: SerGo,
+    bio: `We validate with expertise, you earn with confidence.`,
+    email: 'contact@sergo.dev',
+    website: 'https://sergo.dev',
+    twitter: '',
+    validators: {
+      cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
     },
   },
 ];
