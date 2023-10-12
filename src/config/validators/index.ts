@@ -12,6 +12,17 @@ import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
+    name: 'Jinogami',
+    Thumbnail: Jinogami,
+    bio: `A Community Cere Validator`,
+    email: 'steganosgraphos@gmail.com',
+    website: '',
+    twitter: '@steganosgraphos',
+    validators: {
+      cere: ['6RvHuBMLqBVcwvk62qto81m8DFPoKBq86WCAmVEwHH3rTuNQ'],
+    },
+  },
+  {
     name: 'CERE',
     Thumbnail: Cere,
     bio: `Official Validators from Cere Network, the world's first Decentralized Data Cloud platform.`,
