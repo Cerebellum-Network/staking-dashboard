@@ -64,4 +64,15 @@ export const VALIDATOR_COMMUNITY = [
       cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
     },
   },
+  {
+    name: 'Edge Services',
+    Thumbnail: SerGo,
+    bio: `Blockchain Nodes & Services`,
+    email: 'contact@edgeservices.io',
+    website: 'https://edgeservices.io',
+    twitter: '@EdgeServicesIO',
+    validators: {
+      cere: ['6RByFsuHYQET5V78TqaRuyeF8XQRKPuZhkE9admxL48VUEey'],
+    },
+  },
 ];
