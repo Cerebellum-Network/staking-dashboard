@@ -64,4 +64,15 @@ export const VALIDATOR_COMMUNITY = [
       cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
     },
   },
+  {
+    name: 'OranG3cluB',
+    Thumbnail: OranG3cluB,
+    bio: `Professional Validator, Trusted Support.`,
+    email: 'orang3club@gmail.com',
+    website: 'https://orang3.club',
+    twitter: '',
+    validators: {
+      cere: ['6V3YZhLQb6S4XiQjQ46t6tdxvnumiT8B41SgW2DBCXdsBap1'],
+    },
+  },
 ];
