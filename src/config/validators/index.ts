@@ -9,6 +9,7 @@ import { ReactComponent as Cere } from './thumbnails/cere.svg';
 import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
+import { ReactComponent as EdgeServices } from './thumbnails/edgeservices.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -65,8 +66,8 @@ export const VALIDATOR_COMMUNITY = [
     },
   },
   {
-    name: 'Edge Services',
-    Thumbnail: SerGo,
+    name: 'EdgeServices',
+    Thumbnail: EdgeServices,
     bio: `Blockchain Nodes & Services`,
     email: 'contact@edgeservices.io',
     website: 'https://edgeservices.io',
