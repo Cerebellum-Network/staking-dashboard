@@ -9,6 +9,7 @@ import { ReactComponent as Cere } from './thumbnails/cere.svg';
 import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
+import { ReactComponent as wombat } from './thumbnails/wombat.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -62,6 +63,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: '',
     validators: {
       cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
+    },
+  },
+  {
+    name: 'wombat',
+    Thumbnail: wombat,
+    bio: `Professional blockchain validator`,
+    email: 'sdidenko566@yandex.ru',
+    website: 'https://github.com/wombatqq',
+    twitter: '',
+    validators: {
+      cere: ['6Pqj4UwFRN4mmu25PH8RqWaMT4jNd6ytFNgaJ4KtVTfgByez'],
     },
   },
 ];
