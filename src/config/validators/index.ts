@@ -9,6 +9,7 @@ import { ReactComponent as Cere } from './thumbnails/cere.svg';
 import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
+import { ReactComponent as ddenk } from './thumbnails/ddenk.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -62,6 +63,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: '',
     validators: {
       cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
+    },
+  },
+  {
+    name: 'ddenk',
+    Thumbnail: ddenk,
+    bio: `Just a responsible validator of a decentralized network`,
+    email: 'ddminerv@gmail.com',
+    website: '',
+    twitter: '@ddminerv',
+    validators: {
+      cere: ['6TnRiNAmZ81AEnUJxj24KhwEZmuE6mDBCDbEnR7f1kZWXaym'],
     },
   },
 ];
