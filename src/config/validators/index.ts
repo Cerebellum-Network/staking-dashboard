@@ -9,6 +9,7 @@ import { ReactComponent as Cere } from './thumbnails/cere.svg';
 import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
+import { ReactComponent as Brightlystake } from './thumbnails/Brightlystake-logo.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -64,4 +65,15 @@ export const VALIDATOR_COMMUNITY = [
       cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
     },
   },
+    {
+    name: 'Brightlystake',
+    Thumbnail: Brightlystake,
+    bio: `Cere node from Brightlystake. Contact us for any queries https://linktr.ee/brightlystake`,
+    email: 'contact@brightlystake.com',
+    website: 'https://brightlystake.com/',
+    twitter: 'https://twitter.com/brightlystake',
+    validators: {
+      cere: ['6TnQVHWvDtw5W5vqEjNcewypHagW9N5VtvDTDUNWq3drqZTB'],
+    },
+  }
 ];
