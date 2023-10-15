@@ -9,6 +9,7 @@ import { ReactComponent as Cere } from './thumbnails/cere.svg';
 import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
+import { ReactComponent as garm99 } from './thumbnails/garm99.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -62,6 +63,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: '',
     validators: {
       cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
+    },
+  },
+  {
+    name: 'garm99',
+    Thumbnail: garm99,
+    bio: `Staking Provider of Proof-of-Stake Networks`,
+    email: 'info@nodeskeeper.com',
+    website: 'nodeskeeper.com',
+    twitter: 'https://twitter.com/GARM799',
+    validators: {
+      cere: ['6RLGWVUzwXBvjuyLHY7Hr95TqgdUV6UxboG9i3xZnVp1vVWk'],
     },
   },
 ];
