@@ -9,6 +9,7 @@ import { ReactComponent as Cere } from './thumbnails/cere.svg';
 import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
+import { ReactComponent as Synergy } from './thumbnails/Synergy.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -62,6 +63,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: '',
     validators: {
       cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
+    },
+  },
+  {
+    name: 'Synergy',
+    Thumbnail: Synergy,
+    bio: Professional mainnet validator & developer,
+    email: 'synergy@macrox.ru',
+    website: 'https://synergy.pm',
+    twitter: '@exlimit',
+    validators: {
+      cere: ['6UdPQ5joXNaetqbVmpNQnn2SVGrq4jqHNFvjbZ16u1ysQBHN'],
     },
   },
 ];
