@@ -9,6 +9,7 @@ import { ReactComponent as Cere } from './thumbnails/cere.svg';
 import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
+import { ReactComponent as 4T2.CAPITAL } from './thumbnails/4t2.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -62,6 +63,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: '',
     validators: {
       cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
+    },
+  },
+  {
+    name: '4T2.CAPITAL', 
+    Thumbnail: 4t2, 
+    bio: `validating with love & care | secure and seamless staking experience | based in 🇳🇴`,
+    email: '4t2@4t2.capital',
+    website: 'https://4t2.capital',
+    twitter: '',
+    validators: {
+      cere: ['6VB5dkmPn6zpti4BaEZp2y7Ht8kaj8ELKGAHzpThowzXU66A'],
     },
   },
 ];
