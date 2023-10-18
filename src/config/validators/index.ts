@@ -9,6 +9,7 @@ import { ReactComponent as Cere } from './thumbnails/cere.svg';
 import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
+import { ReactComponent as TRK } from './thumbnails/TRK.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -62,6 +63,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: '',
     validators: {
       cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
+    },
+  },
+  {
+    name: 'TRK',
+    Thumbnail: TRK,
+    bio: `Validating...`,
+    email: '',
+    website: '',
+    twitter: '',
+    validators: {
+      cere: ['6TBNtFjPELfrzSa2sXYyTWhbP1omhjxhF5nk6jtR51S3pfrS'],
     },
   },
 ];
