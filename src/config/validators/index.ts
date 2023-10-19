@@ -9,6 +9,7 @@ import { ReactComponent as Cere } from './thumbnails/cere.svg';
 import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
+import { ReactComponent as Testnetrun } from './thumbnails/Testnetrun.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -62,6 +63,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: '',
     validators: {
       cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
+    },
+  },
+  {
+    name: 'Testnetrun',
+    Thumbnail: Testnetrun,
+    bio: `Position yourself for the blockchain-powered future of the next decade by staking today, ensuring you're part of the fastest and most secure validator network in the space.`,
+    email: 'info@testnet.run',
+    website: 'https://stake.testnet.run',
+    twitter: 'testnetrun',
+    validators: {
+      cere: ['6QPgrdDzaMqj54YcHm1XpyqN8z9DTZ9sySXwF7uFwfUADkiL'],
     },
   },
 ];
