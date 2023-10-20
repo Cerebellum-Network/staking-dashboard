@@ -9,6 +9,7 @@ import { ReactComponent as Cere } from './thumbnails/cere.svg';
 import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
+import { ReactComponent as BandataCrypto } from './thumbnails/bandatacrypto.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -62,6 +63,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: '',
     validators: {
       cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
+    },
+  },
+  {
+    name: 'BandataCrypto',
+    Thumbnail: bandatacrypto,
+    bio: `Ban Data Crypto is a blockchain validating provider, operating from Bulgaria and Germany. Our crypto experience as investors and developers spans back to 2015.`,
+    email: 'mail@anyvalid.com',
+    website: 'bandatacrypto@gmail.com',
+    twitter: '',
+    validators: {
+      cere: ['6QsN3KnpAr6Sbpr9QHCvY7xD2qeaQ39N3M5zMx4M5YwPAXhx'],
     },
   },
 ];
