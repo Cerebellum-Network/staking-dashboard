@@ -64,4 +64,26 @@ export const VALIDATOR_COMMUNITY = [
       cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
     },
   },
+  {
+    name: 'SerGo',
+    Thumbnail: SerGo,
+    bio: `We validate with expertise, you earn with confidence.`,
+    email: 'contact@sergo.dev',
+    website: 'https://sergo.dev',
+    twitter: '',
+    validators: {
+      cere: ['6SpjH8swCtFwmntQmdikMWyDKgr59q1cLauePYc2iqwwe6Bv'],
+    },
+  },
+  {
+    name: 'TomekNode',
+    Thumbnail: tomek,
+    bio: `Experienced and dedicated, I pride myself on being a reliable community validator node maintainer, ensuring optimal performance and trust for our nominators`,
+    email: 'cere.e69cg@passfwd.com',
+    website: '',
+    twitter: '',
+    validators: {
+      cere: ['6PbuJRgBSikmBNajCa75Zq9PqXmaYcCZ6e5QKk7sUyeebBDU'],
+    },
+  },
 ];
