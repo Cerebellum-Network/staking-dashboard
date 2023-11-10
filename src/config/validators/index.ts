@@ -11,6 +11,7 @@ import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
 import { ReactComponent as StakeAngle } from './thumbnails/stakeangle.svg';
 import { ReactComponent as medium } from './thumbnails/medium.svg';
+import { ReactComponent as Jinogami } from './thumbnails/Jinogami.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -86,6 +87,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: '',
     validators: {
       cere: ['6TsKhZ5o9BFAG1bCY2HVriUXAuQMae744APMMcVgYqYhNJRy'],
+    },
+  },
+  {
+    name: 'Jinogami',
+    Thumbnail: Jinogami,
+    bio: `A Community Cere Validator`,
+    email: 'steganosgraphos@gmail.com',
+    website: '',
+    twitter: '@steganosgraphos',
+    validators: {
+      cere: ['6RvHuBMLqBVcwvk62qto81m8DFPoKBq86WCAmVEwHH3rTuNQ'],
     },
   },
 ];
