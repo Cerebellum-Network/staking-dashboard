@@ -10,6 +10,7 @@ import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
 import { ReactComponent as StakeAngle } from './thumbnails/stakeangle.svg';
+import { ReactComponent as medium } from './thumbnails/medium.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -74,6 +75,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: '',
     validators: {
       cere: ['6T9794B5HPPNYqds6VNAxcFjYZHzpgbZfdWXSiE6q65eLpVm'],
+    },
+  },
+  {
+    name: 'medium',
+    Thumbnail: medium,
+    bio: `Individual staking services`,
+    email: 'hsonelove228@gmail.com',
+    website: 'https://github.com/mediumwe11',
+    twitter: '',
+    validators: {
+      cere: ['6TsKhZ5o9BFAG1bCY2HVriUXAuQMae744APMMcVgYqYhNJRy'],
     },
   },
 ];
