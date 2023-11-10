@@ -12,6 +12,7 @@ import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
 import { ReactComponent as StakeAngle } from './thumbnails/stakeangle.svg';
 import { ReactComponent as medium } from './thumbnails/medium.svg';
 import { ReactComponent as Jinogami } from './thumbnails/Jinogami.svg';
+import { ReactComponent as EdgeServices } from './thumbnails/edgeservices.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -98,6 +99,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: '@steganosgraphos',
     validators: {
       cere: ['6RvHuBMLqBVcwvk62qto81m8DFPoKBq86WCAmVEwHH3rTuNQ'],
+    },
+  },
+  {
+    name: 'EdgeServices',
+    Thumbnail: EdgeServices,
+    bio: `Blockchain Nodes & Services`,
+    email: 'contact@edgeservices.io',
+    website: 'https://edgeservices.io',
+    twitter: '@EdgeServicesIO',
+    validators: {
+      cere: ['6RByFsuHYQET5V78TqaRuyeF8XQRKPuZhkE9admxL48VUEey'],
     },
   },
 ];
