@@ -16,6 +16,7 @@ import { ReactComponent as EdgeServices } from './thumbnails/edgeservices.svg';
 import { ReactComponent as wombat } from './thumbnails/wombat.svg';
 import { ReactComponent as Brightlystake } from './thumbnails/Brightlystake-logo.svg';
 import { ReactComponent as garm99 } from './thumbnails/garm99.svg';
+import { ReactComponent as Thumbnail4T2CAPITAL } from './thumbnails/4t2.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -146,6 +147,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: 'https://twitter.com/GARM799',
     validators: {
       cere: ['6RLGWVUzwXBvjuyLHY7Hr95TqgdUV6UxboG9i3xZnVp1vVWk'],
+    },
+  },
+  {
+    name: '4T2.CAPITAL',
+    Thumbnail: Thumbnail4T2CAPITAL,
+    bio: `validating with love & care | secure and seamless staking experience | based in 🇳🇴`,
+    email: '4t2@4t2.capital',
+    website: 'https://4t2.capital',
+    twitter: '',
+    validators: {
+      cere: ['6VB5dkmPn6zpti4BaEZp2y7Ht8kaj8ELKGAHzpThowzXU66A'],
     },
   },
 ];
