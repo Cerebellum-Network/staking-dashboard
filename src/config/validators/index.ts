@@ -18,6 +18,7 @@ import { ReactComponent as Brightlystake } from './thumbnails/Brightlystake-logo
 import { ReactComponent as garm99 } from './thumbnails/garm99.svg';
 import { ReactComponent as Thumbnail4T2CAPITAL } from './thumbnails/4t2.svg';
 import { ReactComponent as TRK } from './thumbnails/TRK.svg';
+import { ReactComponent as Testnetrun } from './thumbnails/Testnetrun.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -170,6 +171,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: '',
     validators: {
       cere: ['6TBNtFjPELfrzSa2sXYyTWhbP1omhjxhF5nk6jtR51S3pfrS'],
+    },
+  },
+  {
+    name: 'Testnetrun',
+    Thumbnail: Testnetrun,
+    bio: `Position yourself for the blockchain-powered future of the next decade by staking today, ensuring you're part of the fastest and most secure validator network in the space.`,
+    email: 'info@testnet.run',
+    website: 'https://stake.testnet.run',
+    twitter: 'testnetrun',
+    validators: {
+      cere: ['6QPgrdDzaMqj54YcHm1XpyqN8z9DTZ9sySXwF7uFwfUADkiL'],
     },
   },
 ];
