@@ -19,6 +19,7 @@ import { ReactComponent as garm99 } from './thumbnails/garm99.svg';
 import { ReactComponent as Thumbnail4T2CAPITAL } from './thumbnails/4t2.svg';
 import { ReactComponent as TRK } from './thumbnails/TRK.svg';
 import { ReactComponent as Testnetrun } from './thumbnails/Testnetrun.svg';
+import { ReactComponent as Tokem } from './thumbnails/tomek.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -182,6 +183,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: 'testnetrun',
     validators: {
       cere: ['6QPgrdDzaMqj54YcHm1XpyqN8z9DTZ9sySXwF7uFwfUADkiL'],
+    },
+  },
+  {
+    name: 'TomekNode',
+    Thumbnail: Tokem,
+    bio: `Experienced and dedicated, I pride myself on being a reliable community validator node maintainer, ensuring optimal performance and trust for our nominators`,
+    email: 'cere.e69cg@passfwd.com',
+    website: '',
+    twitter: '',
+    validators: {
+      cere: ['6PbuJRgBSikmBNajCa75Zq9PqXmaYcCZ6e5QKk7sUyeebBDU'],
     },
   },
 ];
