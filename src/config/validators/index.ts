@@ -136,7 +136,7 @@ export const VALIDATOR_COMMUNITY = [
     bio: `Cere node from Brightlystake. Contact us for any queries https://linktr.ee/brightlystake`,
     email: 'contact@brightlystake.com',
     website: 'https://brightlystake.com/',
-    twitter: 'https://twitter.com/brightlystake',
+    twitter: '@brightlystake',
     validators: {
       cere: ['6TnQVHWvDtw5W5vqEjNcewypHagW9N5VtvDTDUNWq3drqZTB'],
     },
@@ -147,7 +147,7 @@ export const VALIDATOR_COMMUNITY = [
     bio: `Staking Provider of Proof-of-Stake Networks`,
     email: 'info@nodeskeeper.com',
     website: 'nodeskeeper.com',
-    twitter: 'https://twitter.com/GARM799',
+    twitter: '@GARM799',
     validators: {
       cere: ['6RLGWVUzwXBvjuyLHY7Hr95TqgdUV6UxboG9i3xZnVp1vVWk'],
     },
@@ -180,7 +180,7 @@ export const VALIDATOR_COMMUNITY = [
     bio: `Position yourself for the blockchain-powered future of the next decade by staking today, ensuring you're part of the fastest and most secure validator network in the space.`,
     email: 'info@testnet.run',
     website: 'https://stake.testnet.run',
-    twitter: 'testnetrun',
+    twitter: '@testnetrun',
     validators: {
       cere: ['6QPgrdDzaMqj54YcHm1XpyqN8z9DTZ9sySXwF7uFwfUADkiL'],
     },
