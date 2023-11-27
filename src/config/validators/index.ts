@@ -14,6 +14,7 @@ import { ReactComponent as medium } from './thumbnails/medium.svg';
 import { ReactComponent as Jinogami } from './thumbnails/Jinogami.svg';
 import { ReactComponent as EdgeServices } from './thumbnails/edgeservices.svg';
 import { ReactComponent as wombat } from './thumbnails/wombat.svg';
+import { ReactComponent as Brightlystake } from './thumbnails/Brightlystake-logo.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -122,6 +123,17 @@ export const VALIDATOR_COMMUNITY = [
     twitter: '',
     validators: {
       cere: ['6Pqj4UwFRN4mmu25PH8RqWaMT4jNd6ytFNgaJ4KtVTfgByez'],
+    },
+  },
+  {
+    name: 'Brightlystake',
+    Thumbnail: Brightlystake,
+    bio: `Cere node from Brightlystake. Contact us for any queries https://linktr.ee/brightlystake`,
+    email: 'contact@brightlystake.com',
+    website: 'https://brightlystake.com/',
+    twitter: 'https://twitter.com/brightlystake',
+    validators: {
+      cere: ['6TnQVHWvDtw5W5vqEjNcewypHagW9N5VtvDTDUNWq3drqZTB'],
     },
   },
 ];
