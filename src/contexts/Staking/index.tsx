@@ -13,6 +13,7 @@ import {
 } from 'Utils';
 import { ExternalAccount, ImportedAccount } from 'contexts/Connect/types';
 import { AnyApi, MaybeAccount } from 'types';
+import type { VoidFn } from '@polkadot/api/types';
 import {
   EraStakers,
   NominationStatuses,
@@ -54,6 +55,8 @@ export const StakingProvider = ({
   } = useBalances();
   const { units } = network;
   const { maxNominatorRewardedPerValidator } = consts;
+  // Store unsub object fro staking metrics.
+  const unsub = useRef<VoidFn | null>(null);
 
   // store staking metrics in state
   const [stakingMetrics, setStakingMetrics] = useState<StakingMetrics>(
@@ -201,52 +204,39 @@ export const StakingProvider = ({
     if (api !== null && isReady && metrics.activeEra.index !== 0) {
       const previousEra = metrics.activeEra.index - 1;
 
-      // subscribe to staking metrics
-      const unsub = await api.queryMulti<AnyApi>(
+      const u = await api.queryMulti<AnyApi>(
         [
           api.query.staking.counterForNominators,
           api.query.staking.counterForValidators,
           api.query.staking.maxNominatorsCount,
           api.query.staking.maxValidatorsCount,
           api.query.staking.validatorCount,
-          [api.query.staking.erasValidatorReward, previousEra],
-          [api.query.staking.erasTotalStake, previousEra],
+          [api.query.staking.erasValidatorReward, previousEra.toString()],
+          [api.query.staking.erasTotalStake, previousEra.toString()],
           api.query.staking.minNominatorBond,
-          api.query.staking.historyDepth,
           [api.query.staking.payee, activeAccount],
+          [
+            api.query.staking.erasTotalStake,
+            metrics.activeEra.index.toString(),
+          ],
         ],
-        ([
-          _totalNominators,
-          _totalValidators,
-          _maxNominatorsCount,
-          _maxValidatorsCount,
-          _validatorCount,
-          _lastReward,
-          _lastTotalStake,
-          _minNominatorBond,
-          _historyDepth,
-          _payee,
-        ]) => {
+        (q) => {
           setStakingMetrics({
             ...stakingMetrics,
-            payee: _payee.toHuman(),
-            historyDepth: _historyDepth.toBn(),
-            lastTotalStake: _lastTotalStake.toBn(),
-            validatorCount: _validatorCount.toBn(),
-            totalNominators: _totalNominators.toBn(),
-            totalValidators: _totalValidators.toBn(),
-            minNominatorBond: _minNominatorBond.toBn(),
-            lastReward: _lastReward.unwrapOrDefault(new BN(0)),
-            maxValidatorsCount: new BN(_maxValidatorsCount.toString()),
-            maxNominatorsCount: new BN(_maxNominatorsCount.toString()),
+            totalNominators: new BN(q[0].toString()),
+            totalValidators: new BN(q[1].toString()),
+            maxNominatorsCount: new BN(q[2].toString()),
+            maxValidatorsCount: new BN(q[3].toString()),
+            validatorCount: new BN(q[4].toString()),
+            lastReward: new BN(q[5].toString()),
+            lastTotalStake: new BN(q[6].toString()),
+            minNominatorBond: new BN(q[7].toString()),
+            payee: q[7].toString(),
           });
         }
       );
 
-      setStakingMetrics({
-        ...stakingMetrics,
-        unsub,
-      });
+      unsub.current = u;
     }
   };
 
