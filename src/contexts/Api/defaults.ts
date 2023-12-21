@@ -35,5 +35,5 @@ export const defaultApiContext: APIContextInterface = {
   consts,
   isReady: false,
   status: ConnectionStatus.Disconnected,
-  network: NETWORKS.polkadot,
+  network: NETWORKS.cereMainnet,
 };
