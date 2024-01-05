@@ -20,6 +20,7 @@ import { ReactComponent as Thumbnail4T2CAPITAL } from './thumbnails/4t2.svg';
 import { ReactComponent as TRK } from './thumbnails/TRK.svg';
 import { ReactComponent as Testnetrun } from './thumbnails/Testnetrun.svg';
 import { ReactComponent as Tokem } from './thumbnails/tomek.svg';
+import { ReactComponent as FLYINGMINDSAI } from './thumbnails/FMAI.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
@@ -196,4 +197,15 @@ export const VALIDATOR_COMMUNITY = [
       cere: ['6PbuJRgBSikmBNajCa75Zq9PqXmaYcCZ6e5QKk7sUyeebBDU'],
     },
   },
+  {
+    name: 'FLYINGMINDSAI',
+    Thumbnail: FLYINGMINDSAI,
+    bio: 'FLYINGMINDSAI - Experienced and dedicated validator node maintainer. Ensuring optimal performance and trust for our nominators. Join us in securing the future of blockchain technology.',
+    email: 'info@flyingmindsai.com.au',
+    website: 'https://www.flyingmindsai.com.au',
+    twitter: '@mick2008nit',
+    validators: {
+      cere: ['6TrXRYWqxZ5G7c7aTLNxTJr2jq1mxF34LB1ZsuBQwMn7CL5q'],
+    },
+  }
 ];
