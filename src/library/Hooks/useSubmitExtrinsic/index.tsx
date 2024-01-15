@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BN from 'bn.js';
-import { DappName } from 'consts';
+import { DAPP_NAME } from 'consts';
 import { useApi } from 'contexts/Api';
 import { useConnect } from 'contexts/Connect';
 import { Extension } from 'contexts/Connect/types';
@@ -72,7 +72,7 @@ export const useSubmitExtrinsic = (
       throw new Error('wallet not found');
     } else {
       // summons extension popup if not already connected.
-      extension.enable(DappName);
+      extension.enable(DAPP_NAME);
     }
 
     // pre-submission state update

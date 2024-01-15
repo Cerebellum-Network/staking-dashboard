@@ -5,7 +5,7 @@ import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import { useApi } from 'contexts/Api';
 import { useTheme } from 'contexts/Themes';
 import { Doughnut } from 'react-chartjs-2';
-import { defaultThemes, networkColors } from 'theme/default';
+import { defaultThemes } from 'theme/default';
 import { humanNumber } from 'Utils';
 import { BondedProps } from './types';
 import { GraphWrapper } from './Wrappers';
@@ -81,7 +81,7 @@ export const Bonded = (props: BondedProps) => {
         defaultThemes.graphs.inactive[mode],
       ]
     : [
-        networkColors[`${network.name}-${mode}`],
+        defaultThemes.graphs.accent[mode],
         defaultThemes.graphs.colors[0][mode],
         defaultThemes.graphs.colors[1][mode],
       ];

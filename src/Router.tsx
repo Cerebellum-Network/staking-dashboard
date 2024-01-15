@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PAGES_CONFIG } from 'config/pages';
-import { TitleDefault } from 'consts';
+import { TITLE_DEFAULT } from 'consts';
 import { useApi } from 'contexts/Api';
 import { useUi } from 'contexts/UI';
 import { AnimatePresence } from 'framer-motion';
@@ -10,10 +10,10 @@ import { ErrorFallbackApp, ErrorFallbackRoutes } from 'library/ErrorBoundary';
 import { Headers } from 'library/Headers';
 import { Help } from 'library/Help';
 import { Menu } from 'library/Menu';
-import { Tips } from 'library/Tips';
 import { NetworkBar } from 'library/NetworkBar';
 import Notifications from 'library/Notifications';
 import SideMenu from 'library/SideMenu';
+import { Tips } from 'library/Tips';
 import { Tooltip } from 'library/Tooltip';
 import { Modal } from 'modals';
 import { useEffect, useRef } from 'react';
@@ -99,7 +99,7 @@ export const RouterInner = () => {
                           transition={{ duration: 0.2 }}
                         >
                           <Helmet>
-                            <title>{`${page.title} : ${TitleDefault}`}</title>
+                            <title>{`${page.title} : ${TITLE_DEFAULT}`}</title>
                           </Helmet>
                           <Entry page={page} />
                         </PageWrapper>

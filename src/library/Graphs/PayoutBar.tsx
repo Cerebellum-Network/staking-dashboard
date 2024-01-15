@@ -13,16 +13,15 @@ import {
   Tooltip,
 } from 'chart.js';
 import { useApi } from 'contexts/Api';
+import { useCereStats } from 'contexts/CereStats';
 import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
 import { useStaking } from 'contexts/Staking';
-import { useSubscan } from 'contexts/Subscan';
 import { useTheme } from 'contexts/Themes';
 import { useUi } from 'contexts/UI';
 import moment from 'moment';
 import { Bar } from 'react-chartjs-2';
 import {
   defaultThemes,
-  networkColors,
   networkColorsSecondary,
   networkColorsTransparent,
 } from 'theme/default';
@@ -50,7 +49,7 @@ export const PayoutBar = (props: PayoutBarProps) => {
   const { isSyncing } = useUi();
   const { inSetup } = useStaking();
   const { membership } = usePoolMemberships();
-  const { payouts, poolClaims } = useSubscan();
+  const { payouts, poolClaims } = useCereStats();
 
   const { units } = network;
   const notStaking = !isSyncing && inSetup() && !membership;
@@ -67,7 +66,7 @@ export const PayoutBar = (props: PayoutBarProps) => {
   // determine color for payouts
   const colorPayouts = notStaking
     ? networkColorsTransparent[`${network.name}-${mode}`]
-    : networkColors[`${network.name}-${mode}`];
+    : defaultThemes.graphs.accent[mode];
 
   // determine color for poolClaims
   const colorPoolClaims = notStaking

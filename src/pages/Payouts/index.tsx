@@ -4,7 +4,6 @@
 import { BN } from 'bn.js';
 import { MaxPayoutDays } from 'consts';
 import { useStaking } from 'contexts/Staking';
-import { useSubscan } from 'contexts/Subscan';
 import { useUi } from 'contexts/UI';
 import { PayoutBar } from 'library/Graphs/PayoutBar';
 import { PayoutLine } from 'library/Graphs/PayoutLine';
@@ -23,12 +22,13 @@ import moment from 'moment';
 import { useRef } from 'react';
 import { AnySubscan } from 'types';
 import { PageRowWrapper } from 'Wrappers';
+import { useCereStats } from '../../contexts/CereStats';
 import { PageProps } from '../types';
 import { PayoutList } from './PayoutList';
 import LastEraPayoutStatBox from './Stats/LastEraPayout';
 
 export const Payouts = (props: PageProps) => {
-  const { payouts, poolClaims } = useSubscan();
+  const { payouts, poolClaims } = useCereStats();
   const { isSyncing, services } = useUi();
   const { inSetup } = useStaking();
   const notStaking = !isSyncing && inSetup();
@@ -67,12 +67,14 @@ export const Payouts = (props: PageProps) => {
               <OpenHelpIcon helpKey="Payout History" />
             </h4>
             <h2>
-              {payouts.length ? (
+              {payoutsList.length ? (
                 <>
-                  {moment.unix(payouts[0].block_timestamp).format('Do MMMM')}
+                  {moment
+                    .unix(payoutsList[payoutsList.length - 1].block_timestamp)
+                    .format('Do MMMM')}
                   &nbsp;-&nbsp;
                   {moment
-                    .unix(payouts[payouts.length - 1].block_timestamp)
+                    .unix(payoutsList[0].block_timestamp)
                     .format('Do MMMM')}
                 </>
               ) : (
@@ -81,11 +83,11 @@ export const Payouts = (props: PageProps) => {
             </h2>
           </CardHeaderWrapper>
           <div className="inner" ref={ref} style={{ minHeight }}>
-            {!services.includes('subscan') ? (
+            {!services.includes('cereStats') ? (
               <StatusLabel
                 status="active_service"
-                statusFor="subscan"
-                title="Subscan Disabled"
+                statusFor="cereStats"
+                title="Cere Stats Disabled"
                 topOffset="30%"
               />
             ) : (

@@ -28,8 +28,7 @@ export const ChangeNominations = () => {
   const { activeAccount, accountHasSigner } = useConnect();
   const { getBondedAccount, getAccountNominations } = useBalances();
   const { setStatus: setModalStatus, config } = useModal();
-  const { poolNominations, isNominator, isOwner, selectedActivePool } =
-    useActivePools();
+  const { isNominator, isOwner, selectedActivePool } = useActivePools();
   const { txFeesValid } = useTxFees();
 
   const { nominations: newNominations, provider, bondType } = config;
@@ -39,10 +38,7 @@ export const ChangeNominations = () => {
   const controller = getBondedAccount(activeAccount);
   const signingAccount = isPool ? activeAccount : controller;
 
-  const nominations =
-    isPool === true
-      ? poolNominations.targets
-      : getAccountNominations(activeAccount);
+  const nominations = getAccountNominations(activeAccount);
   const removing = nominations.length - newNominations.length;
   const remaining = newNominations.length;
 

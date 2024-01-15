@@ -11,6 +11,7 @@ import { EntryWrapper as Wrapper } from 'Wrappers';
 import { AccountProvider } from './contexts/Account';
 import { APIProvider, useApi } from './contexts/Api';
 import { BalancesProvider } from './contexts/Balances';
+import { CereStatsProvider } from './contexts/CereStats';
 import { ConnectProvider } from './contexts/Connect';
 import { ExtrinsicsProvider } from './contexts/Extrinsics';
 import { HelpProvider } from './contexts/Help';
@@ -25,10 +26,9 @@ import { PoolMembershipsProvider } from './contexts/Pools/PoolMemberships';
 import { PoolsConfigProvider } from './contexts/Pools/PoolsConfig';
 import { SessionEraProvider } from './contexts/SessionEra';
 import { StakingProvider } from './contexts/Staking';
-import { SubscanProvider } from './contexts/Subscan';
 import { useTheme } from './contexts/Themes';
-import { UIProvider } from './contexts/UI';
 import { TipsProvider } from './contexts/Tips';
+import { UIProvider } from './contexts/UI';
 import { ValidatorsProvider } from './contexts/Validators';
 
 export const WrappedRouter = () => (
@@ -66,7 +66,7 @@ export const Providers = withProviders(
   TransferOptionsProvider,
   ValidatorsProvider,
   UIProvider,
-  SubscanProvider,
+  CereStatsProvider,
   MenuProvider,
   TooltipProvider,
   NotificationsProvider,

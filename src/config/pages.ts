@@ -2,15 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { faHashtag } from '@fortawesome/free-solid-svg-icons';
-import { UriPrefix } from 'consts';
+import { URI_PREFIX } from 'consts';
 import * as analyticsJson from 'img/json/analytics-solid.json';
-import * as favoriteHeartJson from 'img/json/favorite-heart-solid.json';
 import * as viewGroupJson from 'img/json/groups-solid.json';
 import * as viewTrendingUpJson from 'img/json/trending-up-solid.json';
 import * as view1SolidJson from 'img/json/view-1-solid.json';
 import * as viewAgendaJson from 'img/json/view-agenda-solid.json';
 import Community from 'pages/Community';
-import Favorites from 'pages/Favorites';
 import Nominate from 'pages/Nominate';
 import Overview from 'pages/Overview';
 import Payouts from 'pages/Payouts';
@@ -37,7 +35,7 @@ export const PAGES_CONFIG: PagesConfig = [
   {
     category: 1,
     title: 'Overview',
-    uri: `${UriPrefix}/`,
+    uri: `${URI_PREFIX}/`,
     hash: '/overview',
     Entry: Overview,
     animate: view1SolidJson,
@@ -45,7 +43,7 @@ export const PAGES_CONFIG: PagesConfig = [
   {
     category: 2,
     title: 'Nominate',
-    uri: `${UriPrefix}/nominate`,
+    uri: `${URI_PREFIX}/nominate`,
     hash: '/nominate',
     Entry: Nominate,
     animate: viewTrendingUpJson,
@@ -53,7 +51,7 @@ export const PAGES_CONFIG: PagesConfig = [
   {
     category: 2,
     title: 'Pools',
-    uri: `${UriPrefix}/pools`,
+    uri: `${URI_PREFIX}/pools`,
     hash: '/pools',
     Entry: Pools,
     animate: viewGroupJson,
@@ -61,7 +59,7 @@ export const PAGES_CONFIG: PagesConfig = [
   {
     category: 2,
     title: 'Payouts',
-    uri: `${UriPrefix}/payouts`,
+    uri: `${URI_PREFIX}/payouts`,
     hash: '/payouts',
     Entry: Payouts,
     animate: analyticsJson,
@@ -69,7 +67,7 @@ export const PAGES_CONFIG: PagesConfig = [
   {
     category: 3,
     title: 'Validators',
-    uri: `${UriPrefix}/validators`,
+    uri: `${URI_PREFIX}/validators`,
     hash: '/validators',
     Entry: Browse,
     animate: viewAgendaJson,
@@ -77,18 +75,10 @@ export const PAGES_CONFIG: PagesConfig = [
   {
     category: 3,
     title: 'Community',
-    uri: `${UriPrefix}/community`,
+    uri: `${URI_PREFIX}/community`,
     hash: '/community',
     Entry: Community,
     icon: faHashtag,
-  },
-  {
-    category: 3,
-    title: 'Favorites',
-    uri: `${UriPrefix}/favorites`,
-    hash: '/favorites',
-    Entry: Favorites,
-    animate: favoriteHeartJson,
   },
 ];
 

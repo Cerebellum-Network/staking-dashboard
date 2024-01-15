@@ -7,12 +7,13 @@ import BN from 'bn.js';
 import { NETWORKS } from 'config/networks';
 import {
   ApiEndpoints,
-  FallbackBondingDuration,
-  FallbackExpectedBlockTime,
-  FallbackMaxElectingVoters,
-  FallbackMaxNominations,
-  FallbackNominatorRewardedPerValidator,
-  FallbackSessionsPerEra,
+  BONDING_DURATION as FallbackBondingDuration,
+  DEFAULT_NETWORK,
+  EXPECTED_BLOCK_TIME as FallbackExpectedBlockTime,
+  MAX_ELECTING_VOTERS as FallbackMaxElectingVoters,
+  MAX_NOMINATIONS as FallbackMaxNominations,
+  MAX_NOMINATOR_REWARDED_PER_VALIDATOR as FallbackNominatorRewardedPerValidator,
+  SESSIONS_PER_ERA as FallbackSessionsPerEra,
 } from 'consts';
 import {
   APIConstants,
@@ -40,12 +41,16 @@ export const APIProvider = ({ children }: { children: React.ReactNode }) => {
   const [api, setApi] = useState<ApiPromise | null>(null);
 
   // network state
-  const _name: NetworkName =
-    (localStorage.getItem('network') as NetworkName) ?? NetworkName.Polkadot;
+  const _name = localStorage.getItem('network') as NetworkName;
+  const initialMeta = NETWORKS[_name] || NETWORKS[DEFAULT_NETWORK];
+
+  if (!_name || !NETWORKS[_name]) {
+    localStorage.setItem('network', DEFAULT_NETWORK);
+  }
 
   const [network, setNetwork] = useState<NetworkState>({
-    name: _name,
-    meta: NETWORKS[localStorage.getItem('network') as NetworkName],
+    name: _name || DEFAULT_NETWORK,
+    meta: initialMeta,
   });
 
   // constants state

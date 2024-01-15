@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BN from 'bn.js';
-import { ServiceList, SideMenuStickyThreshold } from 'consts';
+import { SERVICES, SideMenuStickyThreshold } from 'consts';
 import { ImportedAccount } from 'contexts/Connect/types';
 import { useActivePools } from 'contexts/Pools/ActivePools';
 import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
@@ -44,7 +44,7 @@ export const UIProvider = ({ children }: { children: React.ReactNode }) => {
   // get initial services
   const getAvailableServices = () => {
     // get services config from local storage
-    const _services: any = localStorageOrDefault('services', ServiceList, true);
+    const _services: any = localStorageOrDefault('services', SERVICES, true);
 
     // if fiat is disabled, remove binance_spot service
     const DISABLE_FIAT = Number(process.env.REACT_APP_DISABLE_FIAT ?? 0);

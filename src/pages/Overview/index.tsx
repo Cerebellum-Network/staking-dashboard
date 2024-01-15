@@ -4,7 +4,7 @@
 import BN from 'bn.js';
 import { SectionFullWidthThreshold, SideMenuStickyThreshold } from 'consts';
 import { useApi } from 'contexts/Api';
-import { useSubscan } from 'contexts/Subscan';
+import { useCereStats } from 'contexts/CereStats';
 import { useUi } from 'contexts/UI';
 import { formatRewardsForGraphs } from 'library/Graphs/Utils';
 import { GraphWrapper } from 'library/Graphs/Wrappers';
@@ -32,7 +32,7 @@ import { Tips } from './Tips';
 export const Overview = () => {
   const { network } = useApi();
   const { units } = network;
-  const { payouts, poolClaims } = useSubscan();
+  const { payouts, poolClaims } = useCereStats();
   const { services } = useUi();
   const { lastReward } = formatRewardsForGraphs(
     14,

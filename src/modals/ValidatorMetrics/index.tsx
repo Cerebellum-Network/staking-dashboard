@@ -3,10 +3,10 @@
 
 import { BN } from 'bn.js';
 import { useApi } from 'contexts/Api';
+import { useCereStats } from 'contexts/CereStats';
 import { useModal } from 'contexts/Modal';
 import { useNetworkMetrics } from 'contexts/Network';
 import { useStaking } from 'contexts/Staking';
-import { useSubscan } from 'contexts/Subscan';
 import { EraPoints as EraPointsGraph } from 'library/Graphs/EraPoints';
 import { formatSize, useSize } from 'library/Graphs/Utils';
 import { GraphWrapper } from 'library/Graphs/Wrappers';
@@ -26,7 +26,7 @@ export const ValidatorMetrics = () => {
   } = useApi();
   const { config } = useModal();
   const { address, identity } = config;
-  const { fetchEraPoints }: any = useSubscan();
+  const { fetchEraPoints }: any = useCereStats();
   const { metrics } = useNetworkMetrics();
   const { eraStakers } = useStaking();
   const { stakers } = eraStakers;
@@ -121,8 +121,8 @@ export const ValidatorMetrics = () => {
           <div className="inner" ref={ref} style={{ minHeight }}>
             <StatusLabel
               status="active_service"
-              statusFor="subscan"
-              title="Subscan Disabled"
+              statusFor="cereStats"
+              title="Cere Stats Disabled"
             />
             <div
               className="graph"
