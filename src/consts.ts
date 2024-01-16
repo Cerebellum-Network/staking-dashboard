@@ -7,11 +7,12 @@ import { stringToU8a } from '@polkadot/util';
  * Global Constants
  */
 export const AppVersion = '1.0.1';
-export const UriPrefix = '/';
-export const TitleDefault = 'Polkadot Staking Dashboard';
-export const DappName = 'Polkadot Staking Dashboard';
-export const PolkadotUrl = 'https://polkadot.network/staking/';
-export const DefaultNetwork = 'polkadot';
+export const UriPrefix = '';
+export const TitleDefault = 'Cere Staking Dashboard';
+export const DappName = 'cere_staking_dashboard';
+export const CereUrl = 'https://cere.network';
+
+export const DefaultNetwork = 'cereMainnet';
 
 /*
  * Data Structure Helpers
@@ -50,16 +51,16 @@ export const TipsThresholdMedium = 1200;
 /*
  * Toggle-able services
  */
-export const ServiceList = ['subscan', 'binance_spot', 'tips'];
+export const ServiceList = ['cereStats'];
 
 /*
  * Fallback config values
  */
 export const FallbackMaxNominations = 16;
-export const FallbackBondingDuration = 28;
+export const FallbackBondingDuration = 3;
 export const FallbackSessionsPerEra = 6;
 export const FallbackNominatorRewardedPerValidator = 256;
-export const FallbackMaxElectingVoters = 22500;
+export const FallbackMaxElectingVoters = 10000;
 export const FallbackExpectedBlockTime = 6000;
 
 /*
@@ -89,12 +90,7 @@ export const DefaultParams = {
   auctionAdjust: 0,
   auctionMax: 0,
   falloff: 0.05,
-  maxInflation: 0.1,
-  minInflation: 0.025,
-  stakeTarget: 0.5,
+  stakeTarget: 0.2,
+  maxInflation: 0.05,
+  minInflation: 0.0001,
 };
-
-/*
- * locale
- */
-export const DefaultLocale = 'en';

@@ -15,7 +15,7 @@ import {
 import { useApi } from 'contexts/Api';
 import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
 import { useStaking } from 'contexts/Staking';
-import { useSubscan } from 'contexts/Subscan';
+import { useCereStats } from 'contexts/CereStats';
 import { useTheme } from 'contexts/Themes';
 import { useUi } from 'contexts/UI';
 import { format, fromUnixTime } from 'date-fns';
@@ -50,7 +50,7 @@ export const PayoutBar = ({ days, height }: PayoutBarProps) => {
   const { isSyncing } = useUi();
   const { inSetup } = useStaking();
   const { membership } = usePoolMemberships();
-  const { payouts, poolClaims } = useSubscan();
+  const { payouts, poolClaims } = useCereStats();
   const { i18n } = useTranslation();
 
   // remove slashes from payouts (graph does not support negative values).

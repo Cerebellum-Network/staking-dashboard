@@ -3,7 +3,7 @@
 
 import { faCompressAlt, faExpandAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { SideMenuStickyThreshold } from 'consts';
+import { CereUrl, SideMenuStickyThreshold } from 'consts';
 import { useApi } from 'contexts/Api';
 import { ConnectionStatus } from 'contexts/Api/types';
 import { useHelp } from 'contexts/Help';
@@ -86,7 +86,7 @@ export const SideMenu = () => {
         <Heading title={t('support')} minimised={sideMenuMinimised} />
         <Secondary
           onClick={() => {
-            openHelpWith(null, {});
+            openHelpWith(CereUrl, {});
           }}
           name={t('resources')}
           minimised={sideMenuMinimised}
@@ -137,7 +137,7 @@ export const SideMenu = () => {
           type="button"
           onClick={() =>
             window.open(
-              'https://github.com/paritytech/polkadot-staking-dashboard',
+              'https://github.com/Cerebellum-Network/staking-dashboard/',
               '_blank'
             )
           }

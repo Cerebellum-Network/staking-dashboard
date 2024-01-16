@@ -3,7 +3,7 @@
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { PAGES_CONFIG, PAGE_CATEGORIES } from 'config/pages';
-import { PolkadotUrl, UriPrefix } from 'consts';
+import { CereUrl, UriPrefix } from 'consts';
 import { useApi } from 'contexts/Api';
 import { useBalances } from 'contexts/Balances';
 import { useConnect } from 'contexts/Connect';
@@ -121,7 +121,7 @@ export const Main = () => {
     <>
       <LogoWrapper
         onClick={() => {
-          window.open(PolkadotUrl, '_blank');
+          window.open(CereUrl, '_blank');
         }}
         minimised={sideMenuMinimised}
       >

@@ -34,14 +34,14 @@ export const SubscanButton = () => {
           ? networkColors[`${network.name}-${mode}`]
           : defaultThemes.text.secondary[mode]
       }
-      opacity={services.includes('subscan') ? 1 : 0.5}
+      opacity={services.includes('cereStats') ? 1 : 0.5}
     >
       <FontAwesomeIcon
         icon={faProjectDiagram}
         transform="shrink-2"
         style={{ marginRight: '0.3rem' }}
       />
-      Subscan
+      Cere Stats
     </Wrapper>
   );
 };

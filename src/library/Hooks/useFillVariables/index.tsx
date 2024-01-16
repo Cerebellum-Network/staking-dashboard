@@ -29,10 +29,10 @@ export const useFillVariables = () => {
           ['{NETWORK_UNIT}', network.unit],
           ['{NETWORK_NAME}', network.name],
           [
-            '{MAX_NOMINATOR_REWARDED_PER_VALIDATOR}',
+            '{FallbackNominatorRewardedPerValidator}',
             String(maxNominatorRewardedPerValidator),
           ],
-          ['{MAX_NOMINATIONS}', String(maxNominations)],
+          ['{FallbackMaxNominations}', String(maxNominations)],
           ['{MIN_ACTIVE_BOND}', String(toFixedIfNecessary(minActiveBond, 3))],
           [
             '{MIN_POOL_JOIN_BOND}',
