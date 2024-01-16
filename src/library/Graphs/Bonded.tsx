@@ -85,7 +85,7 @@ export const Bonded = ({
         defaultThemes.graphs.inactive[mode],
       ]
     : [
-        networkColors[`${network.name}-${mode}`],
+        defaultThemes.graphs.accent[mode],
         defaultThemes.graphs.colors[0][mode],
         defaultThemes.graphs.colors[1][mode],
       ];

@@ -15,6 +15,7 @@ import { SubscanButton } from 'library/SubscanButton';
 import { locales } from 'locale';
 import { useTranslation } from 'react-i18next';
 import { humanNumber, planckBnToUnit } from 'Utils';
+import { useCereStats } from 'contexts/CereStats';
 import {
   PageRowWrapper,
   RowPrimaryWrapper,
@@ -34,7 +35,7 @@ import { Tips } from './Tips';
 export const Overview = () => {
   const { network } = useApi();
   const { units } = network;
-  const { payouts, poolClaims } = useSubscan();
+  const { payouts, poolClaims } = useCereStats();
   const { services } = useUi();
   const { lastReward } = formatRewardsForGraphs(
     14,

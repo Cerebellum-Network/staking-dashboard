@@ -3,21 +3,34 @@
 
 import { faCompressAlt, faExpandAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { SideMenuStickyThreshold } from 'consts';
+import {
+  SideMenuStickyThreshold,
+  URI_PREFIX,
+  CERE_URL,
+  SIDE_MENU_STICKY_THRESHOLD,
+  CONNECTION_SYMBOL_COLORS,
+} from 'consts';
 import { useApi } from 'contexts/Api';
+import { useBalances } from 'contexts/Balances';
+import { useStaking } from 'contexts/Staking';
+import {
+  ReactComponent as LogoGithubSVG,
+  ReactComponent as LogoGithubSVG,
+} from 'img/logo-github.svg';
+import { useOutsideAlerter, useOutsideAlerter } from 'library/Hooks';
+import { PAGE_CATEGORIES, PAGES_CONFIG } from 'config/pages';
+import { usePalette } from 'contexts/Palette';
+import { UIContextInterface, UIContextInterface } from 'contexts/UI/types';
 import { ConnectionStatus } from 'contexts/Api/types';
 import { useHelp } from 'contexts/Help';
 import { useModal } from 'contexts/Modal';
 import { useTheme } from 'contexts/Themes';
 import { useUi } from 'contexts/UI';
-import { UIContextInterface } from 'contexts/UI/types';
 import { ReactComponent as CogOutlineSVG } from 'img/cog-outline.svg';
 import { ReactComponent as ForumSVG } from 'img/forum.svg';
 import { ReactComponent as InfoSVG } from 'img/info.svg';
-import { ReactComponent as LogoGithubSVG } from 'img/logo-github.svg';
 import { ReactComponent as MoonOutlineSVG } from 'img/moon-outline.svg';
 import { ReactComponent as SunnyOutlineSVG } from 'img/sunny-outline.svg';
-import { useOutsideAlerter } from 'library/Hooks';
 import throttle from 'lodash.throttle';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -86,7 +99,7 @@ export const SideMenu = () => {
         <Heading title={t('support')} minimised={sideMenuMinimised} />
         <Secondary
           onClick={() => {
-            openHelpWith(null, {});
+            window.open(CERE_URL, '_blank');
           }}
           name={t('resources')}
           minimised={sideMenuMinimised}
@@ -133,11 +146,15 @@ export const SideMenu = () => {
             transform="grow-3"
           />
         </button>
+        <button type="button" onClick={() => togglePalette()}>
+          <PalettePosition ref={posRef} />
+          <FontAwesomeIcon icon={faPalette} transform="grow-5" />
+        </button>
         <button
           type="button"
           onClick={() =>
             window.open(
-              'https://github.com/paritytech/polkadot-staking-dashboard',
+              'https://github.com/Cerebellum-Network/staking-dashboard/',
               '_blank'
             )
           }

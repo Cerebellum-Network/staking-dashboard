@@ -201,18 +201,21 @@ export const StakingProvider = ({
     if (api !== null && isReady && metrics.activeEra.index !== 0) {
       const previousEra = metrics.activeEra.index - 1;
 
-      // subscribe to staking metrics
-      const unsub = await api.queryMulti<AnyApi>(
+      const u = await api.queryMulti<AnyApi>(
         [
           api.query.staking.counterForNominators,
           api.query.staking.counterForValidators,
           api.query.staking.maxNominatorsCount,
           api.query.staking.maxValidatorsCount,
           api.query.staking.validatorCount,
-          [api.query.staking.erasValidatorReward, previousEra],
-          [api.query.staking.erasTotalStake, previousEra],
+          [api.query.staking.erasValidatorReward, previousEra.toString()],
+          [api.query.staking.erasTotalStake, previousEra.toString()],
           api.query.staking.minNominatorBond,
           [api.query.staking.payee, activeAccount],
+          [
+            api.query.staking.erasTotalStake,
+            metrics.activeEra.index.toString(),
+          ],
         ],
         ([
           _totalNominators,
@@ -239,11 +242,6 @@ export const StakingProvider = ({
           });
         }
       );
-
-      setStakingMetrics({
-        ...stakingMetrics,
-        unsub,
-      });
     }
   };
 

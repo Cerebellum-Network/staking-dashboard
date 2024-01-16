@@ -28,9 +28,10 @@ import { PageRowWrapper } from 'Wrappers';
 import { PageProps } from '../types';
 import { PayoutList } from './PayoutList';
 import LastEraPayoutStatBox from './Stats/LastEraPayout';
+import { useCereStats } from '../../contexts/CereStats';
 
 export const Payouts = (props: PageProps) => {
-  const { payouts, poolClaims } = useSubscan();
+  const { payouts, poolClaims } = useCereStats();
   const { isSyncing, services } = useUi();
   const { inSetup } = useStaking();
   const notStaking = !isSyncing && inSetup();
@@ -102,7 +103,7 @@ export const Payouts = (props: PageProps) => {
               <OpenHelpIcon helpKey="Payout History" />
             </h4>
             <h2>
-              {payouts.length ? (
+              {payoutsList.length ? (
                 <>
                   {fromDate}
                   {toDate !== fromDate && <>&nbsp;-&nbsp;{toDate}</>}
@@ -113,11 +114,11 @@ export const Payouts = (props: PageProps) => {
             </h2>
           </CardHeaderWrapper>
           <div className="inner" ref={ref} style={{ minHeight }}>
-            {!services.includes('subscan') ? (
+            {!services.includes('cereStats') ? (
               <StatusLabel
                 status="active_service"
-                statusFor="subscan"
-                title={t('payouts.subscan_disabled', { ns: 'pages' })}
+                statusFor="cereStats"
+                title="Cere Stats Disabled"
                 topOffset="30%"
               />
             ) : (

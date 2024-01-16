@@ -88,29 +88,7 @@ export const NetworkBar = () => {
           )}
         </section>
         <section>
-          <div className="hide-small">
-            {services.includes('binance_spot') && (
-              <>
-                <div className="stat">
-                  <span
-                    className={`change${
-                      prices.change < 0
-                        ? ' neg'
-                        : prices.change > 0
-                        ? ' pos'
-                        : ''
-                    }`}
-                  >
-                    {prices.change < 0 ? '' : prices.change > 0 ? '+' : ''}
-                    {prices.change}%
-                  </span>
-                </div>
-                <div className="stat">
-                  1 {network.api.unit} / {prices.lastPrice} USD
-                </div>
-              </>
-            )}
-          </div>
+          <div className="hide-small" />
         </section>
       </Summary>
 

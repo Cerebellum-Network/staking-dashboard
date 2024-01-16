@@ -13,7 +13,10 @@ import {
   Tooltip,
 } from 'chart.js';
 import { useApi } from 'contexts/Api';
-import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
+import {
+  usePoolMemberships,
+  usePoolMemberships,
+} from 'contexts/Pools/PoolMemberships';
 import { useStaking } from 'contexts/Staking';
 import { useSubscan } from 'contexts/Subscan';
 import { useTheme } from 'contexts/Themes';
@@ -30,6 +33,7 @@ import {
 } from 'theme/default';
 import { AnySubscan } from 'types';
 import { humanNumber } from 'Utils';
+import { useCereStats } from 'contexts/CereStats';
 import { PayoutBarProps } from './types';
 import { formatRewardsForGraphs } from './Utils';
 
@@ -50,7 +54,7 @@ export const PayoutBar = ({ days, height }: PayoutBarProps) => {
   const { isSyncing } = useUi();
   const { inSetup } = useStaking();
   const { membership } = usePoolMemberships();
-  const { payouts, poolClaims } = useSubscan();
+  const { payouts, poolClaims } = useCereStats();
   const { i18n } = useTranslation();
 
   // remove slashes from payouts (graph does not support negative values).

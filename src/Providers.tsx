@@ -32,6 +32,7 @@ import { withProviders } from 'library/Hooks';
 import Router from 'Router';
 import { ThemeProvider } from 'styled-components';
 import { EntryWrapper as Wrapper } from 'Wrappers';
+import { CereStatsProvider } from './contexts/CereStats';
 
 // `polkadot-dashboard-ui` theme classes are inserted here.
 export const WrappedRouter = () => {
@@ -77,7 +78,7 @@ export const Providers = withProviders(
   TransferOptionsProvider,
   ValidatorsProvider,
   UIProvider,
-  SubscanProvider,
+  CereStatsProvider,
   MenuProvider,
   TooltipProvider,
   NotificationsProvider,

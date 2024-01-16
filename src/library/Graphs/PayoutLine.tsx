@@ -25,6 +25,7 @@ import {
 } from 'theme/default';
 import { AnySubscan } from 'types';
 import { humanNumber } from 'Utils';
+import { useCereStats } from 'contexts/CereStats';
 import { PayoutLineProps } from './types';
 import { combineRewardsByDay, formatRewardsForGraphs } from './Utils';
 
@@ -49,7 +50,7 @@ export const PayoutLine = ({
   const { isSyncing } = useUi();
   const { inSetup } = useStaking();
   const { membership: poolMembership } = usePoolMemberships();
-  const { payouts, poolClaims } = useSubscan();
+  const { payouts, poolClaims } = useCereStats();
 
   const notStaking = !isSyncing && inSetup() && !poolMembership;
   const poolingOnly = !isSyncing && inSetup() && poolMembership !== null;

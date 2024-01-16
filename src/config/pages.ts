@@ -16,6 +16,7 @@ import Overview from 'pages/Overview';
 import Payouts from 'pages/Payouts';
 import Pools from 'pages/Pools';
 import Browse from 'pages/Validators';
+import Favourites from 'pages/Favourites';
 import { PageCategories, PagesConfig } from 'types';
 
 export const PAGE_CATEGORIES: PageCategories = [
