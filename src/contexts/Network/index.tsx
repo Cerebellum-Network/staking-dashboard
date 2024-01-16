@@ -1,7 +1,6 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BN } from 'bn.js';
 import React, { useEffect, useState } from 'react';
 import { AnyApi } from 'types';
 import { useApi } from '../Api';

@@ -12,9 +12,9 @@ import {
   Tooltip,
 } from 'chart.js';
 import { useApi } from 'contexts/Api';
+import { useCereStats } from 'contexts/CereStats';
 import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
 import { useStaking } from 'contexts/Staking';
-import { useSubscan } from 'contexts/Subscan';
 import { useTheme } from 'contexts/Themes';
 import { useUi } from 'contexts/UI';
 import { Line } from 'react-chartjs-2';
@@ -25,7 +25,6 @@ import {
 } from 'theme/default';
 import { AnySubscan } from 'types';
 import { humanNumber } from 'Utils';
-import { useCereStats } from 'contexts/CereStats';
 import { PayoutLineProps } from './types';
 import { combineRewardsByDay, formatRewardsForGraphs } from './Utils';
 

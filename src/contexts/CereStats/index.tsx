@@ -1,16 +1,16 @@
-import React, { useState, useEffect, createContext } from 'react';
 import {
   ApolloClient,
-  NormalizedCacheObject,
-  InMemoryCache,
   gql,
+  InMemoryCache,
+  NormalizedCacheObject,
 } from '@apollo/client';
 import { WebSocketLink } from '@apollo/client/link/ws';
+import React, { createContext, useEffect, useState } from 'react';
+import { Network } from '../../types';
+import { useApi } from '../Api';
+import { useConnect } from '../Connect';
 import { defaultCereStatsContext } from './defaults';
 import { CereStatsContextInterface } from './types';
-import { useConnect } from '../Connect';
-import { useApi } from '../Api';
-import { Network } from '../../types';
 
 const useApolloClient = (endpoint: Network['cereStatsEndpoint']) => {
   const [client, setClient] =
@@ -85,10 +85,10 @@ const usePayouts = (
   const [payouts, setPayouts] = useState([]);
 
   const normalizePayouts = (
-    payoutData: { block_number: number; data: string; timestamp: number }[]
+    payoutData: { blockNumber: number; data: string; timestamp: number }[]
   ) => {
     return payoutData
-      .map(({ block_number, data, timestamp }) => {
+      .map(({ blockNumber, data, timestamp }) => {
         let amount = 0;
 
         // Using regex to extract the second parameter from the data string
@@ -100,7 +100,7 @@ const usePayouts = (
 
         return {
           amount,
-          block_num: block_number,
+          block_num: blockNumber,
           block_timestamp: timestamp,
         };
       })
@@ -122,7 +122,7 @@ const usePayouts = (
               data: { _like: $activeAccount }
             }
           ) {
-            block_number
+            blockNumber
             data
             timestamp
           }

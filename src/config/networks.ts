@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { WellKnownChain } from '@polkadot/rpc-provider/substrate-connect';
-import { Networks } from 'types';
 import { DefaultParams } from 'consts';
-import { ReactComponent as CereLogoSvg } from 'img/cere_logo.svg';
 import { ReactComponent as CereIconSvg } from 'img/cere_icon.svg';
+import { ReactComponent as CereLogoSvg } from 'img/cere_logo.svg';
+import { Networks } from 'types';
 
 const cereMainnet = {
   name: 'Cere',

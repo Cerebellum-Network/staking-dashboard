@@ -5,21 +5,21 @@
  * Use upper camel-case for your SVG import, lower camel case for the svg.
  * import { ReactComponent as ValidatorEntityName } from './thumbnails/validatorEntityName.svg';
  */
-import { ReactComponent as Cere } from './thumbnails/cere.svg';
-import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
+import { ReactComponent as Thumbnail4T2CAPITAL } from './thumbnails/4t2.svg';
 import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
+import { ReactComponent as Brightlystake } from './thumbnails/Brightlystake-logo.svg';
+import { ReactComponent as Cere } from './thumbnails/cere.svg';
+import { ReactComponent as EdgeServices } from './thumbnails/edgeservices.svg';
+import { ReactComponent as garm99 } from './thumbnails/garm99.svg';
+import { ReactComponent as Jinogami } from './thumbnails/Jinogami.svg';
+import { ReactComponent as medium } from './thumbnails/medium.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
 import { ReactComponent as StakeAngle } from './thumbnails/stakeangle.svg';
-import { ReactComponent as medium } from './thumbnails/medium.svg';
-import { ReactComponent as Jinogami } from './thumbnails/Jinogami.svg';
-import { ReactComponent as EdgeServices } from './thumbnails/edgeservices.svg';
-import { ReactComponent as wombat } from './thumbnails/wombat.svg';
-import { ReactComponent as Brightlystake } from './thumbnails/Brightlystake-logo.svg';
-import { ReactComponent as garm99 } from './thumbnails/garm99.svg';
-import { ReactComponent as Thumbnail4T2CAPITAL } from './thumbnails/4t2.svg';
-import { ReactComponent as TRK } from './thumbnails/TRK.svg';
 import { ReactComponent as Testnetrun } from './thumbnails/Testnetrun.svg';
 import { ReactComponent as Tokem } from './thumbnails/tomek.svg';
+import { ReactComponent as TRK } from './thumbnails/TRK.svg';
+import { ReactComponent as wombat } from './thumbnails/wombat.svg';
+import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {

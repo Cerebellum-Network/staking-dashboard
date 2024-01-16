@@ -201,6 +201,7 @@ export const StakingProvider = ({
     if (api !== null && isReady && metrics.activeEra.index !== 0) {
       const previousEra = metrics.activeEra.index - 1;
 
+      // eslint-disable-next-line
       const u = await api.queryMulti<AnyApi>(
         [
           api.query.staking.counterForNominators,

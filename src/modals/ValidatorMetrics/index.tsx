@@ -3,10 +3,10 @@
 
 import { BN } from 'bn.js';
 import { useApi } from 'contexts/Api';
+import { useCereStats } from 'contexts/CereStats';
 import { useModal } from 'contexts/Modal';
 import { useNetworkMetrics } from 'contexts/Network';
 import { useStaking } from 'contexts/Staking';
-import { useCereStats } from 'contexts/CereStats';
 import { EraPoints as EraPointsGraph } from 'library/Graphs/EraPoints';
 import { formatSize, useSize } from 'library/Graphs/Utils';
 import { GraphWrapper } from 'library/Graphs/Wrappers';

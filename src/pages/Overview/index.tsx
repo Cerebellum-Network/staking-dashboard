@@ -4,7 +4,7 @@
 import BN from 'bn.js';
 import { SectionFullWidthThreshold, SideMenuStickyThreshold } from 'consts';
 import { useApi } from 'contexts/Api';
-import { useSubscan } from 'contexts/Subscan';
+import { useCereStats } from 'contexts/CereStats';
 import { useUi } from 'contexts/UI';
 import { formatDistance, fromUnixTime, getUnixTime } from 'date-fns';
 import { formatRewardsForGraphs } from 'library/Graphs/Utils';
@@ -15,7 +15,6 @@ import { SubscanButton } from 'library/SubscanButton';
 import { locales } from 'locale';
 import { useTranslation } from 'react-i18next';
 import { humanNumber, planckBnToUnit } from 'Utils';
-import { useCereStats } from 'contexts/CereStats';
 import {
   PageRowWrapper,
   RowPrimaryWrapper,

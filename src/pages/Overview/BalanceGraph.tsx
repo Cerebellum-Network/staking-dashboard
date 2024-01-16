@@ -14,11 +14,7 @@ import { OpenHelpIcon } from 'library/OpenHelpIcon';
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
-import {
-  defaultThemes,
-  networkColors,
-  networkColorsSecondary,
-} from 'theme/default';
+import { defaultThemes, networkColorsSecondary } from 'theme/default';
 import {
   humanNumber,
   planckBnToUnit,

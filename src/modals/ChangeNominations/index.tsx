@@ -27,8 +27,7 @@ export const ChangeNominations = () => {
   const { activeAccount, accountHasSigner } = useConnect();
   const { getBondedAccount, getAccountNominations } = useBalances();
   const { setStatus: setModalStatus, config } = useModal();
-  const { poolNominations, isNominator, isOwner, selectedActivePool } =
-    useActivePools();
+  const { isNominator, isOwner, selectedActivePool } = useActivePools();
   const { txFeesValid } = useTxFees();
 
   const { nominations: newNominations, provider, bondType } = config;

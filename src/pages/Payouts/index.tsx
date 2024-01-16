@@ -4,7 +4,6 @@
 import { BN } from 'bn.js';
 import { MaxPayoutDays } from 'consts';
 import { useStaking } from 'contexts/Staking';
-import { useSubscan } from 'contexts/Subscan';
 import { useUi } from 'contexts/UI';
 import { format, fromUnixTime } from 'date-fns';
 import { PayoutBar } from 'library/Graphs/PayoutBar';
@@ -25,10 +24,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnySubscan } from 'types';
 import { PageRowWrapper } from 'Wrappers';
+import { useCereStats } from '../../contexts/CereStats';
 import { PageProps } from '../types';
 import { PayoutList } from './PayoutList';
 import LastEraPayoutStatBox from './Stats/LastEraPayout';
-import { useCereStats } from '../../contexts/CereStats';
 
 export const Payouts = (props: PageProps) => {
   const { payouts, poolClaims } = useCereStats();
