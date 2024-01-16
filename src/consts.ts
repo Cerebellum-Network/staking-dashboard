@@ -94,3 +94,8 @@ export const DefaultParams = {
   maxInflation: 0.05,
   minInflation: 0.0001,
 };
+
+/*
+ * locale
+ */
+export const DefaultLocale = 'en';

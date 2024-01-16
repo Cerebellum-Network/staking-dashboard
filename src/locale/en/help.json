@@ -12,7 +12,7 @@
       "dashboard_tips": [
         "Dashboard Tips",
         [
-          "Staking dashboard will present you tips to help you along each step of staking on Polkadot.",
+          "Staking dashboard will present you tips to help you along each step of staking on Cere Network.",
           "Tips can be turned off or re-enabled from dashboard settings, that can be accessed via the cog icon in the bottom left corner of the side menu."
         ]
       ],
@@ -81,7 +81,7 @@
           "The status of your nominations at a glance.",
           "A set of nominations will be inactive when none of those nominees are participating in the current validator set (the set of validators currently elected to validate the network).",
           "When at least one of your nominees are active, this nomination status will display as actively nominating - but this still does not guarantee rewards.",
-          "The top {MAX_NOMINATOR_REWARDED_PER_VALIDATOR} nominators of each active validator receive rewards on {NETWORK_NAME}. So if a nominee is active and over-subscribed, you must be a part of the {MAX_NOMINATOR_REWARDED_PER_VALIDATOR} highest bonded nominators to receive rewards.",
+          "The top {FallbackNominatorRewardedPerValidator} nominators of each active validator receive rewards on {NETWORK_NAME}. So if a nominee is active and over-subscribed, you must be a part of the {FallbackNominatorRewardedPerValidator} highest bonded nominators to receive rewards.",
           "If an active nominee is not over-subscribed, you will receive rewards."
         ]
       ],
@@ -117,7 +117,7 @@
           "The amount of {NETWORK_UNIT} needed to be actively nominating in an era. ",
           "This value applies to nominators and for pools. In the pool's case, it is important to join a pool with a total bond amount of at least this value.",
           "Being above this metric simply guarantees that you will be present in the active nominator set for the era. This amount still does not guarantee rewards, as your active nominations may still be over-subscribed.",
-          "Only the top {MAX_NOMINATOR_REWARDED_PER_VALIDATOR} nominators are rewarded per validator in {NETWORK_NAME}. Ensuring your active bond is above this threshold will increase your chances of rewards.",
+          "Only the top {FallbackNominatorRewardedPerValidator} nominators are rewarded per validator in {NETWORK_NAME}. Ensuring your active bond is above this threshold will increase your chances of rewards.",
           "You can keep track of these metrics from the dashboard and amend your staking position if necessary, whether increasing your bonded {NETWORK_UNIT}, changing your nominations, or joining another pool."
         ]
       ],
@@ -138,7 +138,7 @@
       "nominations": [
         "Nominations",
         [
-          "Nominations are the validators a staker chooses to nominate. You can nominate up to {MAX_NOMINATIONS} validators on {NETWORK_NAME}.",
+          "Nominations are the validators a staker chooses to nominate. You can nominate up to {FallbackMaxNominations} validators on {NETWORK_NAME}.",
           "For nomination pools, the pool owner and pool nominator are in charge of nominating validators on behalf of all the pool members.",
           "Once nominations have been submitted, bonded funds are automatically distributed to nominees that are active in the curernt era.",
           "As long as at least one of your nominations is actively validating in a session, your funds will be backing that validator."
@@ -234,14 +234,14 @@
         "Era",
         [
           "At the end of each era, validators are rewarded {NETWORK_UNIT} based on how many era points they accumulated in that era. This {NETWORK_UNIT} reward is then distributed amongst the nominators of the validator via a payout.",
-          "1 era is currently 24 hours in Polkadot."
+          "1 era is currently 24 hours in Cere Network."
         ]
       ],
       "epoch": [
         "Epoch",
         [
           "An epoch is another name for a session in {NETWORK_NAME}. A different set of validators are selected to validate blocks at the beginning of every epoch.",
-          "1 epoch is currently 4 hours in Polkadot."
+          "1 epoch is currently 4 hours in Cere Network."
         ]
       ],
       "era_points": [
@@ -277,7 +277,7 @@
       "over_subscribed": [
         "Over Subscribed",
         [
-          "Only the top {MAX_NOMINATOR_REWARDED_PER_VALIDATOR} nominators for each validator are rewarded in {NETWORK_NAME}. When this number is surpassed, this validator is considered over subscribed."
+          "Only the top {FallbackNominatorRewardedPerValidator} nominators for each validator are rewarded in {NETWORK_NAME}. When this number is surpassed, this validator is considered over subscribed."
         ]
       ],
       "blocked_nominations": [
@@ -314,7 +314,7 @@
     "externals": {
       "connect_your_accounts": "How to Connect Your Accounts",
       "how_to_use": "How to Use the Staking Dashboard: Overview",
-      "stake_dot": "Staking your DOT",
+      "stake_cere": "Staking your CERE",
       "change_destination": "Changing Your Reward Destination",
       "bond_more": "Bond More Tokens to Your Existing Stake",
       "unbonding_tokens": "Unbonding Your Tokens",

@@ -259,15 +259,6 @@ export const GenerateNominations = (props: GenerateNominationsInnerProps) => {
       isDisabled: () => false,
     },
     {
-      title: 'Parachain Validator',
-      onClick: () => addNominationByType('Parachain Validator'),
-      onSelected: false,
-      icon: faPlus,
-      isDisabled: () =>
-        disabledMaxNominations() ||
-        !availableToNominate(nominations).parachainValidators.length,
-    },
-    {
       title: 'Active Validator',
       onClick: () => addNominationByType('Active Validator'),
       onSelected: false,

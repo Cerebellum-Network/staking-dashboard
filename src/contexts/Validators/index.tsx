@@ -49,7 +49,7 @@ export const ValidatorsProvider = ({
   const { poolNominations } = useActivePools();
   const { units } = network;
   const { maxNominatorRewardedPerValidator } = consts;
-  const { activeEra, earliestStoredSession } = metrics;
+  const { activeEra } = metrics;
 
   // stores the total validator entries
   const [validators, setValidators] = useState<Array<Validator>>([]);
@@ -138,10 +138,10 @@ export const ValidatorsProvider = ({
 
   // fetch parachain session validators when earliestStoredSession ready
   useEffect(() => {
-    if (isReady && earliestStoredSession.gt(new BN(0))) {
+    if (isReady) {
       subscribeParachainValidators(api);
     }
-  }, [isReady, earliestStoredSession]);
+  }, [isReady]);
 
   // pre-populating validator meta batches. Needed for generating nominations
   useEffect(() => {
@@ -161,6 +161,8 @@ export const ValidatorsProvider = ({
     if (!activeAccount) {
       return;
     }
+
+    console.log(`Active account: ${activeAccount}`);
     // get raw targets list
     const targets = getAccountNominations(activeAccount);
 
@@ -168,6 +170,8 @@ export const ValidatorsProvider = ({
     const targetsFormatted = targets.map((item: any) => {
       return { address: item };
     });
+    console.log(`Fetching validators from  nominated list:`);
+    console.log(targetsFormatted);
     // fetch preferences
     const nominationsWithPrefs = await fetchValidatorPrefs(targetsFormatted);
 
@@ -188,11 +192,14 @@ export const ValidatorsProvider = ({
   const fetchPoolNominatedList = async () => {
     // get raw nominations list
     let n = poolNominations.targets;
+    console.log(`Raw nominations list:`);
+    console.log(n);
     // format to list format
     n = n.map((item: string) => {
       return { address: item };
     });
     // fetch preferences
+    console.log(`Fetching validators from pool nominated list: ${n}`);
     const nominationsWithPrefs = await fetchValidatorPrefs(n);
     if (nominationsWithPrefs) {
       setPoolNominated(nominationsWithPrefs);
@@ -218,6 +225,8 @@ export const ValidatorsProvider = ({
     const _favorites = [...favorites].map((item: string) => {
       return { address: item };
     });
+    console.log(`Favourite validators:`);
+    console.log(_favorites);
     // // fetch preferences
     const favoritesWithPrefs = await fetchValidatorPrefs(_favorites);
     if (favoritesWithPrefs) {
@@ -305,8 +314,8 @@ export const ValidatorsProvider = ({
    */
   const subscribeParachainValidators = async (_api: AnyApi) => {
     if (isReady) {
-      const unsub = await _api.query.paraSessionInfo.accountKeys(
-        earliestStoredSession.toString(),
+      const unsub = await _api.query.session.validators(
+        // earliestStoredSession.toString(),
         (_validators: AnyApi) => {
           setSessionParachainValidators({
             ...sessionParachainValidators,

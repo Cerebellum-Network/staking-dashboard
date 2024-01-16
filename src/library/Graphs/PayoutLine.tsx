@@ -12,9 +12,9 @@ import {
   Tooltip,
 } from 'chart.js';
 import { useApi } from 'contexts/Api';
+import { useCereStats } from 'contexts/CereStats';
 import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
 import { useStaking } from 'contexts/Staking';
-import { useCereStats } from 'contexts/CereStats';
 import { useTheme } from 'contexts/Themes';
 import { useUi } from 'contexts/UI';
 import { Line } from 'react-chartjs-2';

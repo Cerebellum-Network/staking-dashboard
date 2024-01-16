@@ -122,7 +122,7 @@ const usePayouts = (
               data: { _like: $activeAccount }
             }
           ) {
-            blockNumber
+            block_number
             data
             timestamp
           }

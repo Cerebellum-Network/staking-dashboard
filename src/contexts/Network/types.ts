@@ -13,6 +13,6 @@ export interface NetworkMetrics {
     start: number;
   };
   totalIssuance: BN;
-  auctionCounter: BN;
-  earliestStoredSession: BN;
+  // auctionCounter: BN;
+  // earliestStoredSession: BN;
 }

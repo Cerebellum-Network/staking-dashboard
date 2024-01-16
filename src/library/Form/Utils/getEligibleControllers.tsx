@@ -60,7 +60,13 @@ export const getEligibleControllers = (): Array<InputItem> => {
     _accountsAsInput = _accountsAsInput.sort((a: InputItem, b: InputItem) => {
       const aFree = a?.balance?.free ?? new BN(0);
       const bFree = b?.balance?.free ?? new BN(0);
-      return bFree.sub(aFree).toNumber();
+
+      if (bFree.lt(aFree)) {
+        return -1;
+        // eslint-disable-next-line no-else-return
+      } else {
+        return bFree.sub(aFree).toNumber();
+      }
     });
 
     return _accountsAsInput;

@@ -7,7 +7,8 @@ import { useValidatorFilters } from 'library/Hooks/useValidatorFilters';
 import { shuffle } from 'Utils';
 
 export const useFetchMehods = () => {
-  const { validators, sessionParachain } = useValidators();
+  const includeTestnet = process.env.REACT_APP_INCLUDE_TESTNET !== 'false';
+  const { validators } = useValidators();
   const { applyFilter, applyOrder } = useValidatorFilters();
   let { favoritesList } = useValidators();
   if (favoritesList === null) {
@@ -71,7 +72,11 @@ export const useFetchMehods = () => {
     // filter validators to find active candidates
     _nominations = applyFilter(
       ['active'],
-      ['all_commission', 'blocked_nominations', 'missing_identity'],
+      [
+        'all_commission',
+        'blocked_nominations',
+        includeTestnet ? '' : 'missing_identity',
+      ],
       _nominations,
       rawBatchKey
     );
@@ -98,7 +103,7 @@ export const useFetchMehods = () => {
       [
         'all_commission',
         'blocked_nominations',
-        'missing_identity',
+        includeTestnet ? '' : 'missing_identity',
         'in_session',
       ],
       _nominationsWaiting,
@@ -108,7 +113,11 @@ export const useFetchMehods = () => {
     // filter validators to find active candidates
     _nominationsActive = applyFilter(
       ['active'],
-      ['all_commission', 'blocked_nominations', 'missing_identity'],
+      [
+        'all_commission',
+        'blocked_nominations',
+        includeTestnet ? '' : 'missing_identity',
+      ],
       _nominationsActive,
       rawBatchKey
     );
@@ -118,10 +127,9 @@ export const useFetchMehods = () => {
       _nominationsWaiting = shuffle(_nominationsWaiting).slice(0, 4);
     }
     // choose shuffled subset of active
-    if (_nominationsWaiting.length) {
+    if (_nominationsActive.length) {
       _nominationsActive = shuffle(_nominationsActive).slice(0, 12);
     }
-
     return shuffle(_nominationsWaiting.concat(_nominationsActive));
   };
 
@@ -144,18 +152,25 @@ export const useFetchMehods = () => {
 
     const _activeValidators = applyFilter(
       ['active'],
-      ['all_commission', 'blocked_nominations', 'missing_identity'],
+      [
+        'all_commission',
+        'blocked_nominations',
+        includeTestnet ? '' : 'missing_identity',
+      ],
       _nominations,
       rawBatchKey
-    )
-      .filter(
-        (n: any) => !nominations.find((o: any) => o.address === n.address)
-      )
-      .filter((n: any) => !sessionParachain?.includes(n.address) || false);
+    ).filter(
+      (n: any) => !nominations.find((o: any) => o.address === n.address)
+    );
+    // .filter((n: any) => !sessionParachain?.includes(n.address) || false);
 
     const _randomValidator = applyFilter(
       null,
-      ['all_commission', 'blocked_nominations', 'missing_identity'],
+      [
+        'all_commission',
+        'blocked_nominations',
+        includeTestnet ? '' : 'missing_identity',
+      ],
       _nominations,
       rawBatchKey
     ).filter(
