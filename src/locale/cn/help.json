@@ -299,7 +299,7 @@
     "externals": {
       "connect_your_accounts": "如何连接您的帐户",
       "how_to_use": "如何使用Staking Dashboard:概述",
-      "stake_cere": "抵押您的DOT",
+      "stake_cere": "抵押您的CERE",
       "change_destination": "更改奖励钱包地址",
       "bond_more": "质押更多代币到现有的抵押",
       "unbonding_tokens": "解除您的质押",

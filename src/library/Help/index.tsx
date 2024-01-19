@@ -9,7 +9,6 @@ import {
   DefinitionWithKeys,
   ExternalItem,
   ExternalItems,
-  ExternalWithKeys,
   HelpItem,
 } from 'contexts/Help/types';
 import { useAnimation } from 'framer-motion';
@@ -18,7 +17,6 @@ import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { stringToKey } from 'Utils';
 import Definition from './Items/Definition';
-import External from './Items/External';
 import { ContentWrapper, HeightWrapper, Wrapper } from './Wrappers';
 
 export const Help = () => {
@@ -200,23 +198,6 @@ export const Help = () => {
                       onClick={() => {}}
                       title={item.title}
                       description={item.description}
-                    />
-                  )
-                )}
-              </>
-            )}
-
-            {activeExternals.length > 0 && (
-              <>
-                <h3>{t('modal.articles')}</h3>
-                {activeExternals.map(
-                  (item: ExternalWithKeys, index: number) => (
-                    <External
-                      key={`ext_${index}`}
-                      width="100%"
-                      title={t(item.title)}
-                      url={item.url}
-                      website={item.website}
                     />
                   )
                 )}
