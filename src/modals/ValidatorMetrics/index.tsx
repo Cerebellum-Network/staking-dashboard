@@ -30,7 +30,7 @@ export const ValidatorMetrics = () => {
   } = useApi();
   const { config } = useModal();
   const { address, identity } = config;
-  const { fetchEraPoints }: any = useSubscan();
+  const { fetchEraPoints }: any = useCereStats();
   const { activeEra } = useNetworkMetrics();
   const { eraStakers } = useStaking();
   const { stakers } = eraStakers;
@@ -129,8 +129,8 @@ export const ValidatorMetrics = () => {
           <div className="inner" ref={ref} style={{ minHeight }}>
             <StatusLabel
               status="active_service"
-              statusFor="subscan"
-              title={t('subscanDisabled')}
+              statusFor="cereStats"
+              title="Cere Stats Disabled"
             />
             <div
               className="graph"

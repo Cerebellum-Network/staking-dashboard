@@ -4,4 +4,5 @@ export interface CereStatsContextInterface {
   // The Cere Stats does not currently support `poolClaims`.
   // We need it to maintain consistency with the `useSubscan` hook and for possible future support of `poolClaims`.
   poolClaims: [];
+  unclaimedPayouts: [];
 }

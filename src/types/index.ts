@@ -6,7 +6,12 @@ import type { PageProps } from 'pages/types';
 import type React from 'react';
 import type { FunctionComponent, SVGProps } from 'react';
 
-export type NetworkName = 'polkadot' | 'kusama' | 'westend';
+export enum NetworkName { 
+  CereTestnet = 'Cere Testnet',
+  CereQanet = 'Cere Qanet',
+  CereDevnet = 'Cere Devnet',
+  Cere = 'Cere',
+};
 
 export interface Networks {
   [key: string]: Network;
@@ -27,6 +32,7 @@ export interface Network {
   namespace: string;
   colors: Record<NetworkColor, { [key in Theme]: string }>;
   subscanEndpoint: string;
+  cereStatsEndpoint: string;
   unit: string;
   units: number;
   ss58: number;

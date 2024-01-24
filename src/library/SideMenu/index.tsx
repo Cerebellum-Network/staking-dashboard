@@ -4,7 +4,7 @@
 import { faCompressAlt, faExpandAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { capitalizeFirstLetter } from '@polkadotcloud/utils';
-import { SideMenuStickyThreshold } from 'consts';
+import { CereUrl, SideMenuStickyThreshold } from 'consts';
 import { useApi } from 'contexts/Api';
 import { useHelp } from 'contexts/Help';
 import { useModal } from 'contexts/Modal';
@@ -38,7 +38,7 @@ export const SideMenu = () => {
     userSideMenuMinimised,
     setUserSideMenuMinimised,
   }: UIContextInterface = useUi();
-  const { openHelp } = useHelp();
+  const { openHelp, } = useHelp();
 
   // listen to window resize to hide SideMenu
   useEffect(() => {
@@ -77,7 +77,7 @@ export const SideMenu = () => {
         <Heading title={t('support')} minimised={sideMenuMinimised} />
         <Secondary
           onClick={() => {
-            openHelp(null);
+            openHelp(CereUrl);
           }}
           name={t('resources')}
           minimised={sideMenuMinimised}
@@ -128,7 +128,7 @@ export const SideMenu = () => {
           type="button"
           onClick={() =>
             window.open(
-              'https://github.com/paritytech/polkadot-staking-dashboard',
+              'https://github.com/Cerebellum-Network/staking-dashboard/',
               '_blank'
             )
           }

@@ -6,7 +6,7 @@ import { MaxPayoutDays } from 'consts';
 import { useHelp } from 'contexts/Help';
 import { usePlugins } from 'contexts/Plugins';
 import { useStaking } from 'contexts/Staking';
-import { useSubscan } from 'contexts/Subscan';
+import { useCereStats } from 'contexts/CereStats';
 import { useUi } from 'contexts/UI';
 import { PayoutBar } from 'library/Graphs/PayoutBar';
 import { PayoutLine } from 'library/Graphs/PayoutLine';
@@ -29,7 +29,7 @@ import { LastEraPayoutStat } from './Stats/LastEraPayout';
 
 export const Payouts = ({ page }: PageProps) => {
   const { t } = useTranslation();
-  const { payouts, poolClaims, payoutsFromDate, payoutsToDate } = useSubscan();
+  const { payouts, poolClaims } = useCereStats();
   const { isSyncing } = useUi();
   const { plugins } = usePlugins();
   const { inSetup } = useStaking();
@@ -66,25 +66,13 @@ export const Payouts = ({ page }: PageProps) => {
                 onClick={() => openHelp('Payout History')}
               />
             </h4>
-            <h2>
-              {payoutsFromDate && payoutsToDate ? (
-                <>
-                  {payoutsFromDate}
-                  {payoutsToDate !== payoutsFromDate && (
-                    <>&nbsp;-&nbsp;{payoutsToDate}</>
-                  )}
-                </>
-              ) : (
-                t('payouts.none', { ns: 'pages' })
-              )}
-            </h2>
           </CardHeaderWrapper>
           <div className="inner" ref={ref} style={{ minHeight }}>
-            {!plugins.includes('subscan') ? (
+            {!plugins.includes('cereStats') ? (
               <StatusLabel
                 status="active_service"
-                statusFor="subscan"
-                title={t('payouts.subscanDisabled', { ns: 'pages' })}
+                statusFor="cereStats"
+                title={t('Cere Stats Disabled', { ns: 'pages' })}
                 topOffset="30%"
               />
             ) : (

@@ -34,5 +34,5 @@ export const defaultApiContext: APIContextInterface = {
   isLightClient: false,
   isReady: false,
   apiStatus: 'disconnected',
-  network: NetworkList.polkadot,
+  network: NetworkList.cereMainnet,
 };

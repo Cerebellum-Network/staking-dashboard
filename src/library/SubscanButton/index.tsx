@@ -25,13 +25,13 @@ export const SubscanButton = () => {
   const { plugins } = usePlugins();
 
   return (
-    <Wrapper active={plugins.includes('subscan')}>
+    <Wrapper active={plugins.includes('cereStats')}>
       <FontAwesomeIcon
         icon={faProjectDiagram}
         transform="shrink-2"
         style={{ marginRight: '0.3rem' }}
       />
-      Subscan
+      Cere Stats
     </Wrapper>
   );
 };

@@ -42,7 +42,7 @@ export const HelpConfig: HelpItems = [
         'polkadot.network',
       ],
       [
-        'stakeDot',
+        'stakeCere',
         'https://support.polkadot.network/support/solutions/articles/65000182104-how-to-use-the-staking-dashboard-overview',
         'polkadot.network',
       ],

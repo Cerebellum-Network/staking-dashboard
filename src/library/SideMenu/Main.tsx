@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PageCategories, PagesConfig } from 'config/pages';
-import { BaseURL, PolkadotUrl } from 'consts';
+import { BaseURL, CereUrl } from 'consts';
 import { useApi } from 'contexts/Api';
 import { useBonded } from 'contexts/Bonded';
 import { useConnect } from 'contexts/Connect';
@@ -138,7 +138,7 @@ export const Main = () => {
     <>
       <LogoWrapper
         onClick={() => {
-          window.open(PolkadotUrl, '_blank');
+          window.open(CereUrl, '_blank');
         }}
         minimised={sideMenuMinimised}
       >

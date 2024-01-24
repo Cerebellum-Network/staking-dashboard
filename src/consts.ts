@@ -7,11 +7,13 @@ import BigNumber from 'bignumber.js';
 /*
  * Global Constants
  */
-export const AppVersion = '1.0.6';
 export const BaseURL = '';
-export const DappName = 'Polkadot Staking Dashboard';
-export const PolkadotUrl = 'https://polkadot.network/staking/';
-export const DefaultNetwork = 'polkadot';
+export const AppVersion = '1.0.6';
+export const UriPrefix = '';
+export const TitleDefault = 'Cere Staking Dashboard';
+export const DappName = 'cere_staking_dashboard';
+export const CereUrl = 'https://cere.network';
+export const DefaultNetwork = 'cereMainnet';
 
 /*
  * Data Structure Helpers
@@ -34,17 +36,18 @@ export const TipsThresholdMedium = 1200;
 
 /*
  * Available plugins
+ * Toggle-able services
  */
-export const PluginsList = ['subscan', 'binance_spot', 'tips'];
+export const PluginsList = ['cereStats'];
 
 /*
  * Fallback config values
  */
 export const FallbackMaxNominations = new BigNumber(16);
-export const FallbackBondingDuration = new BigNumber(28);
+export const FallbackBondingDuration = new BigNumber(3);
 export const FallbackSessionsPerEra = new BigNumber(6);
-export const FallbackNominatorRewardedPerValidator = new BigNumber(512);
-export const FallbackMaxElectingVoters = new BigNumber(22500);
+export const FallbackNominatorRewardedPerValidator = new BigNumber(256);
+export const FallbackMaxElectingVoters = new BigNumber(10000);
 export const FallbackExpectedBlockTime = new BigNumber(6000);
 export const FallbackEpochDuration = new BigNumber(2400);
 
@@ -75,9 +78,9 @@ export const DefaultParams = {
   auctionAdjust: 0,
   auctionMax: 0,
   falloff: 0.05,
-  maxInflation: 0.1,
-  minInflation: 0.025,
-  stakeTarget: 0.5,
+  stakeTarget: 0.2,
+  maxInflation: 0.05,
+  minInflation: 0.0001,
 };
 
 /*

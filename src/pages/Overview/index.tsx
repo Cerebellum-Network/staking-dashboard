@@ -10,7 +10,7 @@ import {
 import { planckToUnit } from '@polkadotcloud/utils';
 import BigNumber from 'bignumber.js';
 import { useApi } from 'contexts/Api';
-import { useSubscan } from 'contexts/Subscan';
+import { useCereStats } from 'contexts/CereStats';
 import { formatDistance, fromUnixTime, getUnixTime } from 'date-fns';
 import { formatRewardsForGraphs } from 'library/Graphs/Utils';
 import { GraphWrapper } from 'library/Graphs/Wrappers';
@@ -33,7 +33,7 @@ export const Overview = () => {
   const { i18n, t } = useTranslation('pages');
   const { network } = useApi();
   const { units } = network;
-  const { payouts, poolClaims, unclaimedPayouts } = useSubscan();
+  const { payouts, poolClaims, unclaimedPayouts } = useCereStats();
   const { lastReward } = formatRewardsForGraphs(
     new Date(),
     14,

@@ -29,7 +29,7 @@ import { PoolsConfigProvider } from 'contexts/Pools/PoolsConfig';
 import { ProxiesProvider } from 'contexts/Proxies';
 import { SetupProvider } from 'contexts/Setup';
 import { StakingProvider } from 'contexts/Staking';
-import { SubscanProvider } from 'contexts/Subscan';
+import { CereStatsProvider } from './contexts/CereStats';
 import { useTheme } from 'contexts/Themes';
 import { TooltipProvider } from 'contexts/Tooltip';
 import { TransferOptionsProvider } from 'contexts/TransferOptions';
@@ -77,7 +77,7 @@ export const Providers = withProviders(
   UIProvider,
   PluginsProvider,
   SetupProvider,
-  SubscanProvider,
+  CereStatsProvider,
   MenuProvider,
   TooltipProvider,
   NotificationsProvider,
