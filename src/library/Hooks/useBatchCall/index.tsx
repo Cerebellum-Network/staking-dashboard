@@ -2,17 +2,19 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { useApi } from 'contexts/Api';
-import { useConnect } from 'contexts/Connect';
-import type { AnyApi, MaybeAccount } from 'types';
+import type { AnyApi, MaybeAddress } from 'types';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
 import { useProxySupported } from '../useProxySupported';
 
 export const useBatchCall = () => {
   const { api } = useApi();
-  const { activeProxy } = useConnect();
+  const { activeProxy } = useActiveAccounts();
   const { isProxySupported } = useProxySupported();
 
-  const newBatchCall = (txs: AnyApi[], from: MaybeAccount) => {
-    if (!api) return undefined;
+  const newBatchCall = (txs: AnyApi[], from: MaybeAddress) => {
+    if (!api) {
+      return undefined;
+    }
 
     from = from || '';
 

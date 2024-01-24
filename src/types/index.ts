@@ -1,9 +1,21 @@
 // Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: GPL-3.0-only
 
-import type React from 'react';
-import type { FunctionComponent, SVGProps } from 'react';
+import type { FC, FunctionComponent, SVGProps } from 'react';
 import type { Theme } from 'contexts/Themes/types';
+import type { ExtensionInjected } from '@polkadot-cloud/react/types';
+import type BigNumber from 'bignumber.js';
+import type { NotificationItem } from 'static/NotificationsController/types';
+
+declare global {
+  interface Window {
+    injectedWeb3?: Record<string, ExtensionInjected>;
+  }
+  interface DocumentEventMap {
+    notification: CustomEvent<NotificationItem>;
+    'new-block-number': CustomEvent<{ blockNumber: string }>;
+  }
+}
 
 export type NetworkName = 'polkadot' | 'kusama' | 'westend';
 
@@ -18,8 +30,9 @@ type NetworkColor =
 export interface Network {
   name: NetworkName;
   endpoints: {
-    rpc: string;
     lightClient: AnyApi;
+    defaultRpcEndpoint: string;
+    rpcEndpoints: Record<string, string>;
   };
   namespace: string;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -54,6 +67,7 @@ export interface Network {
   };
   params: Record<string, number>;
   defaultFeeReserve: number;
+  maxExposurePageSize: BigNumber;
 }
 
 export interface PageCategory {
@@ -68,7 +82,7 @@ export interface PageItem {
   key: string;
   uri: string;
   hash: string;
-  Entry: React.FC<PageProps>;
+  Entry: FC<PageProps>;
   lottie: AnyJson;
   action?: {
     type: string;
@@ -87,15 +101,21 @@ interface PageProp {
   key: string;
 }
 
-export type MaybeAccount = string | null;
+export type MaybeAddress = string | null;
 
 export type MaybeString = string | null;
+
+// list of available plugins.
+export type Plugin = 'subscan' | 'binance_spot' | 'tips' | 'polkawatch';
 
 // track the status of a syncing / fetching process.
 export type Sync = 'unsynced' | 'syncing' | 'synced';
 
 // track whether bonding should be for nominator or nomination pool.
 export type BondFor = 'pool' | 'nominator';
+
+// which medium components are being displayed on.
+export type DisplayFor = 'default' | 'modal' | 'canvas';
 
 // generic function with no args or return type.
 export type Fn = () => void;
@@ -111,3 +131,5 @@ export type AnyFunction = any;
 export type AnyMetaBatch = any;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnySubscan = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyPolkawatch = any;

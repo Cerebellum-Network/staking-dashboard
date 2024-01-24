@@ -56,7 +56,9 @@ export const calculateDailyPayouts = (
   );
 
   // return now if no payouts.
-  if (!payouts.length) return payouts;
+  if (!payouts.length) {
+    return payouts;
+  }
 
   // post-fill any missing days. [current day -> last payout]
   dailyPayouts = postFillMissingDays(payouts, fromDate, maxDays);
@@ -93,7 +95,7 @@ export const calculateDailyPayouts = (
       break;
     }
 
-    // get day difference between cursor and currentpayout.
+    // get day difference between cursor and current payout.
     const daysDiff = daysPassed(thisDay, curDay);
 
     // handle new day.
@@ -119,8 +121,11 @@ export const calculateDailyPayouts = (
       curPayout.amount = curPayout.amount.plus(payout.amount);
     }
 
-    // if only 1 payout exists, exit early here.
-    if (payouts.length === 1) {
+    // if only 1 payout exists, or at the last unresolved payout, exit here.
+    if (
+      payouts.length === 1 ||
+      (p === payouts.length && !curPayout.amount.isZero())
+    ) {
       dailyPayouts.push({
         amount: planckToUnit(curPayout.amount, units),
         event_id: getEventId(curPayout),
@@ -145,7 +150,9 @@ export const calculatePayoutAverages = (
   avgDays: number
 ) => {
   // if we don't need to take an average, just return `payouts`.
-  if (avgDays <= 1) return payouts;
+  if (avgDays <= 1) {
+    return payouts;
+  }
 
   // create moving average value over `avgDays` past days, if any.
   let payoutsAverages = [];
@@ -284,15 +291,13 @@ const getPreMaxDaysPayouts = (
   fromDate: Date,
   days: number,
   avgDays: number
-) => {
+) =>
   // remove payouts that are not within `avgDays` `days` pre-graph window.
-  return payouts.filter(
+  payouts.filter(
     (p: AnySubscan) =>
       daysPassed(fromUnixTime(p.block_timestamp), fromDate) > days &&
       daysPassed(fromUnixTime(p.block_timestamp), fromDate) <= days + avgDays
   );
-};
-
 // Combine payouts and pool claims.
 //
 // combines payouts and pool claims into daily records. Removes the `event_id` field from records.

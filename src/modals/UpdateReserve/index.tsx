@@ -10,11 +10,8 @@ import {
 } from '@polkadot-cloud/react';
 import { planckToUnit, unitToPlanck } from '@polkadot-cloud/utils';
 import BigNumber from 'bignumber.js';
-import Slider from 'rc-slider';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useApi } from 'contexts/Api';
-import { useConnect } from 'contexts/Connect';
 import { useHelp } from 'contexts/Help';
 import { useTransferOptions } from 'contexts/TransferOptions';
 import { CardHeaderWrapper } from 'library/Card/Wrappers';
@@ -23,39 +20,33 @@ import { Title } from 'library/Modal/Title';
 import { SliderWrapper } from 'modals/ManagePool/Wrappers';
 import 'rc-slider/assets/index.css';
 import { useOverlay } from '@polkadot-cloud/react/hooks';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
+import { StyledSlider } from 'library/StyledSlider';
 
 export const UpdateReserve = () => {
   const { t } = useTranslation('modals');
   const {
-    network: { units, unit },
-  } = useApi();
-  const { network } = useApi();
+    network,
+    networkData: { units, unit },
+  } = useNetwork();
   const { openHelp } = useHelp();
   const { setModalStatus } = useOverlay().modal;
-  const { activeAccount, accountHasSigner } = useConnect();
+  const { activeAccount } = useActiveAccounts();
+  const { accountHasSigner } = useImportedAccounts();
   const { feeReserve, setFeeReserveBalance, getTransferOptions } =
     useTransferOptions();
 
   const { edReserved } = getTransferOptions(activeAccount);
   const minReserve = planckToUnit(edReserved, units);
   const maxReserve = minReserve.plus(
-    ['polkadot', 'westend'].includes(network.name) ? 3 : 1
+    ['polkadot', 'westend'].includes(network) ? 3 : 1
   );
 
   const [sliderReserve, setSliderReserve] = useState<number>(
     planckToUnit(feeReserve, units).plus(minReserve).decimalPlaces(3).toNumber()
   );
-
-  const sliderProps = {
-    trackStyle: {
-      backgroundColor: 'var(--accent-color-primary)',
-    },
-    handleStyle: {
-      backgroundColor: 'var(--background-primary)',
-      borderColor: 'var(--accent-color-primary)',
-      opacity: 1,
-    },
-  };
 
   const handleChange = (val: BigNumber) => {
     // deduct ED from reserve amount.
@@ -78,20 +69,18 @@ export const UpdateReserve = () => {
         <SliderWrapper style={{ marginTop: '1rem' }}>
           <p>{t('reserveText', { unit })}</p>
           <div>
-            <div className="slider no-value">
-              <Slider
-                min={0}
-                max={maxReserve.toNumber()}
-                value={sliderReserve}
-                step={0.01}
-                onChange={(val) => {
-                  if (typeof val === 'number' && val >= minReserve.toNumber()) {
-                    handleChange(new BigNumber(val));
-                  }
-                }}
-                {...sliderProps}
-              />
-            </div>
+            <StyledSlider
+              classNaame="no-padding"
+              min={0}
+              max={maxReserve.toNumber()}
+              value={sliderReserve}
+              step={0.01}
+              onChange={(val) => {
+                if (typeof val === 'number' && val >= minReserve.toNumber()) {
+                  handleChange(new BigNumber(val));
+                }
+              }}
+            />
           </div>
 
           <div className="stats">

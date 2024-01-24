@@ -4,12 +4,15 @@
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isValidAddress, remToUnit } from '@polkadot-cloud/utils';
-import React, { useEffect, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBonded } from 'contexts/Bonded';
-import { useConnect } from 'contexts/Connect';
-import { PolkadotIcon } from '@polkadot-cloud/react';
-import { useTheme } from 'contexts/Themes';
+import { Polkicon } from '@polkadot-cloud/react';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
+import { useNetwork } from 'contexts/Network';
+import { formatAccountSs58 } from 'contexts/Connect/Utils';
 import { Wrapper } from './Wrapper';
 import type { PayeeInputProps } from './types';
 
@@ -20,9 +23,12 @@ export const PayeeInput = ({
   handleChange,
 }: PayeeInputProps) => {
   const { t } = useTranslation('library');
-  const { activeAccount, formatAccountSs58, accounts } = useConnect();
   const { getBondedAccount } = useBonded();
-  const { mode } = useTheme();
+  const { accounts } = useImportedAccounts();
+  const {
+    networkData: { ss58 },
+  } = useNetwork();
+  const { activeAccount } = useActiveAccounts();
   const controller = getBondedAccount(activeAccount);
 
   const accountMeta = accounts.find((a) => a.address === activeAccount);
@@ -45,9 +51,9 @@ export const PayeeInput = ({
   };
 
   // Handle change of account value. Updates setup progress if the account is a valid value.
-  const handleChangeAccount = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeAccount = (e: ChangeEvent<HTMLInputElement>) => {
     const newAddress = e.target.value;
-    const formatted = formatAccountSs58(newAddress) || newAddress || null;
+    const formatted = formatAccountSs58(newAddress, ss58) || newAddress || null;
     const isValid = isValidAddress(formatted || '');
 
     setValid(isValid);
@@ -81,72 +87,64 @@ export const PayeeInput = ({
     payee.destination === 'Account'
       ? account
       : payee.destination === 'None'
-      ? ''
-      : payee.destination === 'Controller'
-      ? controller
-      : activeAccount;
+        ? ''
+        : payee.destination === 'Controller'
+          ? controller
+          : activeAccount;
 
   const placeholderDisplay =
     payee.destination === 'None' ? t('noPayoutAddress') : t('payoutAddress');
 
   return (
-    <>
-      <Wrapper $activeInput={inputActive}>
-        <div className="inner">
-          <h4>{t('payoutAccount')}:</h4>
-          <div className="account">
-            {showEmpty ? (
-              <div className="emptyIcon" />
-            ) : (
-              <PolkadotIcon
-                dark={mode === 'dark'}
-                nocopy
-                address={accountDisplay || ''}
-                size={remToUnit('2.5rem')}
-              />
-            )}
-            <div className="input" ref={showingRef}>
-              <input
-                type="text"
-                placeholder={placeholderDisplay}
-                disabled={payee.destination !== 'Account'}
-                value={accountDisplay || ''}
-                onFocus={() => setInputActive(true)}
-                onBlur={() => setInputActive(false)}
-                onChange={handleChangeAccount}
-              />
-              <div ref={hiddenRef} className="hidden">
-                {payee.destination === 'Account'
-                  ? activeAccount
-                  : accountDisplay}
-              </div>
+    <Wrapper $activeInput={inputActive}>
+      <div className="inner">
+        <h4>{t('payoutAccount')}:</h4>
+        <div className="account">
+          {showEmpty ? (
+            <div className="emptyIcon" />
+          ) : (
+            <Polkicon
+              address={accountDisplay || ''}
+              size={remToUnit('2.5rem')}
+            />
+          )}
+          <div className="input" ref={showingRef}>
+            <input
+              type="text"
+              placeholder={placeholderDisplay}
+              disabled={payee.destination !== 'Account'}
+              value={accountDisplay || ''}
+              onFocus={() => setInputActive(true)}
+              onBlur={() => setInputActive(false)}
+              onChange={handleChangeAccount}
+            />
+            <div ref={hiddenRef} className="hidden">
+              {payee.destination === 'Account' ? activeAccount : accountDisplay}
             </div>
           </div>
         </div>
-        <div className="label">
-          <h5>
-            {payee.destination === 'Account' ? (
-              <>
-                {account === '' ? (
-                  t('insertPayoutAddress')
-                ) : !valid ? (
-                  t('notValidAddress')
-                ) : (
-                  <>
-                    <FontAwesomeIcon icon={faCheck} />
-                    {t('validAddress')}
-                  </>
-                )}
-              </>
-            ) : payee.destination === 'None' ? null : (
+      </div>
+      <div className="label">
+        <h5>
+          {payee.destination === 'Account' ? (
+            account === '' ? (
+              t('insertPayoutAddress')
+            ) : !valid ? (
+              t('notValidAddress')
+            ) : (
               <>
                 <FontAwesomeIcon icon={faCheck} />
-                {accountMeta?.name || ''}
+                {t('validAddress')}
               </>
-            )}
-          </h5>
-        </div>
-      </Wrapper>
-    </>
+            )
+          ) : payee.destination === 'None' ? null : (
+            <>
+              <FontAwesomeIcon icon={faCheck} />
+              {accountMeta?.name || ''}
+            </>
+          )}
+        </h5>
+      </div>
+    </Wrapper>
   );
 };

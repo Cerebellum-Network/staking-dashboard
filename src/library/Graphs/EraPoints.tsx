@@ -13,10 +13,11 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
-import { useApi } from 'contexts/Api';
 import { useTheme } from 'contexts/Themes';
 import { graphColors } from 'styles/graphs';
+import { useNetwork } from 'contexts/Network';
 import type { EraPointsProps } from './types';
+import type { AnyJson } from 'types';
 
 ChartJS.register(
   CategoryScale,
@@ -31,7 +32,7 @@ ChartJS.register(
 export const EraPoints = ({ items = [], height }: EraPointsProps) => {
   const { t } = useTranslation('library');
   const { mode } = useTheme();
-  const { colors } = useApi().network;
+  const { colors } = useNetwork().networkData;
 
   const options = {
     responsive: true,
@@ -84,11 +85,11 @@ export const EraPoints = ({ items = [], height }: EraPointsProps) => {
         titleColor: graphColors.label[mode],
         bodyColor: graphColors.label[mode],
         bodyFont: {
-          weight: '600',
+          weight: 600,
         },
         callbacks: {
           title: () => [],
-          label: (context: any) => `${context.parsed.y}`,
+          label: (context: AnyJson) => `${context.parsed.y}`,
         },
         intersect: false,
         interaction: {
@@ -99,11 +100,13 @@ export const EraPoints = ({ items = [], height }: EraPointsProps) => {
   };
 
   const data = {
-    labels: items.map((item: any) => item.era),
+    labels: items.map(({ era }: { era: string }) => era),
     datasets: [
       {
         label: t('points'),
-        data: items.map((item: any) => item.reward_point),
+        data: items.map(
+          ({ reward_point }: { reward_point: string }) => reward_point
+        ),
         borderColor: colors.primary[mode],
         backgroundColor: colors.primary[mode],
         pointStyle: undefined,

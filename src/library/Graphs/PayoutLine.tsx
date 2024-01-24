@@ -14,14 +14,14 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
-import { useApi } from 'contexts/Api';
 import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
 import { useStaking } from 'contexts/Staking';
-import { useSubscan } from 'contexts/Subscan';
+import { useSubscan } from 'contexts/Plugins/Subscan';
 import { useTheme } from 'contexts/Themes';
 import { useUi } from 'contexts/UI';
 import { graphColors } from 'styles/graphs';
-import type { AnySubscan } from 'types';
+import type { AnyJson, AnySubscan } from 'types';
+import { useNetwork } from 'contexts/Network';
 import type { PayoutLineProps } from './types';
 import {
   calculatePayoutAverages,
@@ -47,11 +47,11 @@ export const PayoutLine = ({
 }: PayoutLineProps) => {
   const { t } = useTranslation('library');
   const { mode } = useTheme();
-  const { unit, units, colors } = useApi().network;
   const { isSyncing } = useUi();
   const { inSetup } = useStaking();
-  const { membership: poolMembership } = usePoolMemberships();
   const { payouts, poolClaims } = useSubscan();
+  const { unit, units, colors } = useNetwork().networkData;
+  const { membership: poolMembership } = usePoolMemberships();
 
   const notStaking = !isSyncing && inSetup() && !poolMembership;
   const poolingOnly = !isSyncing && inSetup() && poolMembership !== null;
@@ -91,8 +91,8 @@ export const PayoutLine = ({
   const color = notStaking
     ? colors.primary[mode]
     : !poolingOnly
-    ? colors.primary[mode]
-    : colors.secondary[mode];
+      ? colors.primary[mode]
+      : colors.secondary[mode];
 
   // configure graph options
   const options = {
@@ -132,11 +132,11 @@ export const PayoutLine = ({
         titleColor: graphColors.label[mode],
         bodyColor: graphColors.label[mode],
         bodyFont: {
-          weight: '600',
+          weight: 600,
         },
         callbacks: {
           title: () => [],
-          label: (context: any) =>
+          label: (context: AnyJson) =>
             ` ${new BigNumber(context.parsed.y)
               .decimalPlaces(units)
               .toFormat()} ${unit}`,

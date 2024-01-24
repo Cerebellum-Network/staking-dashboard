@@ -5,12 +5,12 @@ import { isNotZero, planckToUnit, unitToPlanck } from '@polkadot-cloud/utils';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useApi } from 'contexts/Api';
-import { useConnect } from 'contexts/Connect';
 import { useActivePools } from 'contexts/Pools/ActivePools';
 import { usePoolsConfig } from 'contexts/Pools/PoolsConfig';
 import { useStaking } from 'contexts/Staking';
 import { useTransferOptions } from 'contexts/TransferOptions';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
 import { Warning } from '../Warning';
 import { Spacer } from '../Wrappers';
 import type { UnbondFeedbackProps } from '../types';
@@ -20,24 +20,25 @@ export const UnbondFeedback = ({
   bondFor,
   inSetup = false,
   setters = [],
-  listenIsValid = () => {},
+  listenIsValid,
   defaultBond,
   setLocalResize,
   parentErrors = [],
   txFees,
 }: UnbondFeedbackProps) => {
   const { t } = useTranslation('library');
-  const { network } = useApi();
-  const { activeAccount } = useConnect();
+  const {
+    networkData: { units, unit },
+  } = useNetwork();
   const { staking } = useStaking();
-  const { getTransferOptions } = useTransferOptions();
-  const { isDepositor } = useActivePools();
   const { stats } = usePoolsConfig();
-  const { minJoinBond, minCreateBond } = stats;
-  const { units, unit } = network;
-  const { minNominatorBond } = staking;
-  const allTransferOptions = getTransferOptions(activeAccount);
+  const { isDepositor } = useActivePools();
+  const { activeAccount } = useActiveAccounts();
+  const { getTransferOptions } = useTransferOptions();
 
+  const { minNominatorBond } = staking;
+  const { minJoinBond, minCreateBond } = stats;
+  const allTransferOptions = getTransferOptions(activeAccount);
   const defaultValue = defaultBond ? String(defaultBond) : '';
 
   // get bond options for either nominating or pooling.
@@ -53,31 +54,16 @@ export const UnbondFeedback = ({
     bond: defaultValue,
   });
 
+  // handler to set bond as a string
+  const handleSetBond = (newBond: { bond: BigNumber }) => {
+    setBond({ bond: newBond.bond.toString() });
+  };
+
   // current bond value BigNumber
   const bondBn = unitToPlanck(String(bond.bond), units);
 
-  // update bond on account change
-  useEffect(() => {
-    setBond({
-      bond: defaultValue,
-    });
-  }, [activeAccount]);
-
-  // handle errors on input change
-  useEffect(() => {
-    handleErrors();
-  }, [bond, txFees]);
-
-  // if resize is present, handle on error change
-  useEffect(() => {
-    if (setLocalResize) setLocalResize();
-  }, [errors]);
-
   // add this component's setBond to setters
-  setters.push({
-    set: setBond,
-    current: bond,
-  });
+  setters.push(handleSetBond);
 
   // bond amount to minimum threshold
   const minBondBn =
@@ -139,9 +125,28 @@ export const UnbondFeedback = ({
       newErrors.push(err);
     }
 
-    listenIsValid(!newErrors.length && bond.bond !== '', newErrors);
+    if (listenIsValid && typeof listenIsValid === 'function') {
+      listenIsValid(!newErrors.length && bond.bond !== '', newErrors);
+    }
     setErrors(newErrors);
   };
+
+  // update bond on account change
+  useEffect(() => {
+    setBond({ bond: defaultValue });
+  }, [activeAccount]);
+
+  // handle errors on input change
+  useEffect(() => {
+    handleErrors();
+  }, [bond, txFees]);
+
+  // if resize is present, handle on error change
+  useEffect(() => {
+    if (setLocalResize) {
+      setLocalResize();
+    }
+  }, [errors]);
 
   return (
     <>

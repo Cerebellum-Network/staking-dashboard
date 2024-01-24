@@ -8,7 +8,7 @@ import { MaxPayoutDays } from 'consts';
 import { useHelp } from 'contexts/Help';
 import { usePlugins } from 'contexts/Plugins';
 import { useStaking } from 'contexts/Staking';
-import { useSubscan } from 'contexts/Subscan';
+import { useSubscan } from 'contexts/Plugins/Subscan';
 import { useUi } from 'contexts/UI';
 import { CardHeaderWrapper, CardWrapper } from 'library/Card/Wrappers';
 import { PayoutBar } from 'library/Graphs/PayoutBar';
@@ -18,8 +18,8 @@ import { GraphWrapper } from 'library/Graphs/Wrapper';
 import { useSize } from 'library/Hooks/useSize';
 import { StatBoxList } from 'library/StatBoxList';
 import { StatusLabel } from 'library/StatusLabel';
-import { SubscanButton } from 'library/SubscanButton';
 import type { AnySubscan, PageProps } from 'types';
+import { PluginLabel } from 'library/PluginLabel';
 import { PayoutList } from './PayoutList';
 import { LastEraPayoutStat } from './Stats/LastEraPayout';
 
@@ -37,7 +37,7 @@ export const Payouts = ({ page }: PageProps) => {
   const { key } = page;
 
   const ref = useRef<HTMLDivElement>(null);
-  const size = useSize(ref.current);
+  const size = useSize(ref?.current || undefined);
   const { width, height, minHeight } = formatSize(size, 280);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export const Payouts = ({ page }: PageProps) => {
       </StatBoxList>
       <PageRow>
         <CardWrapper>
-          <SubscanButton />
+          <PluginLabel plugin="subscan" />
           <CardHeaderWrapper>
             <h4>
               {t('payouts.payoutHistory', { ns: 'pages' })}
@@ -75,7 +75,7 @@ export const Payouts = ({ page }: PageProps) => {
               )}
             </h2>
           </CardHeaderWrapper>
-          <div className="inner" ref={ref} style={{ minHeight }}>
+          <div ref={ref} className="inner" style={{ minHeight }}>
             {!plugins.includes('subscan') ? (
               <StatusLabel
                 status="active_service"
@@ -106,9 +106,7 @@ export const Payouts = ({ page }: PageProps) => {
           </div>
         </CardWrapper>
       </PageRow>
-      {!payoutsList?.length ? (
-        <></>
-      ) : (
+      {!!payoutsList?.length && (
         <PageRow>
           <CardWrapper>
             <PayoutList

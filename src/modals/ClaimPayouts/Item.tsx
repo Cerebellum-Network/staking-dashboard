@@ -3,11 +3,11 @@
 
 import { ButtonSubmit } from '@polkadot-cloud/react';
 import { useTranslation } from 'react-i18next';
-import { useApi } from 'contexts/Api';
-import BigNumber from 'bignumber.js';
 import { planckToUnit } from '@polkadot-cloud/utils';
+import { useNetwork } from 'contexts/Network';
 import { ItemWrapper } from './Wrappers';
 import type { ItemProps } from './types';
+import { getTotalPayout } from './Utils';
 
 export const Item = ({
   era,
@@ -16,13 +16,11 @@ export const Item = ({
   setSection,
 }: ItemProps) => {
   const { t } = useTranslation('modals');
-  const { network } = useApi();
+  const {
+    networkData: { units, unit },
+  } = useNetwork();
 
-  const totalPayout = Object.values(unclaimedPayout).reduce(
-    (acc: BigNumber, cur: string) => acc.plus(cur),
-    new BigNumber(0)
-  );
-
+  const totalPayout = getTotalPayout(unclaimedPayout);
   const numPayouts = Object.values(unclaimedPayout).length;
 
   return (
@@ -31,14 +29,14 @@ export const Item = ({
         <section>
           <h4>
             <span>
-              Era {era}: {numPayouts}
+              Era {era}:{' '}
               {t('pendingPayout', {
                 count: numPayouts,
               })}
             </span>
           </h4>
           <h2>
-            {planckToUnit(totalPayout, network.units).toString()} {network.unit}
+            {planckToUnit(totalPayout, units).toString()} {unit}
           </h2>
         </section>
 
@@ -51,7 +49,9 @@ export const Item = ({
                   {
                     era,
                     payout: totalPayout.toString(),
-                    validators: Object.keys(unclaimedPayout),
+                    paginatedValidators: Object.entries(unclaimedPayout).map(
+                      ([v, [page]]) => [page, v]
+                    ),
                   },
                 ]);
                 setSection(1);

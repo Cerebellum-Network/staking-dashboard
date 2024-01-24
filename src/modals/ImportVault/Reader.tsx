@@ -5,21 +5,27 @@ import { ButtonSecondary } from '@polkadot-cloud/react';
 import { isValidAddress } from '@polkadot-cloud/utils';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConnect } from 'contexts/Connect';
-import { useVaultHardware } from 'contexts/Hardware/Vault';
+import { useVaultAccounts } from 'contexts/Hardware/Vault/VaultAccounts';
 import { usePrompt } from 'contexts/Prompt';
 import { QRViewerWrapper } from 'library/Import/Wrappers';
 import { QrScanSignature } from 'library/QRCode/ScanSignature';
+import { useNetwork } from 'contexts/Network';
+import { formatAccountSs58 } from 'contexts/Connect/Utils';
+import { useOtherAccounts } from 'contexts/Connect/OtherAccounts';
+import type { AnyJson } from 'types';
 
 export const Reader = () => {
   const { t } = useTranslation('modals');
-  const { addToAccounts, formatAccountSs58 } = useConnect();
-  const { setStatus: setPromptStatus } = usePrompt();
+  const {
+    networkData: { ss58 },
+  } = useNetwork();
+  const { addOtherAccounts } = useOtherAccounts();
+  const { closePrompt } = usePrompt();
   const { addVaultAccount, vaultAccountExists, vaultAccounts } =
-    useVaultHardware();
+    useVaultAccounts();
 
   // Store data from QR Code scanner.
-  const [qrData, setQrData] = useState<any>(undefined);
+  const [qrData, setQrData] = useState<AnyJson>(undefined);
 
   // Store QR data feedback.
   const [feedback, setFeedback] = useState<string>('');
@@ -31,7 +37,7 @@ export const Reader = () => {
   const valid =
     isValidAddress(qrData) &&
     !vaultAccountExists(qrData) &&
-    !formatAccountSs58(qrData);
+    !formatAccountSs58(qrData, ss58);
 
   // Reset QR data on open.
   useEffect(() => {
@@ -43,9 +49,9 @@ export const Reader = () => {
     if (valid) {
       const account = addVaultAccount(qrData, vaultAccounts.length);
       if (account) {
-        addToAccounts([account]);
+        addOtherAccounts([account]);
       }
-      setPromptStatus(0);
+      closePrompt();
     }
 
     // Display feedback.
@@ -53,12 +59,12 @@ export const Reader = () => {
       qrData === undefined
         ? `${t('waitingForQRCode')}`
         : isValidAddress(qrData)
-        ? formatAccountSs58(qrData)
-          ? `${t('differentNetworkAddress')}`
-          : vaultAccountExists(qrData)
-          ? `${t('accountAlreadyImported')}`
-          : `${t('addressReceived')}`
-        : `${t('invalidAddress')}`
+          ? formatAccountSs58(qrData, ss58)
+            ? `${t('differentNetworkAddress')}`
+            : vaultAccountExists(qrData)
+              ? `${t('accountAlreadyImported')}`
+              : `${t('addressReceived')}`
+          : `${t('invalidAddress')}`
     );
   }, [qrData]);
 
@@ -67,7 +73,7 @@ export const Reader = () => {
       <h3 className="title">{t('scanFromPolkadotVault')}</h3>
       <div className="viewer">
         <QrScanSignature
-          size={279}
+          size={250}
           onScan={({ signature }) => {
             handleQrData(signature);
           }}
@@ -79,7 +85,7 @@ export const Reader = () => {
           <ButtonSecondary
             lg
             text={t('cancel')}
-            onClick={() => setPromptStatus(0)}
+            onClick={() => closePrompt()}
           />
         </div>
       </div>

@@ -7,8 +7,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TipsConfig } from 'config/tips';
 import { DefaultLocale, TipsThresholdMedium, TipsThresholdSmall } from 'consts';
-import { useApi } from 'contexts/Api';
-import { useConnect } from 'contexts/Connect';
 import { useActivePools } from 'contexts/Pools/ActivePools';
 import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
 import { useStaking } from 'contexts/Staking';
@@ -16,16 +14,19 @@ import { useTransferOptions } from 'contexts/TransferOptions';
 import { useUi } from 'contexts/UI';
 import { useFillVariables } from 'library/Hooks/useFillVariables';
 import type { AnyJson } from 'types';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
 import { Items } from './Items';
 import { PageToggle } from './PageToggle';
 import { Syncing } from './Syncing';
 import { TipsWrapper } from './Wrappers';
+import type { TipDisplay } from './types';
 
 export const Tips = () => {
   const { i18n, t } = useTranslation();
-  const { network } = useApi();
-  const { activeAccount } = useConnect();
+  const { network } = useNetwork();
   const { isNetworkSyncing } = useUi();
+  const { activeAccount } = useActiveAccounts();
   const { fillVariables } = useFillVariables();
   const { membership } = usePoolMemberships();
   const { isNominating, staking } = useStaking();
@@ -96,9 +97,8 @@ export const Tips = () => {
   }, []);
 
   // store the current amount of allowed items on display
-  const [itemsPerPage, setItemsPerPageState] = useState<number>(
-    getItemsPerPage()
-  );
+  const [itemsPerPage, setItemsPerPageState] =
+    useState<number>(getItemsPerPage());
   const itemsPerPageRef = useRef(itemsPerPage);
 
   // store the current page
@@ -135,14 +135,14 @@ export const Tips = () => {
   }
 
   // filter tips relevant to connected account.
-  let items = TipsConfig.filter((i: AnyJson) => segments.includes(i.s));
+  let items = TipsConfig.filter((i) => segments.includes(i.s));
 
-  items = items.map((i: any) => {
-    const { id } = i;
+  items = items.map((item) => {
+    const { id } = item;
 
     return fillVariables(
       {
-        ...i,
+        ...item,
         title: t(`${id}.0`, { ns: 'tips' }),
         subtitle: t(`${id}.1`, { ns: 'tips' }),
         description: i18n.getResource(
@@ -163,7 +163,7 @@ export const Tips = () => {
     ? 1
     : pageRef.current * itemsPerPageRef.current - (itemsPerPageRef.current - 1);
 
-  const itemsDisplay = items.slice(start - 1, end);
+  const itemsDisplay = items.slice(start - 1, end) as TipDisplay[];
 
   const setPageHandler = (newPage: number) => {
     setStateWithRef(newPage, setPage, pageRef);

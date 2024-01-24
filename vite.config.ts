@@ -37,10 +37,13 @@ export default defineConfig({
   },
   server: {
     fs: {
-      strict: true,
+      strict: false,
     },
   },
   optimizeDeps: {
     include: ['react/jsx-runtime'],
+  },
+  worker: {
+    format: 'es',
   },
 });

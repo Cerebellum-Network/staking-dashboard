@@ -8,19 +8,32 @@ import {
   removedFrom,
   setStateWithRef,
 } from '@polkadot-cloud/utils';
-import React, { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useApi } from 'contexts/Api';
-import { useConnect } from 'contexts/Connect';
-import type { AnyApi, MaybeAccount } from 'types';
+import type { AnyApi, MaybeAddress } from 'types';
 import { useEffectIgnoreInitial } from '@polkadot-cloud/react/hooks';
+import { useNetwork } from 'contexts/Network';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
+import { useOtherAccounts } from 'contexts/Connect/OtherAccounts';
+import { useExternalAccounts } from 'contexts/Connect/ExternalAccounts';
 import * as defaults from './defaults';
 import type { BondedAccount, BondedContextInterface } from './types';
 
-export const BondedProvider = ({ children }: { children: React.ReactNode }) => {
-  const { api, isReady, network } = useApi();
-  const { accounts, addExternalAccount } = useConnect();
+export const BondedContext = createContext<BondedContextInterface>(
+  defaults.defaultBondedContext
+);
 
-  // Balance accounts state.
+export const useBonded = () => useContext(BondedContext);
+
+export const BondedProvider = ({ children }: { children: ReactNode }) => {
+  const { network } = useNetwork();
+  const { api, isReady } = useApi();
+  const { accounts } = useImportedAccounts();
+  const { addExternalAccount } = useExternalAccounts();
+  const { addOrReplaceOtherAccount } = useOtherAccounts();
+
+  // Bonded accounts state.
   const [bondedAccounts, setBondedAccounts] = useState<BondedAccount[]>([]);
   const bondedAccountsRef = useRef(bondedAccounts);
 
@@ -36,7 +49,9 @@ export const BondedProvider = ({ children }: { children: React.ReactNode }) => {
 
       removed?.forEach((address) => {
         const unsub = unsubs.current[address];
-        if (unsub) unsub();
+        if (unsub) {
+          unsub();
+        }
       });
 
       unsubs.current = Object.fromEntries(
@@ -80,7 +95,9 @@ export const BondedProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Subscribe to account, get controller and nominations.
   const subscribeToBondedAccount = async (address: string) => {
-    if (!api) return undefined;
+    if (!api) {
+      return undefined;
+    }
 
     const unsub = await api.queryMulti<AnyApi>(
       [
@@ -103,7 +120,10 @@ export const BondedProvider = ({ children }: { children: React.ReactNode }) => {
         // add bonded (controller) account as external account if not presently imported
         if (newController) {
           if (accounts.find((s) => s.address === newController) === undefined) {
-            addExternalAccount(newController, 'system');
+            const result = addExternalAccount(newController, 'system');
+            if (result) {
+              addOrReplaceOtherAccount(result.account, result.type);
+            }
           }
         }
 
@@ -130,18 +150,18 @@ export const BondedProvider = ({ children }: { children: React.ReactNode }) => {
     return unsub;
   };
 
-  const getBondedAccount = (address: MaybeAccount) =>
+  const getBondedAccount = (address: MaybeAddress) =>
     bondedAccountsRef.current.find((a) => a.address === address)?.bonded ||
     null;
 
-  const getAccountNominations = (address: MaybeAccount) =>
+  const getAccountNominations = (address: MaybeAddress) =>
     bondedAccountsRef.current.find((a) => a.address === address)?.nominations
       ?.targets || [];
 
-  const getAccount = (address: MaybeAccount) =>
+  const getAccount = (address: MaybeAddress) =>
     bondedAccountsRef.current.find((a) => a.address === address) || null;
 
-  const isController = (address: MaybeAccount) =>
+  const isController = (address: MaybeAddress) =>
     bondedAccountsRef.current.filter((a) => (a?.bonded || '') === address)
       ?.length > 0 || false;
 
@@ -159,9 +179,3 @@ export const BondedProvider = ({ children }: { children: React.ReactNode }) => {
     </BondedContext.Provider>
   );
 };
-
-export const BondedContext = React.createContext<BondedContextInterface>(
-  defaults.defaultBondedContext
-);
-
-export const useBonded = () => React.useContext(BondedContext);

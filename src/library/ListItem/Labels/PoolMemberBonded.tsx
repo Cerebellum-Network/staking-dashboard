@@ -4,12 +4,21 @@
 import { greaterThanZero, planckToUnit, rmCommas } from '@polkadot-cloud/utils';
 import BigNumber from 'bignumber.js';
 import { useTranslation } from 'react-i18next';
-import { useApi } from 'contexts/Api';
 import { ValidatorStatusWrapper } from 'library/ListItem/Wrappers';
+import { useNetwork } from 'contexts/Network';
+import type { AnyMetaBatch } from 'types';
 
-export const PoolMemberBonded = ({ meta, batchKey, batchIndex }: any) => {
+export const PoolMemberBonded = ({
+  meta,
+  batchKey,
+  batchIndex,
+}: {
+  meta: AnyMetaBatch;
+  batchKey: string;
+  batchIndex: number;
+}) => {
   const { t } = useTranslation('library');
-  const { units, unit } = useApi().network;
+  const { units, unit } = useNetwork().networkData;
 
   const poolMembers = meta[batchKey]?.poolMembers ?? [];
   const poolMember = poolMembers[batchIndex] ?? null;
@@ -26,8 +35,8 @@ export const PoolMemberBonded = ({ meta, batchKey, batchIndex }: any) => {
 
     // converting unbonding eras from points to units
     let totalUnbondingUnit = new BigNumber(0);
-    Object.values(unbondingEras).forEach((amount: any) => {
-      const amountBn = new BigNumber(rmCommas(amount));
+    Object.values(unbondingEras).forEach((amount) => {
+      const amountBn = new BigNumber(rmCommas(amount as string));
       totalUnbondingUnit = totalUnbondingUnit.plus(amountBn);
     });
     totalUnbonding = planckToUnit(new BigNumber(totalUnbondingUnit), units);
@@ -40,15 +49,13 @@ export const PoolMemberBonded = ({ meta, batchKey, batchIndex }: any) => {
           <h5>{t('syncing')}...</h5>
         </ValidatorStatusWrapper>
       ) : (
-        <>
-          {greaterThanZero(bonded) && (
-            <ValidatorStatusWrapper $status={status}>
-              <h5>
-                {t('bonded')}: {bonded.decimalPlaces(3).toFormat()} {unit}
-              </h5>
-            </ValidatorStatusWrapper>
-          )}
-        </>
+        greaterThanZero(bonded) && (
+          <ValidatorStatusWrapper $status={status}>
+            <h5>
+              {t('bonded')}: {bonded.decimalPlaces(3).toFormat()} {unit}
+            </h5>
+          </ValidatorStatusWrapper>
+        )
       )}
 
       {poolMember && greaterThanZero(totalUnbonding) && (

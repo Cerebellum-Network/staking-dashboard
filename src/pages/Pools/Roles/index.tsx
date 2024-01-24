@@ -14,33 +14,38 @@ import {
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useApi } from 'contexts/Api';
-import { useConnect } from 'contexts/Connect';
 import { useHelp } from 'contexts/Help';
 import { useIdentities } from 'contexts/Identities';
 import { useActivePools } from 'contexts/Pools/ActivePools';
 import { useUi } from 'contexts/UI';
 import { CardHeaderWrapper } from 'library/Card/Wrappers';
 import { useOverlay } from '@polkadot-cloud/react/hooks';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
 import { RolesWrapper } from '../Home/ManagePool/Wrappers';
 import { PoolAccount } from '../PoolAccount';
 import { RoleEditInput } from './RoleEditInput';
 import type { RoleEditEntry, RolesProps } from './types';
+import type { MaybeAddress } from '@polkadot-cloud/react/types';
 
 export const Roles = ({
   batchKey,
   defaultRoles,
   setters = [],
   inline = false,
-  listenIsValid = () => {},
+  listenIsValid,
 }: RolesProps) => {
   const { t } = useTranslation('pages');
+  const { isReady } = useApi();
   const { openHelp } = useHelp();
+  const { network } = useNetwork();
   const { isPoolSyncing } = useUi();
   const { openModal } = useOverlay().modal;
-  const { isReady, network } = useApi();
+  const { activeAccount } = useActiveAccounts();
+  const { isReadOnlyAccount } = useImportedAccounts();
   const { fetchIdentitiesMetaBatch } = useIdentities();
   const { isOwner, selectedActivePool } = useActivePools();
-  const { activeAccount, isReadOnlyAccount } = useConnect();
   const { id } = selectedActivePool || { id: 0 };
   const roles = defaultRoles;
 
@@ -58,16 +63,19 @@ export const Roles = ({
   })();
 
   // store any role edits that take place
-  const [roleEdits, setRoleEdits] = useState(initialiseEdits);
+  const [roleEdits, setRoleEdits] =
+    useState<Record<string, RoleEditEntry>>(initialiseEdits);
 
   // store whether roles are being edited
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   // store role accounts
-  const [accounts, setAccounts] = useState(Object.values(roles));
+  const [accounts, setAccounts] = useState<MaybeAddress[]>(
+    Object.values(roles)
+  );
 
   // is this the initial fetch
-  const [fetched, setFetched] = useState(false);
+  const [fetched, setFetched] = useState<boolean>(false);
 
   // update default roles on account switch
   useEffect(() => {
@@ -104,7 +112,7 @@ export const Roles = ({
       if (listenIsValid) {
         listenIsValid(isRoleEditsValid());
       }
-      const rolesUpdated: any = {};
+      const rolesUpdated: Record<string, string> = {};
       for (const [k, v] of Object.entries(roleEdits)) {
         rolesUpdated[k] = v.newAddress;
       }
@@ -149,7 +157,7 @@ export const Roles = ({
 
   return (
     <>
-      <CardHeaderWrapper $withAction>
+      <CardHeaderWrapper $withAction $withMargin>
         {!inline && (
           <h3>
             {t('pools.roles')}
@@ -157,9 +165,7 @@ export const Roles = ({
           </h3>
         )}
 
-        {!(isOwner() === true || setters.length) ? (
-          <></>
-        ) : (
+        {!(isOwner() === true || setters.length) ? null : (
           <>
             {isEditing && (
               <div>

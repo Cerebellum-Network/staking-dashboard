@@ -1,22 +1,35 @@
 // Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: GPL-3.0-only
 
-import React, { useState } from 'react';
+import type { ReactNode } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { useEffectIgnoreInitial } from '@polkadot-cloud/react/hooks';
+import { useNetwork } from 'contexts/Network';
 import { useApi } from 'contexts/Api';
 import type { Validator, FavoriteValidatorsContextInterface } from '../types';
 import { getLocalFavorites } from '../Utils';
 import { defaultFavoriteValidatorsContext } from './defaults';
 import { useValidators } from '../ValidatorEntries';
 
+export const FavoriteValidatorsContext =
+  createContext<FavoriteValidatorsContextInterface>(
+    defaultFavoriteValidatorsContext
+  );
+
+export const useFavoriteValidators = () =>
+  useContext(FavoriteValidatorsContext);
+
 export const FavoriteValidatorsProvider = ({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) => {
-  const { isReady, network } = useApi();
+  const { isReady } = useApi();
+  const {
+    networkData: { name },
+    network,
+  } = useNetwork();
   const { fetchValidatorPrefs } = useValidators();
-  const { name } = network;
 
   // Stores the user's favorite validators.
   const [favorites, setFavorites] = useState<string[]>(getLocalFavorites(name));
@@ -36,15 +49,12 @@ export const FavoriteValidatorsProvider = ({
 
   // Adds a favorite validator.
   const addFavorite = (address: string) => {
-    const newFavorites: any = Object.assign(favorites);
+    const newFavorites = Object.assign(favorites);
     if (!newFavorites.includes(address)) {
       newFavorites.push(address);
     }
 
-    localStorage.setItem(
-      `${network.name}_favorites`,
-      JSON.stringify(newFavorites)
-    );
+    localStorage.setItem(`${network}_favorites`, JSON.stringify(newFavorites));
     setFavorites([...newFavorites]);
   };
 
@@ -53,10 +63,7 @@ export const FavoriteValidatorsProvider = ({
     const newFavorites = Object.assign(favorites).filter(
       (validator: string) => validator !== address
     );
-    localStorage.setItem(
-      `${network.name}_favorites`,
-      JSON.stringify(newFavorites)
-    );
+    localStorage.setItem(`${network}_favorites`, JSON.stringify(newFavorites));
     setFavorites([...newFavorites]);
   };
 
@@ -85,11 +92,3 @@ export const FavoriteValidatorsProvider = ({
     </FavoriteValidatorsContext.Provider>
   );
 };
-
-export const FavoriteValidatorsContext =
-  React.createContext<FavoriteValidatorsContextInterface>(
-    defaultFavoriteValidatorsContext
-  );
-
-export const useFavoriteValidators = () =>
-  React.useContext(FavoriteValidatorsContext);

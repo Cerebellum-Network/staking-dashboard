@@ -16,7 +16,7 @@ export const StatusLabel = ({
   title,
   helpKey,
   hideIcon,
-  statusFor = '',
+  statusFor,
   topOffset = '40%',
   status = 'sync_or_setup',
 }: StatusLabelProps) => {
@@ -29,13 +29,13 @@ export const StatusLabel = ({
   // syncing or not staking
   if (status === 'sync_or_setup') {
     if (isSyncing || !inSetup() || membership !== null) {
-      return <></>;
+      return null;
     }
   }
 
-  if (status === 'active_service') {
-    if (plugins.includes(statusFor || '')) {
-      return <></>;
+  if (status === 'active_service' && statusFor) {
+    if (plugins.includes(statusFor)) {
+      return null;
     }
   }
 
@@ -51,7 +51,7 @@ export const StatusLabel = ({
               <ButtonHelp
                 marginLeft
                 onClick={() => openHelp(helpKey)}
-                backgroundSecondary
+                background="secondary"
               />
             </span>
           ) : null}

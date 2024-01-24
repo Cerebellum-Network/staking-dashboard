@@ -7,7 +7,6 @@ import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useApi } from 'contexts/Api';
-import { useConnect } from 'contexts/Connect';
 import { useActivePools } from 'contexts/Pools/ActivePools';
 import { useTransferOptions } from 'contexts/TransferOptions';
 import { BondFeedback } from 'library/Form/Bond/BondFeedback';
@@ -19,11 +18,16 @@ import { Close } from 'library/Modal/Close';
 import { SubmitTx } from 'library/SubmitTx';
 import { useTxMeta } from 'contexts/TxMeta';
 import { useOverlay } from '@polkadot-cloud/react/hooks';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
 
 export const Bond = () => {
   const { t } = useTranslation('modals');
-  const { api, network } = useApi();
-  const { activeAccount } = useConnect();
+  const { api } = useApi();
+  const {
+    networkData: { units, unit },
+  } = useNetwork();
+  const { activeAccount } = useActiveAccounts();
   const { notEnoughFunds } = useTxMeta();
   const { selectedActivePool } = useActivePools();
   const { getSignerWarnings } = useSignerWarnings();
@@ -33,28 +37,30 @@ export const Bond = () => {
     config: { options },
     setModalResize,
   } = useOverlay().modal;
-  const { units } = network;
+
   const { bondFor } = options;
   const isStaking = bondFor === 'nominator';
   const isPooling = bondFor === 'pool';
-  const { nominate, pool } = getTransferOptions(activeAccount);
+  const { nominate, transferrableBalance } = getTransferOptions(activeAccount);
 
-  const freeBalanceBn =
-    bondFor === 'nominator'
+  const freeToBond = planckToUnit(
+    (bondFor === 'nominator'
       ? nominate.totalAdditionalBond
-      : pool.totalAdditionalBond;
+      : transferrableBalance
+    ).minus(feeReserve),
+    units
+  );
 
-  const freeBalance = planckToUnit(freeBalanceBn.minus(feeReserve), units);
   const largestTxFee = useBondGreatestFee({ bondFor });
 
   // calculate any unclaimed pool rewards.
   let { pendingRewards } = selectedActivePool || {};
   pendingRewards = pendingRewards ?? new BigNumber(0);
-  pendingRewards = planckToUnit(pendingRewards, network.units);
+  pendingRewards = planckToUnit(pendingRewards, units);
 
   // local bond value.
   const [bond, setBond] = useState<{ bond: string }>({
-    bond: freeBalance.toString(),
+    bond: freeToBond.toString(),
   });
 
   // bond valid.
@@ -63,8 +69,13 @@ export const Bond = () => {
   // feedback errors to trigger modal resize
   const [feedbackErrors, setFeedbackErrors] = useState<string[]>([]);
 
+  // handler to set bond as a string
+  const handleSetBond = (newBond: { bond: BigNumber }) => {
+    setBond({ bond: newBond.bond.toString() });
+  };
+
   // bond minus tx fees.
-  const enoughToCoverTxFees: boolean = freeBalance
+  const enoughToCoverTxFees: boolean = freeToBond
     .minus(bond.bond)
     .isGreaterThan(planckToUnit(largestTxFee, units));
 
@@ -80,11 +91,6 @@ export const Bond = () => {
     );
   }
 
-  // update bond value on task change.
-  useEffect(() => {
-    setBond({ bond: freeBalance.toString() });
-  }, [freeBalance.toString()]);
-
   // determine whether this is a pool or staking transaction.
   const determineTx = (bondToSubmit: BigNumber) => {
     let tx = null;
@@ -95,8 +101,8 @@ export const Bond = () => {
     const bondAsString = !bondValid
       ? '0'
       : bondToSubmit.isNaN()
-      ? '0'
-      : bondToSubmit.toString();
+        ? '0'
+        : bondToSubmit.toString();
 
     if (isPooling) {
       tx = api.tx.nominationPools.bondExtra({
@@ -123,7 +129,6 @@ export const Bond = () => {
     callbackSubmit: () => {
       setModalStatus('closing');
     },
-    callbackInBlock: () => {},
   });
 
   const warnings = getSignerWarnings(
@@ -131,6 +136,11 @@ export const Bond = () => {
     false,
     submitExtrinsic.proxySupported
   );
+
+  // update bond value on task change.
+  useEffect(() => {
+    handleSetBond({ bond: freeToBond });
+  }, [freeToBond.toString()]);
 
   // modal resize on form update
   useEffect(
@@ -143,12 +153,10 @@ export const Bond = () => {
       <Close />
       <ModalPadding>
         <h2 className="title unbounded">{t('addToBond')}</h2>
-        {pendingRewards > 0 && bondFor === 'pool' ? (
+        {pendingRewards.isGreaterThan(0) && bondFor === 'pool' ? (
           <ModalWarnings withMargin>
             <Warning
-              text={`${t('bondingWithdraw')} ${pendingRewards} ${
-                network.unit
-              }.`}
+              text={`${t('bondingWithdraw')} ${pendingRewards} ${unit}.`}
             />
           </ModalWarnings>
         ) : null}
@@ -160,12 +168,7 @@ export const Bond = () => {
             setFeedbackErrors(errors);
           }}
           defaultBond={null}
-          setters={[
-            {
-              set: setBond,
-              current: bond,
-            },
-          ]}
+          setters={[handleSetBond]}
           parentErrors={warnings}
           txFees={largestTxFee}
         />

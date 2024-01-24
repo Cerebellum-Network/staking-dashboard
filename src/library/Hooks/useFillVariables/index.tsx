@@ -3,57 +3,53 @@
 
 import { capitalizeFirstLetter, planckToUnit } from '@polkadot-cloud/utils';
 import { useApi } from 'contexts/Api';
-import { useNetworkMetrics } from 'contexts/Network';
+import { useNetwork } from 'contexts/Network';
+import { useNetworkMetrics } from 'contexts/NetworkMetrics';
 import { usePoolsConfig } from 'contexts/Pools/PoolsConfig';
 import type { AnyJson } from 'types';
+import { useErasPerDay } from '../useErasPerDay';
 
 export const useFillVariables = () => {
-  const { network, consts } = useApi();
+  const { consts } = useApi();
   const { stats } = usePoolsConfig();
-  const {
-    maxNominations,
-    maxNominatorRewardedPerValidator,
-    existentialDeposit,
-  } = consts;
+  const { networkData } = useNetwork();
+  const { maxNominations, maxExposurePageSize, existentialDeposit } = consts;
+  const { maxSupportedDays } = useErasPerDay();
   const { minJoinBond, minCreateBond } = stats;
   const { metrics } = useNetworkMetrics();
   const { minimumActiveStake } = metrics;
 
   const fillVariables = (d: AnyJson, keys: string[]) => {
-    const fields: AnyJson = Object.entries(d).filter(([k]: any) =>
-      keys.includes(k)
-    );
+    const fields: AnyJson = Object.entries(d).filter(([k]) => keys.includes(k));
     const transformed = Object.entries(fields).map(
       ([, [key, val]]: AnyJson) => {
         const varsToValues = [
-          ['{NETWORK_UNIT}', network.unit],
-          ['{NETWORK_NAME}', capitalizeFirstLetter(network.name)],
-          [
-            '{MAX_NOMINATOR_REWARDED_PER_VALIDATOR}',
-            maxNominatorRewardedPerValidator.toString(),
-          ],
+          ['{AVERAGE_REWARD_RATE_DAYS}', maxSupportedDays > 30 ? '30' : '15'],
+          ['{NETWORK_UNIT}', networkData.unit],
+          ['{NETWORK_NAME}', capitalizeFirstLetter(networkData.name)],
+          ['{MAX_EXPOSURE_PAGE_SIZE}', maxExposurePageSize.toString()],
           ['{MAX_NOMINATIONS}', maxNominations.toString()],
           [
             '{MIN_ACTIVE_STAKE}',
-            planckToUnit(minimumActiveStake, network.units)
+            planckToUnit(minimumActiveStake, networkData.units)
               .decimalPlaces(3)
               .toFormat(),
           ],
           [
             '{MIN_POOL_JOIN_BOND}',
-            planckToUnit(minJoinBond, network.units)
+            planckToUnit(minJoinBond, networkData.units)
               .decimalPlaces(3)
               .toFormat(),
           ],
           [
             '{MIN_POOL_CREATE_BOND}',
-            planckToUnit(minCreateBond, network.units)
+            planckToUnit(minCreateBond, networkData.units)
               .decimalPlaces(3)
               .toFormat(),
           ],
           [
             '{EXISTENTIAL_DEPOSIT}',
-            planckToUnit(existentialDeposit, network.units).toFormat(),
+            planckToUnit(existentialDeposit, networkData.units).toFormat(),
           ],
         ];
 

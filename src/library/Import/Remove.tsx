@@ -1,27 +1,30 @@
-// Copyright 2023 @paritytech/polkadot-live authors & contributors
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: GPL-3.0-only
 
-import {
-  ButtonMono,
-  ButtonMonoInvert,
-  PolkadotIcon,
-} from '@polkadot-cloud/react';
+import { ButtonMono, ButtonMonoInvert, Polkicon } from '@polkadot-cloud/react';
 import { useTranslation } from 'react-i18next';
-import { useConnect } from 'contexts/Connect';
 import { usePrompt } from 'contexts/Prompt';
-import { useTheme } from 'contexts/Themes';
 import { ConfirmWrapper } from 'library/Import/Wrappers';
+import { useOtherAccounts } from 'contexts/Connect/OtherAccounts';
 import type { RemoveProps } from './types';
+import { ellipsisFn } from '@polkadot-cloud/utils';
+import { NotificationsController } from 'static/NotificationsController';
 
 export const Remove = ({ address, getHandler, removeHandler }: RemoveProps) => {
   const { t } = useTranslation('modals');
-  const { forgetAccounts } = useConnect();
   const { setStatus } = usePrompt();
-  const { mode } = useTheme();
+  const { forgetOtherAccounts } = useOtherAccounts();
+
+  const removeAccountCallback = () => {
+    NotificationsController.emit({
+      title: t('ledgerAccountRemoved'),
+      subtitle: t('ledgerRemovedAccount', { account: ellipsisFn(address) }),
+    });
+  };
 
   return (
     <ConfirmWrapper>
-      <PolkadotIcon dark={mode === 'dark'} nocopy address={address} size={60} />
+      <Polkicon address={address} size="3rem" />
       <h3>{t('removeAccount')}</h3>
       <h5>{address}</h5>
       <div className="footer">
@@ -31,8 +34,8 @@ export const Remove = ({ address, getHandler, removeHandler }: RemoveProps) => {
           onClick={() => {
             const account = getHandler(address);
             if (account) {
-              removeHandler(address);
-              forgetAccounts([account]);
+              removeHandler(address, removeAccountCallback);
+              forgetOtherAccounts([account]);
               setStatus(0);
             }
           }}

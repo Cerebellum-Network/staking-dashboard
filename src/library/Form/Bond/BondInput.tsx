@@ -3,10 +3,11 @@
 
 import { ButtonSubmitInvert } from '@polkadot-cloud/react';
 import BigNumber from 'bignumber.js';
-import React, { useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useApi } from 'contexts/Api';
-import { useConnect } from 'contexts/Connect';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
 import { InputWrapper } from '../Wrappers';
 import type { BondInputProps } from '../types';
 
@@ -14,14 +15,16 @@ export const BondInput = ({
   setters = [],
   disabled,
   defaultValue,
-  freeBalance,
+  freeToBond,
   disableTxFeeUpdate = false,
   value = '0',
   syncing = false,
 }: BondInputProps) => {
   const { t } = useTranslation('library');
-  const { network } = useApi();
-  const { activeAccount } = useConnect();
+  const {
+    networkData: { unit },
+  } = useNetwork();
+  const { activeAccount } = useActiveAccounts();
 
   // the current local bond value
   const [localBond, setLocalBond] = useState<string>(value);
@@ -38,20 +41,22 @@ export const BondInput = ({
   }, [value]);
 
   // handle change for bonding.
-  const handleChangeBond = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeBond = (e: ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (new BigNumber(val).isNaN() && val !== '') {
       return;
     }
     setLocalBond(val);
-    updateParentState(val);
+    updateParentState(new BigNumber(val));
   };
 
   // apply bond to parent setters.
-  const updateParentState = (val: string) => {
-    for (const s of setters) {
-      s.set({
-        ...s.current,
+  const updateParentState = (val: BigNumber) => {
+    if (new BigNumber(val).isNaN()) {
+      return;
+    }
+    for (const setter of setters) {
+      setter({
         bond: val,
       });
     }
@@ -60,9 +65,7 @@ export const BondInput = ({
   // available funds as jsx.
   const availableFundsJsx = (
     <p>
-      {syncing
-        ? '...'
-        : `${freeBalance.toFormat()} ${network.unit} ${t('available')}`}
+      {syncing ? '...' : `${freeToBond.toFormat()} ${unit} ${t('available')}`}
     </p>
   );
 
@@ -74,7 +77,7 @@ export const BondInput = ({
             <div>
               <input
                 type="text"
-                placeholder={`0 ${network.unit}`}
+                placeholder={`0 ${unit}`}
                 value={localBond}
                 onChange={(e) => {
                   handleChangeBond(e);
@@ -88,10 +91,10 @@ export const BondInput = ({
         <section>
           <ButtonSubmitInvert
             text={t('max')}
-            disabled={disabled || syncing || freeBalance.isZero()}
+            disabled={disabled || syncing || freeToBond.isZero()}
             onClick={() => {
-              setLocalBond(freeBalance.toString());
-              updateParentState(freeBalance.toString());
+              setLocalBond(freeToBond.toString());
+              updateParentState(freeToBond);
             }}
           />
         </section>

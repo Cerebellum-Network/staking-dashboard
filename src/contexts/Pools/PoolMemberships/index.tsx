@@ -3,27 +3,39 @@
 
 import { rmCommas, setStateWithRef } from '@polkadot-cloud/utils';
 import BigNumber from 'bignumber.js';
-import React, { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
   ClaimPermissionConfig,
   PoolMembership,
   PoolMembershipsContextState,
-} from 'contexts/Pools/types';
+} from './types';
 import type { AnyApi, Fn } from 'types';
 import { useEffectIgnoreInitial } from '@polkadot-cloud/react/hooks';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
 import { useApi } from '../../Api';
-import { useConnect } from '../../Connect';
 import * as defaults from './defaults';
+
+export const PoolMembershipsContext =
+  createContext<PoolMembershipsContextState>(
+    defaults.defaultPoolMembershipsContext
+  );
+
+export const usePoolMemberships = () => useContext(PoolMembershipsContext);
 
 export const PoolMembershipsProvider = ({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) => {
   const { t } = useTranslation('base');
-  const { api, network, isReady } = useApi();
-  const { accounts: connectAccounts, activeAccount } = useConnect();
+  const { network } = useNetwork();
+  const { api, isReady } = useApi();
+  const { activeAccount } = useActiveAccounts();
+  const { accounts: connectAccounts } = useImportedAccounts();
 
   // Stores pool memberships for the imported accounts.
   const [poolMemberships, setPoolMemberships] = useState<PoolMembership[]>([]);
@@ -64,7 +76,9 @@ export const PoolMembershipsProvider = ({
 
   // subscribe to an account's pool membership
   const subscribeToPoolMembership = async (address: string) => {
-    if (!api) return undefined;
+    if (!api) {
+      return undefined;
+    }
 
     const unsub = await api.queryMulti<AnyApi>(
       [
@@ -85,6 +99,7 @@ export const PoolMembershipsProvider = ({
       if (membership) {
         // format pool's unlocking chunks
         const unbondingEras: AnyApi = membership.unbondingEras;
+
         const unlocking = [];
         for (const [e, v] of Object.entries(unbondingEras || {})) {
           unlocking.push({
@@ -180,11 +195,3 @@ export const PoolMembershipsProvider = ({
     </PoolMembershipsContext.Provider>
   );
 };
-
-export const PoolMembershipsContext =
-  React.createContext<PoolMembershipsContextState>(
-    defaults.defaultPoolMembershipsContext
-  );
-
-export const usePoolMemberships = () =>
-  React.useContext(PoolMembershipsContext);

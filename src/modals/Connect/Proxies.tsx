@@ -11,15 +11,14 @@ import {
   ButtonHelp,
   ButtonMonoInvert,
   ButtonSecondary,
-  PolkadotIcon,
+  Polkicon,
 } from '@polkadot-cloud/react';
-import React from 'react';
+import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConnect } from 'contexts/Connect';
 import { useHelp } from 'contexts/Help';
 import { useProxies } from 'contexts/Proxies';
 import { AccountInput } from 'library/AccountInput';
-import { useTheme } from 'contexts/Themes';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
 import {
   ActionWithButton,
   ManualAccount,
@@ -29,17 +28,18 @@ import type { ListWithInputProps } from './types';
 
 export const Proxies = ({ setInputOpen, inputOpen }: ListWithInputProps) => {
   const { t } = useTranslation('modals');
-  const { accounts, getAccount } = useConnect();
   const { openHelp } = useHelp();
-  const { mode } = useTheme();
-  const { delegates, handleDeclareDelegate } = useProxies();
+  const { accounts, getAccount } = useImportedAccounts();
+  const { handleDeclareDelegate, formatProxiesToDelegates } = useProxies();
 
   // Filter delegates to only show those who are imported in the dashboard.
+  const delegates = formatProxiesToDelegates();
   const importedDelegates = Object.fromEntries(
     Object.entries(delegates).filter(([delegate]) =>
       accounts.find((a) => a.address === delegate)
     )
   );
+
   return (
     <>
       <ActionWithButton>
@@ -61,32 +61,25 @@ export const Proxies = ({ setInputOpen, inputOpen }: ListWithInputProps) => {
       <ManualAccountsWrapper>
         <div className="content">
           {inputOpen && (
-            <>
-              <AccountInput
-                resetOnSuccess
-                defaultLabel={t('inputDelegatorAddress')}
-                successCallback={async (delegator) => {
-                  const result = await handleDeclareDelegate(delegator);
-                  return result;
-                }}
-              />
-            </>
+            <AccountInput
+              resetOnSuccess
+              defaultLabel={t('inputDelegatorAddress')}
+              successCallback={async (delegator) => {
+                const result = await handleDeclareDelegate(delegator);
+                return result;
+              }}
+            />
           )}
           {Object.entries(importedDelegates).length ? (
             <div className="accounts">
               {Object.entries(importedDelegates).map(
                 ([delegate, delegators], i) => (
-                  <React.Fragment key={`user_delegate_account_${i}}`}>
+                  <Fragment key={`user_delegate_account_${i}}`}>
                     {delegators.map(({ delegator, proxyType }, j) => (
                       <ManualAccount key={`user_delegate_${i}_delegator_${j}`}>
                         <div>
                           <span>
-                            <PolkadotIcon
-                              dark={mode === 'dark'}
-                              nocopy
-                              address={delegate}
-                              size={26}
-                            />
+                            <Polkicon address={delegate} size={26} />
                           </span>
                           <div className="text">
                             <h4 className="title">
@@ -106,7 +99,7 @@ export const Proxies = ({ setInputOpen, inputOpen }: ListWithInputProps) => {
                         <ButtonSecondary text={t('declared')} disabled />
                       </ManualAccount>
                     ))}
-                  </React.Fragment>
+                  </Fragment>
                 )
               )}
             </div>

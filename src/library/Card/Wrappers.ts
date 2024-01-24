@@ -14,17 +14,14 @@ import type { CardHeaderWrapperProps, CardWrapperProps } from '../Graphs/types';
 export const CardHeaderWrapper = styled.div<CardHeaderWrapperProps>`
   display: flex;
   flex-flow: ${(props) => (props.$withAction ? 'row' : 'column')} wrap;
-  width: 100%;
+  align-items: ${(props) => (props.$withAction ? 'center' : 'none')};
+  justify-content: ${(props) => (props.$withAction ? 'none' : 'center')};
+  margin-bottom: ${(props) => (props.$withMargin ? '1rem' : 0)};
   padding: 0rem 0.25rem;
+  width: 100%;
 
   h2 {
     font-family: InterBold, sans-serif;
-  }
-  h3 {
-    margin-top: 0.25rem;
-  }
-  h2,
-  h3 {
     margin-bottom: 1rem;
   }
   h2,
@@ -34,6 +31,10 @@ export const CardHeaderWrapper = styled.div<CardHeaderWrapperProps>`
     flex-flow: row wrap;
     align-items: center;
     flex-grow: ${(props) => (props.$withAction ? 1 : 0)};
+
+    @media (max-width: ${SideMenuStickyThreshold}px) {
+      margin-top: 0.5rem;
+    }
   }
   h3,
   h4 {
@@ -82,6 +83,11 @@ export const CardWrapper = styled.div<CardWrapperProps>`
   margin-top: 1.4rem;
   padding: 1.5rem;
 
+  &.canvas {
+    background: var(--background-canvas-card);
+    padding: 1.25rem;
+  }
+
   &.transparent {
     background: none;
     border: none;
@@ -119,6 +125,7 @@ export const CardWrapper = styled.div<CardWrapperProps>`
       margin-top: 0;
     }
     h3 {
+      margin-left: 0;
       margin-bottom: 0.75rem;
     }
 

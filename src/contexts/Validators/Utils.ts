@@ -1,9 +1,10 @@
 // Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: GPL-3.0-only
 
-import type BigNumber from 'bignumber.js';
+import BigNumber from 'bignumber.js';
 import type { LocalMeta } from 'contexts/FastUnstake/types';
 import type {
+  EraRewardPoints,
   LocalValidatorEntriesData,
   Validator,
 } from 'contexts/Validators/types';
@@ -23,8 +24,9 @@ export const getLocalEraValidators = (network: NetworkName, era: string) => {
   const current = data ? (JSON.parse(data) as LocalValidatorEntriesData) : null;
   const currentEra = current?.era;
 
-  if (currentEra && currentEra !== era)
+  if (currentEra && currentEra !== era) {
     localStorage.removeItem(`${network}_validators`);
+  }
 
   return currentEra === era ? current : null;
 };
@@ -55,12 +57,15 @@ export const validateLocalExposure = (
   let localChecked = localMeta?.checked ?? null;
 
   // check types saved.
-  if (typeof localIsExposed !== 'boolean' || !Array.isArray(localChecked))
+  if (typeof localIsExposed !== 'boolean' || !Array.isArray(localChecked)) {
     return null;
+  }
 
   // check checked only contains numbers.
   const checkedNumeric = localChecked.every((e) => typeof e === 'number');
-  if (!checkedNumeric) return null;
+  if (!checkedNumeric) {
+    return null;
+  }
 
   // remove any expired eras and sort highest first.
   localChecked = localChecked
@@ -83,14 +88,60 @@ export const validateLocalExposure = (
     }
     const p = prev;
     prev = e;
-    if (e === p - 1) return true;
+    if (e === p - 1) {
+      return true;
+    }
     return false;
   });
 
-  if (!noMissingEras) return null;
+  if (!noMissingEras) {
+    return null;
+  }
 
   return {
     isExposed: localIsExposed,
     checked: localChecked,
   };
+};
+
+// Check if era reward points entry exists for an era.
+export const hasLocalEraRewardPoints = (network: NetworkName, era: string) => {
+  const current = JSON.parse(
+    localStorage.getItem(`${network}_era_reward_points`) || '{}'
+  );
+  return !!current?.[era];
+};
+
+// Get local era reward points entry for an era.
+export const getLocalEraRewardPoints = (network: NetworkName, era: string) => {
+  const current = JSON.parse(
+    localStorage.getItem(`${network}_era_reward_points`) || '{}'
+  );
+  return current?.[era] || {};
+};
+
+// Set local era reward points entry for an era.
+export const setLocalEraRewardPoints = (
+  network: NetworkName,
+  era: string,
+  eraRewardPoints: EraRewardPoints | null,
+  endEra: string
+) => {
+  const current = JSON.parse(
+    localStorage.getItem(`${network}_era_reward_points`) || '{}'
+  );
+
+  const removeStaleEras = Object.fromEntries(
+    Object.entries(current || {}).filter(([k]: [string, unknown]) =>
+      new BigNumber(k).isGreaterThanOrEqualTo(endEra)
+    )
+  );
+
+  localStorage.setItem(
+    `${network}_era_reward_points`,
+    JSON.stringify({
+      ...removeStaleEras,
+      [era]: eraRewardPoints,
+    })
+  );
 };

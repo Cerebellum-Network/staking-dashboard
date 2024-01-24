@@ -9,31 +9,24 @@ import {
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useApi } from 'contexts/Api';
 import { useBondedPools } from 'contexts/Pools/BondedPools';
 import { useStaking } from 'contexts/Staking';
 import { ValidatorStatusWrapper } from 'library/ListItem/Wrappers';
 import type { Pool } from 'library/Pool/types';
+import { useNetwork } from 'contexts/Network';
 
-export const PoolBonded = ({
-  pool,
-  batchKey,
-  batchIndex,
-}: {
-  pool: Pool;
-  batchKey: string;
-  batchIndex: number;
-}) => {
+export const PoolBonded = ({ pool }: { pool: Pool }) => {
   const { t } = useTranslation('library');
-  const { network } = useApi();
+  const {
+    networkData: { units, unit },
+  } = useNetwork();
+  const { getPoolNominationStatusCode, poolsNominations } = useBondedPools();
   const { eraStakers, getNominationsStatusFromTargets } = useStaking();
-  const { meta, getPoolNominationStatusCode } = useBondedPools();
   const { addresses, points } = pool;
-  const { units, unit } = network;
 
   // get pool targets from nominations meta batch
-  const nominations = meta[batchKey]?.nominations ?? [];
-  const targets = nominations[batchIndex]?.targets ?? [];
+  const nominations = poolsNominations[pool.id];
+  const targets = nominations?.targets || [];
 
   // store nomination status in state
   const [nominationsStatus, setNominationsStatus] =
@@ -53,8 +46,7 @@ export const PoolBonded = ({
     if (
       targets.length &&
       nominationsStatus === null &&
-      eraStakers.stakers.length &&
-      nominations.length
+      eraStakers.stakers.length
     ) {
       handleNominationsStatus();
     }
@@ -64,7 +56,7 @@ export const PoolBonded = ({
   // recalculate nominations status
   useEffect(() => {
     handleNominationsStatus();
-  }, [meta, pool, eraStakers.stakers.length]);
+  }, [pool, eraStakers.stakers.length, Object.keys(poolsNominations).length]);
 
   // calculate total bonded pool amount
   const poolBonded = planckToUnit(new BigNumber(rmCommas(points)), units);
@@ -75,18 +67,16 @@ export const PoolBonded = ({
   );
 
   return (
-    <>
-      <ValidatorStatusWrapper $status={nominationStatus}>
-        <h5>
-          {nominationStatus === null || !eraStakers.stakers.length
-            ? `${t('syncing')}...`
-            : targets.length
+    <ValidatorStatusWrapper $status={nominationStatus} $noMargin>
+      <h5>
+        {nominationStatus === null || !eraStakers.stakers.length
+          ? `${t('syncing')}...`
+          : targets.length
             ? capitalizeFirstLetter(t(`${nominationStatus}`) ?? '')
             : t('notNominating')}
-          {' / '}
-          {t('bonded')}: {poolBonded.decimalPlaces(3).toFormat()} {unit}
-        </h5>
-      </ValidatorStatusWrapper>
-    </>
+        {' / '}
+        {t('bonded')}: {poolBonded.decimalPlaces(3).toFormat()} {unit}
+      </h5>
+    </ValidatorStatusWrapper>
   );
 };

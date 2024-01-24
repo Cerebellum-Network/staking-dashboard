@@ -6,18 +6,20 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { MinBondPrecision } from 'consts';
-import { useApi } from 'contexts/Api';
 import { useTooltip } from 'contexts/Tooltip';
 import {
   OverSubscribedWrapper,
   TooltipTrigger,
 } from 'library/ListItem/Wrappers';
 import { useStaking } from 'contexts/Staking';
+import { useNetwork } from 'contexts/Network';
 import type { OversubscribedProps } from '../types';
 
 export const Oversubscribed = ({ address }: OversubscribedProps) => {
   const { t } = useTranslation('library');
-  const { network } = useApi();
+  const {
+    networkData: { unit },
+  } = useNetwork();
   const { setTooltipTextAndOpen } = useTooltip();
   const { erasStakersSyncing, getLowestRewardFromStaker } = useStaking();
 
@@ -31,35 +33,33 @@ export const Oversubscribed = ({ address }: OversubscribedProps) => {
 
   const tooltipText = `${t(
     'overSubscribedMinReward'
-  )} ${lowestRewardFormatted} ${network.unit}`;
+  )} ${lowestRewardFormatted} ${unit}`;
 
   return (
-    <>
-      {displayOversubscribed && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.1 }}
-        >
-          <div className="label warning">
-            <TooltipTrigger
-              className="tooltip-trigger-element"
-              data-tooltip-text={tooltipText}
-              onMouseMove={() => setTooltipTextAndOpen(tooltipText)}
-            />
-            <OverSubscribedWrapper>
-              <span className="warning">
-                <FontAwesomeIcon
-                  icon={faExclamationTriangle}
-                  transform="shrink-2"
-                  className="warning"
-                />
-              </span>
-              {lowestRewardFormatted} {network.unit}
-            </OverSubscribedWrapper>
-          </div>
-        </motion.div>
-      )}
-    </>
+    displayOversubscribed && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.1 }}
+      >
+        <div className="label warning">
+          <TooltipTrigger
+            className="tooltip-trigger-element"
+            data-tooltip-text={tooltipText}
+            onMouseMove={() => setTooltipTextAndOpen(tooltipText)}
+          />
+          <OverSubscribedWrapper>
+            <span className="warning">
+              <FontAwesomeIcon
+                icon={faExclamationTriangle}
+                transform="shrink-2"
+                className="warning"
+              />
+            </span>
+            {lowestRewardFormatted} {unit}
+          </OverSubscribedWrapper>
+        </div>
+      </motion.div>
+    )
   );
 };

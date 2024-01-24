@@ -13,9 +13,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useApi } from 'contexts/Api';
 import { useBonded } from 'contexts/Bonded';
-import { useConnect } from 'contexts/Connect';
 import { useFastUnstake } from 'contexts/FastUnstake';
-import { useNetworkMetrics } from 'contexts/Network';
+import { useNetworkMetrics } from 'contexts/NetworkMetrics';
 import { useTransferOptions } from 'contexts/TransferOptions';
 import { Warning } from 'library/Form/Warning';
 import { useSignerWarnings } from 'library/Hooks/useSignerWarnings';
@@ -25,13 +24,18 @@ import { Close } from 'library/Modal/Close';
 import { SubmitTx } from 'library/SubmitTx';
 import { useTxMeta } from 'contexts/TxMeta';
 import { useOverlay } from '@polkadot-cloud/react/hooks';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
 
 export const ManageFastUnstake = () => {
   const { t } = useTranslation('modals');
-  const { activeAccount } = useConnect();
+  const { api, consts } = useApi();
+  const {
+    networkData: { units, unit },
+  } = useNetwork();
+  const { activeAccount } = useActiveAccounts();
   const { notEnoughFunds } = useTxMeta();
   const { getBondedAccount } = useBonded();
-  const { api, consts, network } = useApi();
   const { isFastUnstaking } = useUnstaking();
   const { setModalResize, setModalStatus } = useOverlay().modal;
   const { getSignerWarnings } = useSignerWarnings();
@@ -44,12 +48,11 @@ export const ManageFastUnstake = () => {
   const { checked } = meta;
   const controller = getBondedAccount(activeAccount);
   const allTransferOptions = getTransferOptions(activeAccount);
-  const { nominate, freeBalance } = allTransferOptions;
-  const { totalUnlockChuncks } = nominate;
+  const { nominate, transferrableBalance } = allTransferOptions;
+  const { totalUnlockChunks } = nominate;
 
-  const enoughForDeposit = freeBalance
-    .minus(feeReserve)
-    .isGreaterThanOrEqualTo(fastUnstakeDeposit);
+  const enoughForDeposit =
+    transferrableBalance.isGreaterThanOrEqualTo(fastUnstakeDeposit);
 
   // valid to submit transaction
   const [valid, setValid] = useState<boolean>(false);
@@ -60,16 +63,16 @@ export const ManageFastUnstake = () => {
         ((!isFastUnstaking &&
           enoughForDeposit &&
           isExposed === false &&
-          totalUnlockChuncks === 0) ||
+          totalUnlockChunks === 0) ||
           isFastUnstaking)
     );
   }, [
     isExposed,
     fastUnstakeErasToCheckPerBlock,
-    totalUnlockChuncks,
+    totalUnlockChunks,
     isFastUnstaking,
     fastUnstakeDeposit,
-    freeBalance,
+    transferrableBalance,
     feeReserve,
   ]);
 
@@ -96,7 +99,6 @@ export const ManageFastUnstake = () => {
     tx: getTx(),
     from: controller,
     shouldSubmit: valid,
-    callbackSubmit: () => {},
     callbackInBlock: () => {
       setModalStatus('closing');
     },
@@ -114,15 +116,15 @@ export const ManageFastUnstake = () => {
       warnings.push(
         `${t('noEnough')} ${planckToUnit(
           fastUnstakeDeposit,
-          network.units
-        ).toString()} ${network.unit}`
+          units
+        ).toString()} ${unit}`
       );
     }
 
-    if (totalUnlockChuncks > 0) {
+    if (totalUnlockChunks > 0) {
       warnings.push(
         `${t('fastUnstakeWarningUnlocksActive', {
-          count: totalUnlockChuncks,
+          count: totalUnlockChunks,
         })} ${t('fastUnstakeWarningUnlocksActiveMore')}`
       );
     }
@@ -168,38 +170,29 @@ export const ManageFastUnstake = () => {
               </p>
             </ModalNotes>
           </>
+        ) : !isFastUnstaking ? (
+          <>
+            <ActionItem text={t('fastUnstake', { context: 'register' })} />
+            <ModalNotes>
+              <p>
+                {t('registerFastUnstake')}{' '}
+                {planckToUnit(fastUnstakeDeposit, units).toString()} {unit}.{' '}
+                {t('fastUnstakeOnceRegistered')}
+              </p>
+              <p>
+                {t('fastUnstakeCurrentQueue')}: <b>{counterForQueue}</b>
+              </p>
+            </ModalNotes>
+          </>
         ) : (
           <>
-            {!isFastUnstaking ? (
-              <>
-                <ActionItem text={t('fastUnstake', { context: 'register' })} />
-                <ModalNotes>
-                  <p>
-                    <>
-                      {t('registerFastUnstake')}{' '}
-                      {planckToUnit(
-                        fastUnstakeDeposit,
-                        network.units
-                      ).toString()}{' '}
-                      {network.unit}. {t('fastUnstakeOnceRegistered')}
-                    </>
-                  </p>
-                  <p>
-                    {t('fastUnstakeCurrentQueue')}: <b>{counterForQueue}</b>
-                  </p>
-                </ModalNotes>
-              </>
-            ) : (
-              <>
-                <ActionItem text={t('fastUnstakeRegistered')} />
-                <ModalNotes>
-                  <p>
-                    {t('fastUnstakeCurrentQueue')}: <b>{counterForQueue}</b>
-                  </p>
-                  <p>{t('fastUnstakeUnorderedNote')}</p>
-                </ModalNotes>
-              </>
-            )}
+            <ActionItem text={t('fastUnstakeRegistered')} />
+            <ModalNotes>
+              <p>
+                {t('fastUnstakeCurrentQueue')}: <b>{counterForQueue}</b>
+              </p>
+              <p>{t('fastUnstakeUnorderedNote')}</p>
+            </ModalNotes>
           </>
         )}
       </ModalPadding>

@@ -6,10 +6,8 @@ import { faBars, faProjectDiagram } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConnect } from 'contexts/Connect';
 import { useMenu } from 'contexts/Menu';
-import { useNotifications } from 'contexts/Notifications';
-import type { NotificationText } from 'contexts/Notifications/types';
+import type { NotificationText } from 'static/NotificationsController/types';
 import { useBondedPools } from 'contexts/Pools/BondedPools';
 import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
 import { useUi } from 'contexts/UI';
@@ -27,36 +25,41 @@ import {
 } from 'library/ListItem/Wrappers';
 import { usePoolsTabs } from 'pages/Pools/Home/context';
 import { useOverlay } from '@polkadot-cloud/react/hooks';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
 import { JoinPool } from '../ListItem/Labels/JoinPool';
 import { Members } from '../ListItem/Labels/Members';
 import { PoolId } from '../ListItem/Labels/PoolId';
 import type { PoolProps } from './types';
+import { Rewards } from './Rewards';
+import { NotificationsController } from 'static/NotificationsController';
+import type { MenuItem } from 'contexts/Menu/types';
 
-export const Pool = ({ pool, batchKey, batchIndex }: PoolProps) => {
+export const Pool = ({ pool }: PoolProps) => {
   const { t } = useTranslation('library');
   const { memberCounter, addresses, id, state } = pool;
-  const { openModal } = useOverlay().modal;
-  const { activeAccount, isReadOnlyAccount } = useConnect();
-  const { meta } = useBondedPools();
-  const { membership } = usePoolMemberships();
-  const { addNotification } = useNotifications();
-  const { validators } = useValidators();
   const { isPoolSyncing } = useUi();
+  const { validators } = useValidators();
   const { setActiveTab } = usePoolsTabs();
-  const { setMenuPosition, setMenuItems, open }: any = useMenu();
+  const { openModal } = useOverlay().modal;
+  const { membership } = usePoolMemberships();
+  const { poolsNominations } = useBondedPools();
+  const { activeAccount } = useActiveAccounts();
+  const { isReadOnlyAccount } = useImportedAccounts();
   const { getCurrentCommission } = usePoolCommission();
+  const { setMenuPosition, setMenuItems, open } = useMenu();
 
   const currentCommission = getCurrentCommission(id);
 
   // get metadata from pools metabatch
-  const nominations = meta[batchKey]?.nominations ?? [];
+  const nominations = poolsNominations[pool.id];
 
   // get pool targets from nominations metadata
-  const targets = nominations[batchIndex]?.targets ?? [];
+  const targets = nominations?.targets || [];
 
   // extract validator entries from pool targets
-  const targetValidators = validators.filter((v: any) =>
-    targets.includes(v.address)
+  const targetValidators = validators.filter(({ address }) =>
+    targets.includes(address)
   );
 
   // configure floating menu position
@@ -71,13 +74,12 @@ export const Pool = ({ pool, batchKey, batchIndex }: PoolProps) => {
           subtitle: addresses.stash,
         };
 
-  // consruct pool menu items
-  const menuItems: any[] = [];
+  // Consruct pool menu items.
+  const menuItems: MenuItem[] = [];
 
   // add view pool nominations button to menu
   menuItems.push({
     icon: <FontAwesomeIcon icon={faProjectDiagram} transform="shrink-3" />,
-    wrap: null,
     title: `${t('viewPoolNominations')}`,
     cb: () => {
       openModal({
@@ -93,12 +95,11 @@ export const Pool = ({ pool, batchKey, batchIndex }: PoolProps) => {
   // add copy pool address button to menu
   menuItems.push({
     icon: <FontAwesomeIcon icon={faCopy} transform="shrink-3" />,
-    wrap: null,
     title: t('copyPoolAddress'),
     cb: () => {
       navigator.clipboard.writeText(addresses.stash);
       if (notificationCopyAddress) {
-        addNotification(notificationCopyAddress);
+        NotificationsController.emit(notificationCopyAddress);
       }
     },
   });
@@ -111,46 +112,50 @@ export const Pool = ({ pool, batchKey, batchIndex }: PoolProps) => {
     }
   };
 
+  const displayJoin =
+    !isPoolSyncing &&
+    state === 'Open' &&
+    !membership &&
+    !isReadOnlyAccount(activeAccount) &&
+    activeAccount;
+
   return (
-    <Wrapper $format="nomination">
+    <Wrapper className={displayJoin ? 'pool-join' : 'pool'}>
       <div className="inner">
         <MenuPosition ref={posRef} />
-        <div className="row">
-          <PoolIdentity
-            batchKey={batchKey}
-            batchIndex={batchIndex}
-            pool={pool}
-          />
+        <div className="row top">
+          <PoolIdentity pool={pool} />
           <div>
             <Labels>
+              <FavoritePool address={addresses.stash} />
+              <div className="label">
+                <button type="button" onClick={() => toggleMenu()}>
+                  <FontAwesomeIcon icon={faBars} transform="shrink-2" />
+                </button>
+              </div>
+            </Labels>
+          </div>
+        </div>
+        <Separator />
+        <div className="row bottom lg">
+          <div>
+            <Rewards address={addresses.stash} displayFor="default" />
+          </div>
+          <div>
+            <Labels style={{ marginBottom: '0.9rem' }}>
               {currentCommission > 0 && (
                 <PoolCommission commission={`${currentCommission}%`} />
               )}
               <PoolId id={id} />
               <Members members={memberCounter} />
-              <FavoritePool address={addresses.stash} />
-              <button
-                type="button"
-                className="label"
-                onClick={() => toggleMenu()}
-              >
-                <FontAwesomeIcon icon={faBars} />
-              </button>
             </Labels>
-          </div>
-        </div>
-        <Separator />
-        <div className="row status">
-          <PoolBonded pool={pool} batchIndex={batchIndex} batchKey={batchKey} />
-          {!isPoolSyncing &&
-            state === 'Open' &&
-            !membership &&
-            !isReadOnlyAccount(activeAccount) &&
-            activeAccount && (
-              <Labels>
+            <PoolBonded pool={pool} />
+            {displayJoin && (
+              <Labels style={{ marginTop: '1rem' }}>
                 <JoinPool id={id} setActiveTab={setActiveTab} />
               </Labels>
             )}
+          </div>
         </div>
       </div>
     </Wrapper>

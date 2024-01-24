@@ -4,9 +4,9 @@
 import BigNumber from 'bignumber.js';
 import { useEffect, useMemo, useState } from 'react';
 import { useApi } from 'contexts/Api';
-import { useConnect } from 'contexts/Connect';
 import { useTransferOptions } from 'contexts/TransferOptions';
 import type { BondFor } from 'types';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
 
 interface Props {
   bondFor: BondFor;
@@ -14,13 +14,13 @@ interface Props {
 
 export const useBondGreatestFee = ({ bondFor }: Props) => {
   const { api } = useApi();
-  const { activeAccount } = useConnect();
+  const { activeAccount } = useActiveAccounts();
   const { feeReserve, getTransferOptions } = useTransferOptions();
   const transferOptions = useMemo(
     () => getTransferOptions(activeAccount),
     [activeAccount]
   );
-  const { freeBalance } = transferOptions;
+  const { transferrableBalance } = transferOptions;
 
   // store the largest possible tx fees for bonding.
   const [largestTxFee, setLargestTxFee] = useState<BigNumber>(new BigNumber(0));
@@ -38,7 +38,10 @@ export const useBondGreatestFee = ({ bondFor }: Props) => {
 
   // estimate the largest possible tx fee based on users free balance.
   const txLargestFee = async () => {
-    const bond = freeBalance.minus(feeReserve).toString();
+    const bond = BigNumber.max(
+      transferrableBalance.minus(feeReserve),
+      0
+    ).toString();
 
     let tx = null;
     if (!api) {

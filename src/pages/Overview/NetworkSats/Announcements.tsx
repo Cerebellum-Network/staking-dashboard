@@ -12,24 +12,24 @@ import {
 import BigNumber from 'bignumber.js';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { useApi } from 'contexts/Api';
 import { useBondedPools } from 'contexts/Pools/BondedPools';
 import { usePoolsConfig } from 'contexts/Pools/PoolsConfig';
-import type { BondedPool } from 'contexts/Pools/types';
 import { useStaking } from 'contexts/Staking';
-import { useUi } from 'contexts/UI';
 import { Announcement as AnnouncementLoader } from 'library/Loader/Announcement';
+import { useNetwork } from 'contexts/Network';
 import { Item } from './Wrappers';
+import type { BondedPool } from 'contexts/Pools/BondedPools/types';
 
 export const Announcements = () => {
   const { t } = useTranslation('pages');
-  const { network } = useApi();
-  const { isSyncing } = useUi();
   const { staking } = useStaking();
   const { stats } = usePoolsConfig();
+  const {
+    network,
+    networkData: { units, unit },
+  } = useNetwork();
   const { bondedPools } = useBondedPools();
 
-  const { units } = network;
   const { totalStaked } = staking;
   const { counterForPoolMembers } = stats;
 
@@ -60,19 +60,19 @@ export const Announcements = () => {
 
   const announcements = [];
 
-  const networkUnit = network.unit;
+  const networkUnit = unit;
 
   // total staked on the network
-  if (!isSyncing) {
+  if (!totalStaked.isZero()) {
     announcements.push({
       class: 'neutral',
       title: t('overview.networkCurrentlyStaked', {
         total: planckToUnit(totalStaked, units).integerValue().toFormat(),
-        unit: network.unit,
-        network: capitalizeFirstLetter(network.name),
+        unit,
+        network: capitalizeFirstLetter(network),
       }),
       subtitle: t('overview.networkCurrentlyStakedSubtitle', {
-        unit: network.unit,
+        unit,
       }),
     });
   } else {
@@ -83,9 +83,9 @@ export const Announcements = () => {
   if (bondedPools.length) {
     announcements.push({
       class: 'neutral',
-      title: `${totalPoolPointsUnit.integerValue().toFormat()} ${
-        network.unit
-      } ${t('overview.inPools')}`,
+      title: `${totalPoolPointsUnit.integerValue().toFormat()} ${unit} ${t(
+        'overview.inPools'
+      )}`,
       subtitle: `${t('overview.bondedInPools', { networkUnit })}`,
     });
   } else {

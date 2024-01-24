@@ -4,9 +4,9 @@
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import {
   ButtonPrimaryInvert,
-  ModalCanvas,
+  CanvasContainer,
   ModalContent,
-  ModalScroll,
+  CanvasScroll,
 } from '@polkadot-cloud/react';
 import { camelize } from '@polkadot-cloud/utils';
 import { useAnimation } from 'framer-motion';
@@ -42,19 +42,25 @@ export const Help = () => {
 
   // control canvas fade.
   useEffect(() => {
-    if (status === 'open') onFadeIn();
-    if (status === 'closing') onFadeOut();
+    if (status === 'open') {
+      onFadeIn();
+    }
+    if (status === 'closing') {
+      onFadeOut();
+    }
   }, [status]);
 
   // render early if help not open
-  if (status === 'closed') return <></>;
+  if (status === 'closed') {
+    return null;
+  }
 
   let meta: HelpItem | undefined;
 
   if (definition) {
     // get items for active category
-    meta = Object.values(HelpConfig).find(
-      (c) => c?.definitions?.find((d) => d === definition)
+    meta = Object.values(HelpConfig).find((c) =>
+      c?.definitions?.find((d) => d === definition)
     );
   } else {
     // get all items
@@ -131,7 +137,7 @@ export const Help = () => {
   });
 
   return (
-    <ModalCanvas
+    <CanvasContainer
       initial={{
         opacity: 0,
         scale: 1.05,
@@ -154,7 +160,7 @@ export const Help = () => {
         zIndex: 20,
       }}
     >
-      <ModalScroll>
+      <CanvasScroll>
         <ModalContent>
           <div className="buttons">
             <ButtonPrimaryInvert
@@ -183,7 +189,6 @@ export const Help = () => {
               {activeDefinitions.map((item, index: number) => (
                 <Definition
                   key={`def_${index}`}
-                  onClick={() => {}}
                   title={item.title}
                   description={item.description}
                 />
@@ -206,10 +211,10 @@ export const Help = () => {
             </>
           )}
         </ModalContent>
-      </ModalScroll>
+      </CanvasScroll>
       <button type="button" className="close" onClick={() => closeHelp()}>
         &nbsp;
       </button>
-    </ModalCanvas>
+    </CanvasContainer>
   );
 };

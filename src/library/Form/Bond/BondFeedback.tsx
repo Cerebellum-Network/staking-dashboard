@@ -5,12 +5,12 @@ import { planckToUnit, unitToPlanck } from '@polkadot-cloud/utils';
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useApi } from 'contexts/Api';
-import { useConnect } from 'contexts/Connect';
 import { useActivePools } from 'contexts/Pools/ActivePools';
 import { usePoolsConfig } from 'contexts/Pools/PoolsConfig';
 import { useStaking } from 'contexts/Staking';
 import { useTransferOptions } from 'contexts/TransferOptions';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
 import { Warning } from '../Warning';
 import { Spacer } from '../Wrappers';
 import type { BondFeedbackProps } from '../types';
@@ -22,7 +22,7 @@ export const BondFeedback = ({
   joiningPool = false,
   parentErrors = [],
   setters = [],
-  listenIsValid = () => {},
+  listenIsValid,
   disableTxFeeUpdate = false,
   defaultBond,
   txFees,
@@ -30,32 +30,30 @@ export const BondFeedback = ({
   syncing = false,
 }: BondFeedbackProps) => {
   const { t } = useTranslation('library');
-  const { network } = useApi();
-  const { activeAccount } = useConnect();
+  const {
+    networkData: { units, unit },
+  } = useNetwork();
   const { staking } = useStaking();
-  const { getTransferOptions } = useTransferOptions();
-  const { isDepositor } = useActivePools();
+  const { activeAccount } = useActiveAccounts();
   const { stats } = usePoolsConfig();
+  const { isDepositor } = useActivePools();
+  const { getTransferOptions } = useTransferOptions();
   const { minJoinBond, minCreateBond } = stats;
-  const { units, unit } = network;
   const { minNominatorBond } = staking;
   const allTransferOptions = getTransferOptions(activeAccount);
 
   const defaultBondStr = defaultBond ? String(defaultBond) : '';
 
   // get bond options for either staking or pooling.
-  const freeBalanceBn =
+  const availableBalance =
     bondFor === 'nominator'
       ? allTransferOptions.nominate.totalAdditionalBond
-      : allTransferOptions.pool.totalAdditionalBond;
+      : allTransferOptions.transferrableBalance;
 
-  // if we are bonding, subtract tx fees from bond amount
-  const freeBondAmount = !disableTxFeeUpdate
-    ? BigNumber.max(freeBalanceBn.minus(txFees), 0)
-    : freeBalanceBn;
-
-  // the default bond balance
-  const freeBalance = planckToUnit(freeBondAmount, units);
+  // the default bond balance. If we are bonding, subtract tx fees from bond amount.
+  const freeToBond = !disableTxFeeUpdate
+    ? BigNumber.max(availableBalance.minus(txFees), 0)
+    : availableBalance;
 
   // store errors
   const [errors, setErrors] = useState<string[]>([]);
@@ -65,47 +63,26 @@ export const BondFeedback = ({
     bond: defaultBondStr,
   });
 
+  // handler to set bond as a string
+  const handleSetBond = (newBond: { bond: BigNumber }) => {
+    setBond({ bond: newBond.bond.toString() });
+  };
+
   // current bond value BigNumber
   const bondBn = unitToPlanck(bond.bond, units);
 
   // whether bond is disabled
-  const [bondDisabled, setBondDisabled] = useState(false);
+  const [bondDisabled, setBondDisabled] = useState<boolean>(false);
 
   // bond minus tx fees if too much
-  const enoughToCoverTxFees = freeBondAmount
-    .minus(bondBn)
-    .isGreaterThan(txFees);
+  const enoughToCoverTxFees = freeToBond.minus(bondBn).isGreaterThan(txFees);
 
   const bondAfterTxFees = enoughToCoverTxFees
     ? bondBn
     : BigNumber.max(bondBn.minus(txFees), 0);
 
-  // update bond on account change
-  useEffect(() => {
-    setBond({
-      bond: defaultBondStr,
-    });
-  }, [activeAccount]);
-
-  // handle errors on input change
-  useEffect(() => {
-    handleErrors();
-  }, [bond, txFees]);
-
-  // update max bond after txFee sync
-  useEffect(() => {
-    if (!disableTxFeeUpdate) {
-      if (bondBn.isGreaterThan(freeBondAmount)) {
-        setBond({ bond: String(freeBalance) });
-      }
-    }
-  }, [txFees]);
-
   // add this component's setBond to setters
-  setters.push({
-    set: setBond,
-    current: bond,
-  });
+  setters.push(handleSetBond);
 
   // bond amount to minimum threshold.
   const minBondBn =
@@ -123,13 +100,13 @@ export const BondFeedback = ({
     const decimals = bond.bond.toString().split('.')[1]?.length ?? 0;
 
     // bond errors
-    if (freeBondAmount.isZero()) {
+    if (freeToBond.isZero()) {
       disabled = true;
       newErrors.push(`${t('noFree', { unit })}`);
     }
 
     // bond amount must not surpass freeBalalance
-    if (bondBn.isGreaterThan(freeBondAmount)) {
+    if (bondBn.isGreaterThan(freeToBond)) {
       newErrors.push(t('moreThanBalance'));
     }
 
@@ -149,7 +126,7 @@ export const BondFeedback = ({
     }
 
     if (inSetup || joiningPool) {
-      if (freeBondAmount.isLessThan(minBondBn)) {
+      if (freeToBond.isLessThan(minBondBn)) {
         disabled = true;
         newErrors.push(`${t('notMeet')} ${minBondUnit} ${unit}.`);
       }
@@ -161,9 +138,34 @@ export const BondFeedback = ({
 
     const bondValid = !newErrors.length && bond.bond !== '';
     setBondDisabled(disabled);
-    listenIsValid(bondValid, newErrors);
+
+    if (listenIsValid && typeof listenIsValid === 'function') {
+      listenIsValid(bondValid, newErrors);
+    }
+
     setErrors(newErrors);
   };
+
+  // update bond on account change
+  useEffect(() => {
+    setBond({
+      bond: defaultBondStr,
+    });
+  }, [activeAccount]);
+
+  // handle errors on input change
+  useEffect(() => {
+    handleErrors();
+  }, [bond, txFees]);
+
+  // update max bond after txFee sync
+  useEffect(() => {
+    if (!disableTxFeeUpdate) {
+      if (bondBn.isGreaterThan(freeToBond)) {
+        setBond({ bond: String(planckToUnit(freeToBond, units)) });
+      }
+    }
+  }, [txFees]);
 
   return (
     <>
@@ -183,7 +185,7 @@ export const BondFeedback = ({
           syncing={syncing}
           disabled={bondDisabled}
           setters={setters}
-          freeBalance={freeBalance}
+          freeToBond={planckToUnit(freeToBond, units)}
           disableTxFeeUpdate={disableTxFeeUpdate}
         />
       </div>

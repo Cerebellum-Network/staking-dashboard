@@ -2,17 +2,18 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { useEffect, useRef, useState } from 'react';
-import { useApi } from 'contexts/Api';
 import { usePlugins } from 'contexts/Plugins';
 import { useUnitPrice } from 'library/Hooks/useUnitPrice';
+import { useNetwork } from 'contexts/Network';
+import type { AnyJson } from 'types';
 
 export const usePrices = () => {
-  const { network } = useApi();
+  const { network } = useNetwork();
   const { plugins } = usePlugins();
   const fetchUnitPrice = useUnitPrice();
 
   const pricesLocalStorage = () => {
-    const pricesLocal = localStorage.getItem(`${network.name}_prices`);
+    const pricesLocal = localStorage.getItem(`${network}_prices`);
     return pricesLocal === null
       ? {
           lastPrice: 0,
@@ -21,11 +22,11 @@ export const usePrices = () => {
       : JSON.parse(pricesLocal);
   };
 
-  const [prices, _setPrices] = useState(pricesLocalStorage());
+  const [prices, _setPrices] = useState<AnyJson>(pricesLocalStorage());
   const pricesRef = useRef(prices);
 
-  const setPrices = (p: any) => {
-    localStorage.setItem(`${network.name}_prices`, JSON.stringify(p));
+  const setPrices = (p: AnyJson) => {
+    localStorage.setItem(`${network}_prices`, JSON.stringify(p));
     pricesRef.current = {
       ...pricesRef.current,
       ...p,
@@ -43,7 +44,7 @@ export const usePrices = () => {
     }
   };
 
-  let priceHandle: any = null;
+  let priceHandle: ReturnType<typeof setInterval>;
   const setPriceInterval = async () => {
     priceHandle = setInterval(async () => {
       setPrices(await fetchUnitPrice());
@@ -54,7 +55,7 @@ export const usePrices = () => {
   useEffect(() => {
     initiatePriceInterval();
     return () => {
-      if (priceHandle !== null) {
+      if (priceHandle) {
         clearInterval(priceHandle);
       }
     };
@@ -62,7 +63,7 @@ export const usePrices = () => {
 
   // resubscribe on network toggle
   useEffect(() => {
-    if (priceHandle !== null) {
+    if (priceHandle) {
       clearInterval(priceHandle);
     }
     initiatePriceInterval();
@@ -71,10 +72,10 @@ export const usePrices = () => {
   // servie toggle
   useEffect(() => {
     if (plugins.includes('binance_spot')) {
-      if (priceHandle === null) {
+      if (priceHandle) {
         initiatePriceInterval();
       }
-    } else if (priceHandle !== null) {
+    } else if (priceHandle) {
       clearInterval(priceHandle);
     }
   }, [plugins]);

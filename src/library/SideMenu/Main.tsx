@@ -1,14 +1,12 @@
 // Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: GPL-3.0-only
 
-import React, { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PageCategories, PagesConfig } from 'config/pages';
 import { PolkadotUrl } from 'consts';
-import { useApi } from 'contexts/Api';
 import { useBonded } from 'contexts/Bonded';
-import { useConnect } from 'contexts/Connect';
 import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
 import { useSetup } from 'contexts/Setup';
 import type { SetupContextInterface } from 'contexts/Setup/types';
@@ -16,16 +14,21 @@ import { useStaking } from 'contexts/Staking';
 import { useUi } from 'contexts/UI';
 import type { UIContextInterface } from 'contexts/UI/types';
 import type { PageCategory, PageItem, PagesConfigItems } from 'types';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
 import { Heading } from './Heading/Heading';
 import { Primary } from './Primary';
 import { LogoWrapper } from './Wrapper';
+import type { AnyJson } from '@polkadot-cloud/react/types';
 
 export const Main = () => {
   const { t, i18n } = useTranslation('base');
-  const { network } = useApi();
-  const { activeAccount, accounts } = useConnect();
+  const { networkData } = useNetwork();
   const { pathname } = useLocation();
   const { getBondedAccount } = useBonded();
+  const { accounts } = useImportedAccounts();
+  const { activeAccount } = useActiveAccounts();
   const { inSetup: inNominatorSetup, addressDifferentToStash } = useStaking();
   const { membership } = usePoolMemberships();
   const controller = getBondedAccount(activeAccount);
@@ -38,19 +41,21 @@ export const Main = () => {
   const { isSyncing, sideMenuMinimised }: UIContextInterface = useUi();
   const controllerDifferentToStash = addressDifferentToStash(controller);
 
-  const [pageConfig, setPageConfig] = useState({
+  const [pageConfig, setPageConfig] = useState<AnyJson>({
     categories: Object.assign(PageCategories),
     pages: Object.assign(PagesConfig),
   });
 
   useEffect(() => {
-    if (!accounts.length) return;
+    if (!accounts.length) {
+      return;
+    }
 
     // inject actions into menu items
     const pages = Object.assign(pageConfig.pages);
-    for (let i = 0; i < pages.length; i++) {
-      const { uri } = pages[i];
 
+    let i = 0;
+    for (const { uri } of pages) {
       // set undefined action as default
       pages[i].action = undefined;
       if (uri === `${import.meta.env.BASE_URL}`) {
@@ -111,13 +116,15 @@ export const Main = () => {
           };
         }
       }
+      i++;
     }
+
     setPageConfig({
       categories: pageConfig.categories,
       pages,
     });
   }, [
-    network,
+    networkData,
     activeAccount,
     accounts,
     controllerDifferentToStash,
@@ -141,23 +148,23 @@ export const Main = () => {
         onClick={() => window.open(PolkadotUrl, '_blank')}
       >
         {sideMenuMinimised ? (
-          <network.brand.icon style={{ maxHeight: '100%', width: '2rem' }} />
+          <networkData.brand.icon
+            style={{ maxHeight: '100%', width: '2rem' }}
+          />
         ) : (
-          <>
-            <network.brand.logo.svg
-              style={{
-                maxHeight: '100%',
-                height: '100%',
-                width: network.brand.logo.width,
-              }}
-            />
-          </>
+          <networkData.brand.logo.svg
+            style={{
+              maxHeight: '100%',
+              height: '100%',
+              width: networkData.brand.logo.width,
+            }}
+          />
         )}
       </LogoWrapper>
 
       {pageConfig.categories.map(
         ({ id: categoryId, key: categoryKey }: PageCategory) => (
-          <React.Fragment key={`sidemenu_category_${categoryId}`}>
+          <Fragment key={`sidemenu_category_${categoryId}`}>
             {/* display heading if not `default` (used for top links) */}
             {categoryKey !== 'default' && (
               <Heading title={t(categoryKey)} minimised={sideMenuMinimised} />
@@ -166,7 +173,7 @@ export const Main = () => {
             {/* display category links */}
             {pagesToDisplay.map(
               ({ category, hash, key, lottie, action }: PageItem) => (
-                <React.Fragment key={`sidemenu_page_${categoryId}_${key}`}>
+                <Fragment key={`sidemenu_page_${categoryId}_${key}`}>
                   {category === categoryId && (
                     <Primary
                       name={t(key)}
@@ -177,10 +184,10 @@ export const Main = () => {
                       minimised={sideMenuMinimised}
                     />
                   )}
-                </React.Fragment>
+                </Fragment>
               )
             )}
-          </React.Fragment>
+          </Fragment>
         )
       )}
     </>

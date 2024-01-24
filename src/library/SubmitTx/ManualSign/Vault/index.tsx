@@ -3,12 +3,12 @@
 
 import { faSquarePen } from '@fortawesome/free-solid-svg-icons';
 import { ButtonSubmit } from '@polkadot-cloud/react';
-import React from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConnect } from 'contexts/Connect';
 import { usePrompt } from 'contexts/Prompt';
 import { useTxMeta } from 'contexts/TxMeta';
 import { EstimatedTxFee } from 'library/EstimatedTxFee';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
 import type { SubmitProps } from '../../types';
 import { SignPrompt } from './SignPrompt';
 
@@ -19,9 +19,10 @@ export const Vault = ({
   submitText,
   buttons,
   submitAddress,
-}: SubmitProps & { buttons?: React.ReactNode[] }) => {
+  displayFor,
+}: SubmitProps & { buttons?: ReactNode[] }) => {
   const { t } = useTranslation('library');
-  const { accountHasSigner } = useConnect();
+  const { accountHasSigner } = useImportedAccounts();
   const { txFeesValid, getTxSignature } = useTxMeta();
   const { openPromptWith, status: promptStatus } = usePrompt();
 
@@ -30,7 +31,7 @@ export const Vault = ({
     submitting || !valid || !accountHasSigner(submitAddress) || !txFeesValid;
 
   return (
-    <>
+    <div className="inner">
       <div>
         <EstimatedTxFee />
         {valid ? <p>{t('submitTransaction')}</p> : <p>...</p>}
@@ -39,6 +40,7 @@ export const Vault = ({
         {buttons}
         {getTxSignature() !== null || submitting ? (
           <ButtonSubmit
+            lg={displayFor === 'canvas'}
             text={submitText || ''}
             iconLeft={faSquarePen}
             iconTransform="grow-2"
@@ -48,6 +50,7 @@ export const Vault = ({
           />
         ) : (
           <ButtonSubmit
+            lg={displayFor === 'canvas'}
             text={promptStatus === 0 ? t('sign') : t('signing')}
             iconLeft={faSquarePen}
             iconTransform="grow-2"
@@ -62,6 +65,6 @@ export const Vault = ({
           />
         )}
       </div>
-    </>
+    </div>
   );
 };

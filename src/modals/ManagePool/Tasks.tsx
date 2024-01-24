@@ -2,63 +2,63 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { ButtonOption } from '@polkadot-cloud/react';
+import type { ForwardedRef } from 'react';
 import { forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConnect } from 'contexts/Connect';
 import { useActivePools } from 'contexts/Pools/ActivePools';
 import { usePoolsConfig } from 'contexts/Pools/PoolsConfig';
 import { useTransferOptions } from 'contexts/TransferOptions';
 import { Warning } from 'library/Form/Warning';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
 import { ContentWrapper } from './Wrappers';
+import type { TasksProps } from './types';
 
-export const Tasks = forwardRef(({ setSection, setTask }: any, ref: any) => {
-  const { t } = useTranslation('modals');
-  const { activeAccount } = useConnect();
-  const { selectedActivePool, isOwner, isBouncer, isMember, isDepositor } =
-    useActivePools();
-  const { getTransferOptions } = useTransferOptions();
-  const { stats } = usePoolsConfig();
-  const { globalMaxCommission } = stats;
-  const { active } = getTransferOptions(activeAccount).pool;
+export const Tasks = forwardRef(
+  ({ setSection, setTask }: TasksProps, ref: ForwardedRef<HTMLDivElement>) => {
+    const { t } = useTranslation('modals');
+    const { stats } = usePoolsConfig();
+    const { activeAccount } = useActiveAccounts();
+    const { getTransferOptions } = useTransferOptions();
+    const { selectedActivePool, isOwner, isBouncer, isMember, isDepositor } =
+      useActivePools();
 
-  const poolLocked = selectedActivePool?.bondedPool?.state === 'Blocked';
-  const poolDestroying = selectedActivePool?.bondedPool?.state === 'Destroying';
+    const { active } = getTransferOptions(activeAccount).pool;
+    const { globalMaxCommission } = stats;
 
-  return (
-    <ContentWrapper>
-      <div className="padding">
+    const poolLocked = selectedActivePool?.bondedPool?.state === 'Blocked';
+    const poolDestroying =
+      selectedActivePool?.bondedPool?.state === 'Destroying';
+
+    return (
+      <ContentWrapper>
         <div className="items" ref={ref} style={{ paddingBottom: '1.5rem' }}>
           <div style={{ paddingBottom: '0.75rem' }}>
             {poolDestroying && <Warning text={t('beingDestroyed')} />}
           </div>
-          {isOwner() && (
+          {isOwner() && globalMaxCommission > 0 && (
             <>
-              {globalMaxCommission > 0 && (
-                <>
-                  <ButtonOption
-                    onClick={() => {
-                      setSection(1);
-                      setTask('claim_commission');
-                    }}
-                  >
-                    <div>
-                      <h3>{t('claimCommission')}</h3>
-                      <p>{t('claimOutstandingCommission')}</p>
-                    </div>
-                  </ButtonOption>
-                  <ButtonOption
-                    onClick={() => {
-                      setSection(1);
-                      setTask('manage_commission');
-                    }}
-                  >
-                    <div>
-                      <h3>{t('manageCommission')}</h3>
-                      <p>{t('updatePoolCommission')}</p>
-                    </div>
-                  </ButtonOption>
-                </>
-              )}
+              <ButtonOption
+                onClick={() => {
+                  setSection(1);
+                  setTask('claim_commission');
+                }}
+              >
+                <div>
+                  <h3>{t('claimCommission')}</h3>
+                  <p>{t('claimOutstandingCommission')}</p>
+                </div>
+              </ButtonOption>
+              <ButtonOption
+                onClick={() => {
+                  setSection(1);
+                  setTask('manage_commission');
+                }}
+              >
+                <div>
+                  <h3>{t('manageCommission')}</h3>
+                  <p>{t('updatePoolCommission')}</p>
+                </div>
+              </ButtonOption>
             </>
           )}
           <ButtonOption
@@ -144,7 +144,9 @@ export const Tasks = forwardRef(({ setSection, setTask }: any, ref: any) => {
             </ButtonOption>
           )}
         </div>
-      </div>
-    </ContentWrapper>
-  );
-});
+      </ContentWrapper>
+    );
+  }
+);
+
+Tasks.displayName = 'Tasks';

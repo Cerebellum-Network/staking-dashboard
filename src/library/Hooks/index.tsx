@@ -1,20 +1,22 @@
 // Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: GPL-3.0-only
 
+import type { FC, RefObject } from 'react';
 import { useEffect } from 'react';
+import type { AnyFunction, AnyJson } from 'types';
 
 /*
  * A hook that alerts clicks outside of the passed ref.
  */
 export const useOutsideAlerter = (
-  ref: any,
-  callback: any,
-  ignore: any = []
+  ref: RefObject<HTMLElement>,
+  callback: AnyFunction,
+  ignore: string[] = []
 ) => {
   useEffect(() => {
-    const handleClickOutside = (event: any) => {
+    const handleClickOutside = (event: AnyJson) => {
       if (ref.current && !ref.current.contains(event.target)) {
-        const invalid = ignore.find((i: any) =>
+        const invalid = ignore.find((i: string) =>
           event.target.classList.contains(i)
         );
         if (invalid === undefined) {
@@ -29,22 +31,20 @@ export const useOutsideAlerter = (
   }, [ref]);
 };
 
-/*
- * A hook that wraps multiple context providers to a component and makes each parent context accessible.
- */
-export const withProviders =
-  (...providers: any) =>
-  (WrappedComponent: any) =>
-  (props: any) =>
-    providers.reduceRight(
-      (acc: any, prov: any) => {
-        let Provider = prov;
-        if (Array.isArray(prov)) {
-          Provider = prov[0];
-          return <Provider {...prov[1]}>{acc}</Provider>;
-        }
-
-        return <Provider>{acc}</Provider>;
-      },
-      <WrappedComponent {...props} />
-    );
+// A pure function that applies an arbitrary amount of context providers to a wrapped
+// component.
+export const withProviders = (
+  providers: (FC<AnyJson> | [FC<AnyJson>, AnyJson])[],
+  Wrapped: FC
+) =>
+  providers.reduceRight(
+    (acc, prov) => {
+      if (Array.isArray(prov)) {
+        const Provider = prov[0];
+        return <Provider {...prov[1]}>{acc}</Provider>;
+      }
+      const Provider = prov;
+      return <Provider>{acc}</Provider>;
+    },
+    <Wrapped />
+  );

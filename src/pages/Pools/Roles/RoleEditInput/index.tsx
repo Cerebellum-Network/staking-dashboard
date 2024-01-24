@@ -2,14 +2,22 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import { isValidAddress } from '@polkadot-cloud/utils';
-import React from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConnect } from 'contexts/Connect';
+import { useNetwork } from 'contexts/Network';
+import { formatAccountSs58 } from 'contexts/Connect/Utils';
 import { Wrapper } from './Wrapper';
+import type { RoleEditInputProps } from '../types';
 
-export const RoleEditInput = ({ setRoleEdit, roleKey, roleEdit }: any) => {
+export const RoleEditInput = ({
+  setRoleEdit,
+  roleKey,
+  roleEdit,
+}: RoleEditInputProps) => {
   const { t } = useTranslation('pages');
-  const { formatAccountSs58 } = useConnect();
+  const {
+    networkData: { ss58 },
+  } = useNetwork();
 
   const processRoleEdit = (newAddress: string) => {
     let edit = {
@@ -18,7 +26,7 @@ export const RoleEditInput = ({ setRoleEdit, roleKey, roleEdit }: any) => {
       reformatted: false,
     };
     if (isValidAddress(newAddress)) {
-      const addressFormatted = formatAccountSs58(newAddress);
+      const addressFormatted = formatAccountSs58(newAddress, ss58);
       if (addressFormatted) {
         edit = {
           newAddress: addressFormatted,
@@ -32,7 +40,7 @@ export const RoleEditInput = ({ setRoleEdit, roleKey, roleEdit }: any) => {
     return { ...roleEdit, ...edit };
   };
 
-  const handleChange = (e: React.FormEvent<HTMLInputElement>) => {
+  const handleChange = (e: FormEvent<HTMLInputElement>) => {
     const newValue = e.currentTarget.value;
     // set value on key change
     const edit = processRoleEdit(newValue);
@@ -56,7 +64,7 @@ export const RoleEditInput = ({ setRoleEdit, roleKey, roleEdit }: any) => {
           <input
             placeholder={t('pools.address')}
             type="text"
-            onChange={(e: React.FormEvent<HTMLInputElement>) => handleChange(e)}
+            onChange={(e: FormEvent<HTMLInputElement>) => handleChange(e)}
             value={roleEdit?.newAddress ?? ''}
           />
         </section>

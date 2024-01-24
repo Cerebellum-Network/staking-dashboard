@@ -4,26 +4,33 @@
 import { planckToUnit, rmCommas } from '@polkadot-cloud/utils';
 import BigNumber from 'bignumber.js';
 import { useTranslation } from 'react-i18next';
-import { useApi } from 'contexts/Api';
 import { useActivePools } from 'contexts/Pools/ActivePools';
 import { CardHeaderWrapper, CardWrapper } from 'library/Card/Wrappers';
 import { usePoolCommission } from 'library/Hooks/usePoolCommission';
 import { StatsHead } from 'library/StatsHead';
+import { useNetwork } from 'contexts/Network';
 import { Announcements } from './Announcements';
 import { Wrapper } from './Wrappers';
+import type { PoolStatLabel } from 'library/StatsHead/types';
+import { useOverlay } from '@polkadot-cloud/react/hooks';
 
 export const PoolStats = () => {
   const { t } = useTranslation('pages');
-  const { network } = useApi();
-  const { selectedActivePool, selectedPoolMemberCount } = useActivePools();
+  const { openCanvas } = useOverlay().canvas;
+  const {
+    networkData: { units, unit },
+  } = useNetwork();
   const { getCurrentCommission } = usePoolCommission();
+  const { selectedActivePool, selectedPoolMemberCount } = useActivePools();
+
+  const poolId = selectedActivePool?.id || 0;
 
   const { state, points } = selectedActivePool?.bondedPool || {};
-  const currentCommission = getCurrentCommission(selectedActivePool?.id ?? 0);
+  const currentCommission = getCurrentCommission(poolId);
 
   const bonded = planckToUnit(
     new BigNumber(points ? rmCommas(points) : 0),
-    network.units
+    units
   )
     .decimalPlaces(3)
     .toFormat();
@@ -41,7 +48,7 @@ export const PoolStats = () => {
       break;
   }
 
-  const items = [
+  const items: PoolStatLabel[] = [
     {
       label: t('pools.poolState'),
       value: stateDisplay,
@@ -59,16 +66,23 @@ export const PoolStats = () => {
     {
       label: t('pools.poolMembers'),
       value: `${selectedPoolMemberCount}`,
+      button: {
+        text: t('pools.browseMembers'),
+        onClick: () => {
+          openCanvas({ key: 'PoolMembers', size: 'xl' });
+        },
+        disabled: selectedPoolMemberCount === 0,
+      },
     },
     {
       label: t('pools.totalBonded'),
-      value: `${bonded} ${network.unit}`,
+      value: `${bonded} ${unit}`,
     }
   );
 
   return (
     <CardWrapper style={{ boxShadow: 'var(--card-shadow-secondary)' }}>
-      <CardHeaderWrapper>
+      <CardHeaderWrapper $withMargin>
         <h3>{t('pools.poolStats')}</h3>
       </CardHeaderWrapper>
       <Wrapper>

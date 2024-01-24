@@ -3,24 +3,25 @@
 
 import { PageRow } from '@polkadot-cloud/react';
 import { useEffect, useState } from 'react';
-import { useApi } from 'contexts/Api';
 import { useValidators } from 'contexts/Validators/ValidatorEntries';
+import { useNetwork } from 'contexts/Network';
 import { Item } from './Item';
 import { ItemsWrapper } from './Wrappers';
 import { useCommunitySections } from './context';
+import type { ValidatorEntry } from '@polkadot-cloud/assets/types';
 
 export const List = () => {
-  const { network } = useApi();
+  const { network } = useNetwork();
   const { validatorCommunity } = useValidators();
   const { scrollPos } = useCommunitySections();
 
-  const [entityItems, setEntityItems] = useState(
-    validatorCommunity.filter((v) => v.validators[network.name] !== undefined)
+  const [entityItems, setEntityItems] = useState<ValidatorEntry[]>(
+    validatorCommunity.filter((v) => v.validators[network] !== undefined)
   );
 
   useEffect(() => {
     setEntityItems(
-      validatorCommunity.filter((v) => v.validators[network.name] !== undefined)
+      validatorCommunity.filter((v) => v.validators[network] !== undefined)
     );
   }, [network]);
 
@@ -42,7 +43,7 @@ export const List = () => {
   return (
     <PageRow yMargin>
       <ItemsWrapper variants={container} initial="hidden" animate="show">
-        {entityItems.map((item: any, index: number) => (
+        {entityItems.map((item, index: number) => (
           <Item key={`community_item_${index}`} item={item} actionable />
         ))}
       </ItemsWrapper>

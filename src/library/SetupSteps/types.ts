@@ -1,10 +1,10 @@
 // Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: GPL-3.0-only
 
+import type { ReactNode } from 'react';
 import type { BondFor } from 'types';
 
 export interface NominationsProps {
-  batchKey: string;
   bondFor: BondFor;
   section: number;
 }
@@ -12,12 +12,6 @@ export interface NominationsProps {
 export interface FooterProps {
   complete: boolean;
   bondFor: BondFor;
-}
-
-export interface GenerateNominationsInnerProps {
-  setters: any[];
-  nominations: string[];
-  batchKey: string;
 }
 
 export interface HeaderProps {
@@ -28,8 +22,12 @@ export interface HeaderProps {
   bondFor: BondFor;
 }
 
-export type Nominations = string[];
-
 export interface SetupStepProps {
   section: number;
+}
+
+export interface MotionContainerProps {
+  thisSection: number;
+  activeSection: number;
+  children: ReactNode;
 }

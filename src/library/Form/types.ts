@@ -3,9 +3,11 @@
 
 import type BigNumber from 'bignumber.js';
 import type { Balance } from 'contexts/Balances/types';
-import type { ExternalAccount } from 'contexts/Connect/types';
-import type { ExtensionAccount } from 'contexts/Extensions/types';
-import type { BondFor, MaybeAccount } from 'types';
+import type {
+  ExtensionAccount,
+  ExternalAccount,
+} from '@polkadot-cloud/react/types';
+import type { BondFor, MaybeAddress } from 'types';
 
 export interface ExtensionAccountItem extends ExtensionAccount {
   active?: boolean;
@@ -28,17 +30,19 @@ export interface DropdownInput {
 
 export interface AccountDropdownProps {
   current: InputItem;
-  to: MaybeAccount;
+  to: MaybeAddress;
 }
+
+export type BondSetter = ({ bond }: { bond: BigNumber }) => void;
 
 export interface BondFeedbackProps {
   syncing?: boolean;
-  setters: any;
+  setters: BondSetter[];
   bondFor: BondFor;
-  defaultBond: number | null;
+  defaultBond: string | null;
   inSetup?: boolean;
   joiningPool?: boolean;
-  listenIsValid: { (valid: boolean, errors: string[]): void } | { (): void };
+  listenIsValid?: ((valid: boolean, errors: string[]) => void) | (() => void);
   parentErrors?: string[];
   disableTxFeeUpdate?: boolean;
   setLocalResize?: () => void;
@@ -47,21 +51,21 @@ export interface BondFeedbackProps {
 }
 
 export interface BondInputProps {
-  freeBalance: BigNumber;
+  freeToBond: BigNumber;
   value: string;
   defaultValue: string;
   syncing?: boolean;
-  setters: any;
+  setters: BondSetter[];
   disabled: boolean;
   disableTxFeeUpdate?: boolean;
 }
 
 export interface UnbondFeedbackProps {
-  setters: any;
+  setters: BondSetter[];
   bondFor: BondFor;
   defaultBond?: number;
   inSetup?: boolean;
-  listenIsValid: { (valid: boolean, errors: string[]): void } | { (): void };
+  listenIsValid?: ((valid: boolean, errors: string[]) => void) | (() => void);
   parentErrors?: string[];
   setLocalResize?: () => void;
   txFees: BigNumber;
@@ -70,24 +74,14 @@ export interface UnbondFeedbackProps {
 export interface UnbondInputProps {
   active: BigNumber;
   unbondToMin: BigNumber;
-  defaultValue: number | string;
+  defaultValue: string;
   disabled: boolean;
-  setters: any;
-  value: any;
+  setters: BondSetter[];
+  value: string;
 }
 
 export interface NominateStatusBarProps {
   value: BigNumber;
-}
-
-export interface DropdownProps {
-  items: DropdownInput[];
-  onChange: (o: any) => void;
-  label?: string;
-  placeholder: string;
-  value: DropdownInput;
-  current: DropdownInput;
-  height: string;
 }
 
 export interface WarningProps {

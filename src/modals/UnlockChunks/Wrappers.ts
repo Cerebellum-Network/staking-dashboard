@@ -4,22 +4,17 @@
 import styled from 'styled-components';
 
 export const ContentWrapper = styled.div`
-  border-radius: 1rem;
   display: flex;
   flex-flow: column nowrap;
-  flex-basis: 50%;
-  flex: 1;
-
-  .padding {
-    padding: 0 1rem;
-  }
+  border-radius: 1rem;
+  width: 100%;
 
   > div:last-child {
     margin-bottom: 0;
   }
 `;
 
-export const ChunkWrapper = styled.div<any>`
+export const ChunkWrapper = styled.div`
   flex: 1;
   display: flex;
   flex-flow: column wrap;

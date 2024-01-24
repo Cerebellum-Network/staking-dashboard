@@ -11,15 +11,16 @@ import {
   ButtonHelp,
   ButtonMonoInvert,
   ButtonSecondary,
-  PolkadotIcon,
+  Polkicon,
 } from '@polkadot-cloud/react';
 import { useTranslation } from 'react-i18next';
-import { useConnect } from 'contexts/Connect';
-import type { ExternalAccount } from 'contexts/Connect/types';
 import { useHelp } from 'contexts/Help';
 import { AccountInput } from 'library/AccountInput';
-import { useTheme } from 'contexts/Themes';
 import { useOverlay } from '@polkadot-cloud/react/hooks';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
+import { useOtherAccounts } from 'contexts/Connect/OtherAccounts';
+import type { ExternalAccount } from '@polkadot-cloud/react/types';
+import { useExternalAccounts } from 'contexts/Connect/ExternalAccounts';
 import {
   ActionWithButton,
   ManualAccount,
@@ -30,9 +31,10 @@ import type { ListWithInputProps } from './types';
 export const ReadOnly = ({ setInputOpen, inputOpen }: ListWithInputProps) => {
   const { t } = useTranslation('modals');
   const { openHelp } = useHelp();
+  const { accounts } = useImportedAccounts();
   const { setModalResize } = useOverlay().modal;
-  const { mode } = useTheme();
-  const { accounts, forgetAccounts, addExternalAccount } = useConnect();
+  const { addExternalAccount, forgetExternalAccounts } = useExternalAccounts();
+  const { forgetOtherAccounts, addOrReplaceOtherAccount } = useOtherAccounts();
 
   // get all external accounts
   const externalAccountsOnly = accounts.filter(
@@ -44,11 +46,15 @@ export const ReadOnly = ({ setInputOpen, inputOpen }: ListWithInputProps) => {
     ({ addedBy }) => addedBy === 'user'
   );
 
-  // forget account
-  const forgetAccount = (account: ExternalAccount) => {
-    forgetAccounts([account]);
+  const handleForgetExternalAccount = (account: ExternalAccount) => {
+    forgetExternalAccounts([account]);
+    // forget the account from state only if it has not replaced by a `system` external account.
+    if (account.addedBy === 'user') {
+      forgetOtherAccounts([account]);
+    }
     setModalResize();
   };
+
   return (
     <>
       <ActionWithButton>
@@ -77,7 +83,11 @@ export const ReadOnly = ({ setInputOpen, inputOpen }: ListWithInputProps) => {
               resetOnSuccess
               defaultLabel={t('inputAddress')}
               successCallback={async (value: string) => {
-                addExternalAccount(value, 'user');
+                const result = addExternalAccount(value, 'user');
+                if (result) {
+                  addOrReplaceOtherAccount(result.account, result.type);
+                }
+
                 return true;
               }}
             />
@@ -88,12 +98,7 @@ export const ReadOnly = ({ setInputOpen, inputOpen }: ListWithInputProps) => {
                 <ManualAccount key={`user_external_account_${i}`}>
                   <div>
                     <span>
-                      <PolkadotIcon
-                        dark={mode === 'dark'}
-                        nocopy
-                        address={a.address}
-                        size={26}
-                      />
+                      <Polkicon address={a.address} size={26} />
                     </span>
                     <div className="text">
                       <h4>{a.address}</h4>
@@ -101,9 +106,7 @@ export const ReadOnly = ({ setInputOpen, inputOpen }: ListWithInputProps) => {
                   </div>
                   <ButtonSecondary
                     text={t('forget')}
-                    onClick={() => {
-                      forgetAccount(a);
-                    }}
+                    onClick={() => handleForgetExternalAccount(a)}
                   />
                 </ManualAccount>
               ))}

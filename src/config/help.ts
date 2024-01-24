@@ -16,8 +16,7 @@ export const HelpConfig: HelpItems = [
       'Your Balance',
       'Reserve Balance',
       'Locked Balance',
-      'Historical Rewards Rate',
-      'Adjusted Rewards Rate',
+      'Average Reward Rate',
       'Inflation',
       'Ideal Staked',
       'Supply Staked',
@@ -47,8 +46,6 @@ export const HelpConfig: HelpItems = [
     key: 'nominate',
     definitions: [
       'Nomination Status',
-      'Stash and Controller Accounts',
-      'Controller Account Eligibility',
       'Bonding',
       'Active Stake Threshold',
       'Payout Destination',
@@ -131,6 +128,7 @@ export const HelpConfig: HelpItems = [
       'Commission',
       'Over Subscribed',
       'Blocked Nominations',
+      'Rewards By Country And Network',
     ],
     external: [
       [
@@ -157,6 +155,7 @@ export const HelpConfig: HelpItems = [
       'Ledger Rejected Transaction',
       'Ledger Request Timeout',
       'Open App On Ledger',
+      'Ledger App Not on Latest Runtime Version',
       'Wrong Transaction',
     ],
     external: [],

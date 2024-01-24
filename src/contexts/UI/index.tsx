@@ -3,57 +3,77 @@
 
 import { localStorageOrDefault, setStateWithRef } from '@polkadot-cloud/utils';
 import BigNumber from 'bignumber.js';
-import React, { useEffect, useRef, useState } from 'react';
+import type { ReactNode, RefObject } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { SideMenuStickyThreshold } from 'consts';
 import { useBalances } from 'contexts/Balances';
-import type { ImportedAccount } from 'contexts/Connect/types';
+import type { ImportedAccount } from '@polkadot-cloud/react/types';
 import { useActivePools } from 'contexts/Pools/ActivePools';
 import { useEffectIgnoreInitial } from '@polkadot-cloud/react/hooks';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
+import type { AnyJson } from 'types';
 import { useApi } from '../Api';
-import { useConnect } from '../Connect';
-import { useNetworkMetrics } from '../Network';
+import { useNetworkMetrics } from '../NetworkMetrics';
 import { useStaking } from '../Staking';
 import * as defaults from './defaults';
 import type { UIContextInterface } from './types';
 
-export const UIProvider = ({ children }: { children: React.ReactNode }) => {
+export const UIContext = createContext<UIContextInterface>(
+  defaults.defaultUIContext
+);
+
+export const useUi = () => useContext(UIContext);
+
+export const UIProvider = ({ children }: { children: ReactNode }) => {
   const { isReady } = useApi();
   const { balances } = useBalances();
   const { staking, eraStakers } = useStaking();
   const { activeEra, metrics } = useNetworkMetrics();
-  const { accounts: connectAccounts } = useConnect();
   const { synced: activePoolsSynced } = useActivePools();
+  const { accounts: connectAccounts } = useImportedAccounts();
 
-  // set whether the network has been synced.
-  const [isNetworkSyncing, setIsNetworkSyncing] = useState(false);
+  // Set whether the network has been synced.
+  const [isNetworkSyncing, setIsNetworkSyncing] = useState<boolean>(false);
 
-  // set whether pools are being synced.
-  const [isPoolSyncing, setIsPoolSyncing] = useState(false);
+  // Set whether pools are being synced.
+  const [isPoolSyncing, setIsPoolSyncing] = useState<boolean>(false);
 
-  // set whether app is syncing. Includes workers (active nominations).
-  const [isSyncing, setIsSyncing] = useState(false);
+  // Set whether app is syncing. Includes workers (active nominations).
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
-  // side menu control
-  const [sideMenuOpen, setSideMenuOpen] = useState(false);
+  // Side whether the side menu is open.
+  const [sideMenuOpen, setSideMenu] = useState<boolean>(false);
 
-  // get side menu minimised state from local storage, default to false.
-  const [userSideMenuMinimised, setUserSideMenuMinimisedState] = useState(
-    localStorageOrDefault('side_menu_minimised', false, true) as boolean
-  );
+  // Store whether in Brave browser. Used for light client warning.
+  const [isBraveBrowser, setIsBraveBrowser] = useState<boolean>(false);
+
+  // Store referneces for main app conainers.
+  const [containerRefs, setContainerRefsState] = useState<
+    Record<string, RefObject<HTMLDivElement>>
+  >({});
+  const setContainerRefs = (v: Record<string, RefObject<HTMLDivElement>>) => {
+    setContainerRefsState(v);
+  };
+
+  // Get side menu minimised state from local storage, default to false.
+  const [userSideMenuMinimised, setUserSideMenuMinimisedState] =
+    useState<boolean>(
+      localStorageOrDefault('side_menu_minimised', false, true) as boolean
+    );
   const userSideMenuMinimisedRef = useRef(userSideMenuMinimised);
   const setUserSideMenuMinimised = (v: boolean) => {
     localStorage.setItem('side_menu_minimised', String(v));
     setStateWithRef(v, setUserSideMenuMinimisedState, userSideMenuMinimisedRef);
   };
 
-  // automatic side menu minimised
-  const [sideMenuMinimised, setSideMenuMinimised] = useState(
+  // Automatic side menu minimised.
+  const [sideMenuMinimised, setSideMenuMinimised] = useState<boolean>(
     window.innerWidth <= SideMenuStickyThreshold
       ? true
       : userSideMenuMinimisedRef.current
   );
 
-  // resize side menu callback
+  // Resize side menu callback.
   const resizeCallback = () => {
     if (window.innerWidth <= SideMenuStickyThreshold) {
       setSideMenuMinimised(false);
@@ -62,30 +82,31 @@ export const UIProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // resize event listener
+  // Resize event listener.
   useEffect(() => {
+    (window.navigator as AnyJson)?.brave
+      ?.isBrave()
+      .then(async (isBrave: boolean) => {
+        setIsBraveBrowser(isBrave);
+      });
+
     window.addEventListener('resize', resizeCallback);
     return () => {
       window.removeEventListener('resize', resizeCallback);
     };
   }, []);
 
-  // re-configure minimised on user change
+  // Re-configure minimised on user change.
   useEffectIgnoreInitial(() => {
     resizeCallback();
   }, [userSideMenuMinimised]);
 
-  // app syncing updates
+  // App syncing updates.
   useEffect(() => {
     let syncing = false;
     let networkSyncing = false;
     let poolSyncing = false;
 
-    if (!isReady) {
-      syncing = true;
-      networkSyncing = true;
-      poolSyncing = true;
-    }
     // staking metrics have synced
     if (staking.lastReward === new BigNumber(0)) {
       syncing = true;
@@ -128,15 +149,6 @@ export const UIProvider = ({ children }: { children: React.ReactNode }) => {
     setIsSyncing(syncing);
   }, [isReady, staking, metrics, balances, eraStakers, activePoolsSynced]);
 
-  const setSideMenu = (v: boolean) => {
-    setSideMenuOpen(v);
-  };
-
-  const [containerRefs, _setContainerRefs] = useState({});
-  const setContainerRefs = (v: any) => {
-    _setContainerRefs(v);
-  };
-
   return (
     <UIContext.Provider
       value={{
@@ -144,21 +156,16 @@ export const UIProvider = ({ children }: { children: React.ReactNode }) => {
         setUserSideMenuMinimised,
         setContainerRefs,
         sideMenuOpen,
-        userSideMenuMinimised: userSideMenuMinimisedRef.current,
         sideMenuMinimised,
         isSyncing,
         isNetworkSyncing,
         isPoolSyncing,
         containerRefs,
+        isBraveBrowser,
+        userSideMenuMinimised,
       }}
     >
       {children}
     </UIContext.Provider>
   );
 };
-
-export const UIContext = React.createContext<UIContextInterface>(
-  defaults.defaultUIContext
-);
-
-export const useUi = () => React.useContext(UIContext);

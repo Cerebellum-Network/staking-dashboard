@@ -3,16 +3,19 @@
 
 import { faChevronRight, faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ModalPadding } from '@polkadot-cloud/react';
+import { ButtonTertiary, ModalPadding } from '@polkadot-cloud/react';
 import { capitalizeFirstLetter } from '@polkadot-cloud/utils';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { NetworkList } from 'config/networks';
 import { useApi } from 'contexts/Api';
 import { Title } from 'library/Modal/Title';
-import type { AnyJson, NetworkName } from 'types';
+import type { NetworkName } from 'types';
 import { useOverlay } from '@polkadot-cloud/react/hooks';
-import { ReactComponent as BraveIconSVG } from '../../img/brave-logo.svg';
+import { useNetwork } from 'contexts/Network';
+import { useUi } from 'contexts/UI';
+import { usePrompt } from 'contexts/Prompt';
+import BraveIconSVG from '../../img/brave-logo.svg?react';
 import {
   BraveWarning,
   ConnectionButton,
@@ -20,23 +23,19 @@ import {
   ContentWrapper,
   NetworkButton,
 } from './Wrapper';
+import { ProvidersPrompt } from './ProvidersPrompt';
 
 export const Networks = () => {
   const { t } = useTranslation('modals');
+  const { isBraveBrowser } = useUi();
+  const { openPromptWith } = usePrompt();
+  const { network, switchNetwork } = useNetwork();
   const { setModalStatus, setModalResize } = useOverlay().modal;
-  const { switchNetwork, network, isLightClient } = useApi();
-  const networkKey: string = network.name;
+  const { isLightClient, setIsLightClient, rpcEndpoint } = useApi();
+  const networkKey = network;
 
-  const [braveBrowser, setBraveBrowser] = useState<boolean>(false);
-
-  useEffect(() => {
-    const navigator: AnyJson = window.navigator;
-    navigator?.brave?.isBrave().then(async (isBrave: boolean) => {
-      setBraveBrowser(isBrave);
-    });
-  });
-
-  useEffect(() => setModalResize(), [braveBrowser]);
+  // Likely never going to happen; here just to be safe.
+  useEffect(() => setModalResize(), [isBraveBrowser]);
 
   return (
     <>
@@ -45,74 +44,88 @@ export const Networks = () => {
         <ContentWrapper>
           <h4>{t('selectNetwork')}</h4>
           <div className="items">
-            {Object.entries(NetworkList).map(
-              ([key, item]: any, index: number) => {
-                const Svg = item.brand.inline.svg;
-                const rpcDisabled = networkKey === key;
+            {Object.entries(NetworkList).map(([key, item], index: number) => {
+              const Svg = item.brand.inline.svg;
+              const rpcDisabled = networkKey === key;
 
-                return (
-                  <NetworkButton
-                    $connected={networkKey === key}
-                    disabled={rpcDisabled}
-                    key={`network_switch_${index}`}
-                    type="button"
-                    onClick={() => {
-                      if (networkKey !== key) {
-                        switchNetwork(key, isLightClient);
-                        setModalStatus('closing');
-                      }
-                    }}
-                  >
-                    <div style={{ width: '1.75rem' }}>
-                      <Svg
-                        width={item.brand.inline.size}
-                        height={item.brand.inline.size}
-                      />
-                    </div>
-                    <h3>{capitalizeFirstLetter(item.name)}</h3>
-                    {networkKey === key && (
-                      <h4 className="selected">{t('selected')}</h4>
-                    )}
-                    <div>
-                      <FontAwesomeIcon
-                        transform="shrink-2"
-                        icon={faChevronRight}
-                      />
-                    </div>
-                  </NetworkButton>
-                );
-              }
-            )}
+              return (
+                <NetworkButton
+                  $connected={networkKey === key}
+                  disabled={rpcDisabled}
+                  key={`network_switch_${index}`}
+                  type="button"
+                  onClick={() => {
+                    if (networkKey !== key) {
+                      switchNetwork(key as NetworkName);
+                      setModalStatus('closing');
+                    }
+                  }}
+                >
+                  <div style={{ width: '1.75rem' }}>
+                    <Svg
+                      width={item.brand.inline.size}
+                      height={item.brand.inline.size}
+                    />
+                  </div>
+                  <h3>{capitalizeFirstLetter(item.name)}</h3>
+                  {networkKey === key && (
+                    <h4 className="selected">{t('selected')}</h4>
+                  )}
+                  <div>
+                    <FontAwesomeIcon
+                      transform="shrink-2"
+                      icon={faChevronRight}
+                    />
+                  </div>
+                </NetworkButton>
+              );
+            })}
           </div>
           <h4>{t('connectionType')}</h4>
           <ConnectionsWrapper>
-            <ConnectionButton
-              $connected={!isLightClient}
-              disabled={!isLightClient}
-              type="button"
-              onClick={() => {
-                switchNetwork(networkKey as NetworkName, false);
-                setModalStatus('closing');
-              }}
-            >
-              <h3>RPC</h3>
-              {!isLightClient && <h4 className="selected">{t('selected')}</h4>}
-            </ConnectionButton>
-            <ConnectionButton
-              $connected={isLightClient}
-              className="off"
-              type="button"
-              onClick={() => {
-                switchNetwork(networkKey as NetworkName, true);
-                setModalStatus('closing');
-              }}
-            >
-              <h3>{t('lightClient')}</h3>
-              {isLightClient && <h4 className="selected">{t('selected')}</h4>}
-            </ConnectionButton>
+            <div>
+              <ConnectionButton
+                $connected={!isLightClient}
+                disabled={!isLightClient}
+                type="button"
+                onClick={() => {
+                  setIsLightClient(false);
+                  switchNetwork(networkKey as NetworkName);
+                  setModalStatus('closing');
+                }}
+              >
+                <h3>RPC</h3>
+                {!isLightClient && (
+                  <h4 className="selected">{t('selected')}</h4>
+                )}
+              </ConnectionButton>
+              <div className="provider">
+                <p>{t('provider')}:</p>
+                <ButtonTertiary
+                  text={rpcEndpoint}
+                  onClick={() => openPromptWith(<ProvidersPrompt />)}
+                  marginLeft
+                />
+              </div>
+            </div>
+            <div>
+              <ConnectionButton
+                $connected={isLightClient}
+                className="off"
+                type="button"
+                onClick={() => {
+                  setIsLightClient(true);
+                  switchNetwork(networkKey as NetworkName);
+                  setModalStatus('closing');
+                }}
+              >
+                <h3>{t('lightClient')}</h3>
+                {isLightClient && <h4 className="selected">{t('selected')}</h4>}
+              </ConnectionButton>
+            </div>
           </ConnectionsWrapper>
 
-          {braveBrowser ? (
+          {isBraveBrowser ? (
             <BraveWarning>
               <BraveIconSVG />
               <div className="brave-text">

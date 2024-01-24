@@ -7,17 +7,17 @@ import {
   ButtonHelp,
   ButtonPrimary,
   ButtonSecondary,
-  PolkadotIcon,
+  Polkicon,
   Odometer,
 } from '@polkadot-cloud/react';
 import { applyWidthAsPadding, minDecimalPlaces } from '@polkadot-cloud/utils';
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef } from 'react';
 import { useHelp } from 'contexts/Help';
-import { useNotifications } from 'contexts/Notifications';
-import { useTheme } from 'contexts/Themes';
-import { useApi } from 'contexts/Api';
+import { useNetwork } from 'contexts/Network';
 import { Wrapper } from './Wrapper';
 import type { StatAddress, StatProps } from './types';
+import { NotificationsController } from 'static/NotificationsController';
+import type { AnyJson } from 'types';
 
 export const Stat = ({
   label,
@@ -31,10 +31,8 @@ export const Stat = ({
 }: StatProps) => {
   const {
     brand: { token: Token },
-  } = useApi().network;
-  const { addNotification } = useNotifications();
+  } = useNetwork().networkData;
   const { openHelp } = useHelp();
-  const { mode } = useTheme();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const subjectRef = useRef<HTMLDivElement>(null);
@@ -96,7 +94,7 @@ export const Stat = ({
             type="button"
             className="btn"
             onClick={() => {
-              addNotification(copy.notification);
+              NotificationsController.emit(copy.notification);
               navigator.clipboard.writeText(copy.content);
             }}
           >
@@ -114,19 +112,17 @@ export const Stat = ({
           ) : null}
           {type === 'address' ? (
             <div className="identicon">
-              <PolkadotIcon
-                dark={mode === 'dark'}
-                nocopy
+              <Polkicon
                 address={(stat as StatAddress)?.address || ''}
-                size={26}
+                size="2.4rem"
               />
             </div>
           ) : null}
           {display}
           {buttons ? (
             <span ref={subjectRef}>
-              {buttons.map((btn: any, index: number) => (
-                <React.Fragment key={`stat_${index}`}>
+              {buttons.map((btn: AnyJson, index: number) => (
+                <Fragment key={`stat_${index}`}>
                   <Button
                     key={`btn_${index}_${Math.random()}`}
                     text={btn.title}
@@ -137,7 +133,7 @@ export const Stat = ({
                     onClick={() => btn.onClick()}
                   />
                   &nbsp;&nbsp;
-                </React.Fragment>
+                </Fragment>
               ))}
             </span>
           ) : null}

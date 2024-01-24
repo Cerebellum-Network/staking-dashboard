@@ -17,27 +17,32 @@ import {
 } from 'react-router-dom';
 import { Prompt } from 'library/Prompt';
 import { PagesConfig } from 'config/pages';
-import { useApi } from 'contexts/Api';
-import { useConnect } from 'contexts/Connect';
-import { useNotifications } from 'contexts/Notifications';
 import { useUi } from 'contexts/UI';
 import { ErrorFallbackApp, ErrorFallbackRoutes } from 'library/ErrorBoundary';
 import { Headers } from 'library/Headers';
 import { Help } from 'library/Help';
 import { Menu } from 'library/Menu';
 import { NetworkBar } from 'library/NetworkBar';
-import { Notifications } from 'library/Notifications';
 import { SideMenu } from 'library/SideMenu';
 import { Tooltip } from 'library/Tooltip';
 import { Overlays } from 'overlay';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
+import { useOtherAccounts } from 'contexts/Connect/OtherAccounts';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
+import { SideMenuMaximisedWidth } from 'consts';
+import { useTheme } from 'styled-components';
+import { Notifications } from 'library/Notifications';
+import { NotificationsController } from 'static/NotificationsController';
 
 export const RouterInner = () => {
   const { t } = useTranslation();
-  const { network } = useApi();
+  const mode = useTheme();
+  const { network } = useNetwork();
   const { pathname } = useLocation();
-  const { addNotification } = useNotifications();
-  const { accountsInitialised, accounts, activeAccount, connectToAccount } =
-    useConnect();
+  const { accounts } = useImportedAccounts();
+  const { accountsInitialised } = useOtherAccounts();
+  const { activeAccount, setActiveAccount } = useActiveAccounts();
   const { sideMenuOpen, sideMenuMinimised, setContainerRefs } = useUi();
 
   // Scroll to top of the window on every page change or network change.
@@ -52,6 +57,15 @@ export const RouterInner = () => {
     });
   }, []);
 
+  // Update body background to `--background-default` upon theme change.
+  useEffect(() => {
+    const elem = document.querySelector('.core-entry');
+    if (elem) {
+      document.getElementsByTagName('body')[0].style.backgroundColor =
+        getComputedStyle(elem).getPropertyValue('--background-default');
+    }
+  }, [mode]);
+
   // Open default account modal if url var present and accounts initialised.
   useEffect(() => {
     if (accountsInitialised) {
@@ -59,11 +73,12 @@ export const RouterInner = () => {
       if (aUrl) {
         const account = accounts.find((a) => a.address === aUrl);
         if (account && aUrl !== activeAccount) {
-          connectToAccount(account);
-          addNotification({
+          setActiveAccount(account.address || null);
+
+          NotificationsController.emit({
             title: t('accountConnected', { ns: 'library' }),
             subtitle: `${t('connectedTo', { ns: 'library' })} ${
-              account?.name || aUrl
+              account.name || aUrl
             }.`,
           });
         }
@@ -76,6 +91,9 @@ export const RouterInner = () => {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallbackApp}>
+      {/* Notification popups */}
+      <Notifications />
+
       <Body>
         {/* Help: closed by default */}
         <Help />
@@ -93,7 +111,11 @@ export const RouterInner = () => {
         <Prompt />
 
         {/* Left side menu */}
-        <Side open={sideMenuOpen} minimised={sideMenuMinimised}>
+        <Side
+          open={sideMenuOpen}
+          minimised={sideMenuMinimised}
+          width={`${SideMenuMaximisedWidth}px`}
+        >
           <SideMenu />
         </Side>
 
@@ -116,7 +138,7 @@ export const RouterInner = () => {
                         <Page>
                           <Helmet>
                             <title>{`${t(key, { ns: 'base' })} : ${t('title', {
-                              context: `${network.name}`,
+                              context: `${network}`,
                               ns: 'base',
                             })}`}</title>
                           </Helmet>
@@ -139,9 +161,6 @@ export const RouterInner = () => {
 
       {/* Network status and network details */}
       <NetworkBar />
-
-      {/* Notification popups */}
-      <Notifications />
     </ErrorBoundary>
   );
 };

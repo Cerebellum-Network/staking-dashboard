@@ -10,58 +10,54 @@ import { usePoolsConfig } from 'contexts/Pools/PoolsConfig';
 import { useUi } from 'contexts/UI';
 import { CardWrapper } from 'library/Card/Wrappers';
 import { PoolList } from 'library/PoolList/Default';
+import { ListStatusHeader } from 'library/List';
+import { PoolListProvider } from 'library/PoolList/context';
+import type { BondedPool } from 'contexts/Pools/BondedPools/types';
 
 export const PoolFavorites = () => {
   const { t } = useTranslation('pages');
   const { isReady } = useApi();
-  const { favorites, removeFavorite } = usePoolsConfig();
-  const { bondedPools } = useBondedPools();
   const { isPoolSyncing } = useUi();
+  const { bondedPools } = useBondedPools();
+  const { favorites, removeFavorite } = usePoolsConfig();
 
-  // store local favorite list and update when favorites list is mutated
-  const [favoritesList, setFavoritesList] = useState<any[]>([]);
+  // Store local favorite list and update when favorites list is mutated.
+  const [favoritesList, setFavoritesList] = useState<BondedPool[]>([]);
 
   useEffect(() => {
     // map favorites to bonded pools
-    let newFavoritesList = favorites.map((f) => {
-      const pool = !bondedPools.find((b) => b.addresses.stash === f);
-      if (!pool) removeFavorite(f);
-      return pool;
-    });
+    const newFavoritesList = favorites
+      .map((f) => {
+        const pool = bondedPools.find((b) => b.addresses.stash === f);
+        if (!pool) {
+          removeFavorite(f);
+        }
+        return pool;
+      })
+      .filter((f): f is BondedPool => f !== undefined);
 
     // filter not found bonded pools
-    newFavoritesList = newFavoritesList.filter((f: any) => f !== undefined);
-
     setFavoritesList(newFavoritesList);
   }, [favorites]);
 
   return (
-    <>
-      <PageRow>
-        <CardWrapper>
-          {favoritesList === null || isPoolSyncing ? (
-            <h3>{t('pools.fetchingFavoritePools')}...</h3>
+    <PageRow>
+      <CardWrapper>
+        {favoritesList === null || isPoolSyncing ? (
+          <ListStatusHeader>
+            {t('pools.fetchingFavoritePools')}...
+          </ListStatusHeader>
+        ) : (
+          isReady &&
+          (favoritesList.length > 0 ? (
+            <PoolListProvider>
+              <PoolList pools={favoritesList} allowMoreCols pagination />
+            </PoolListProvider>
           ) : (
-            <>
-              {isReady && (
-                <>
-                  {favoritesList.length > 0 ? (
-                    <PoolList
-                      batchKey="favorite_pools"
-                      pools={favoritesList}
-                      title={t('pools.favoritesList')}
-                      allowMoreCols
-                      pagination
-                    />
-                  ) : (
-                    <h3>{t('pools.noFavorites')}</h3>
-                  )}
-                </>
-              )}
-            </>
-          )}
-        </CardWrapper>
-      </PageRow>
-    </>
+            <ListStatusHeader>{t('pools.noFavorites')}</ListStatusHeader>
+          ))
+        )}
+      </CardWrapper>
+    </PageRow>
   );
 };

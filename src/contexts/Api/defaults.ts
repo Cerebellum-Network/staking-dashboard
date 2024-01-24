@@ -1,17 +1,20 @@
 // Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: GPL-3.0-only
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
 
 import { stringToU8a } from '@polkadot/util';
 import BigNumber from 'bignumber.js';
-import { NetworkList } from 'config/networks';
-import type { APIConstants, APIContextInterface } from 'contexts/Api/types';
+import type {
+  APIChainState,
+  APIConstants,
+  APIContextInterface,
+} from 'contexts/Api/types';
 
-export const consts: APIConstants = {
+export const defaultConsts: APIConstants = {
   bondDuration: new BigNumber(0),
   maxNominations: new BigNumber(0),
   sessionsPerEra: new BigNumber(0),
-  maxNominatorRewardedPerValidator: new BigNumber(0),
+  maxExposurePageSize: new BigNumber(0),
   historyDepth: new BigNumber(0),
   maxElectingVoters: new BigNumber(0),
   expectedBlockTime: new BigNumber(0),
@@ -21,15 +24,22 @@ export const consts: APIConstants = {
   poolsPalletId: stringToU8a('0'),
 };
 
-export const defaultApiContext: APIContextInterface = {
-  switchNetwork: async (n, lc) => {
-    await new Promise((resolve) => resolve(null));
+export const defaultChainState: APIChainState = {
+  chain: null,
+  version: {
+    specVersion: 0,
   },
+  ss58Prefix: 0,
+};
+
+export const defaultApiContext: APIContextInterface = {
   api: null,
-  consts,
-  chainState: undefined,
-  isLightClient: false,
+  consts: defaultConsts,
+  chainState: defaultChainState,
   isReady: false,
   apiStatus: 'disconnected',
-  network: NetworkList.polkadot,
+  isLightClient: false,
+  setIsLightClient: () => {},
+  rpcEndpoint: '',
+  setRpcEndpoint: (key) => {},
 };

@@ -3,17 +3,16 @@
 
 import { faCopy } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { clipAddress, remToUnit } from '@polkadot-cloud/utils';
+import { ellipsisFn, remToUnit } from '@polkadot-cloud/utils';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useIdentities } from 'contexts/Identities';
-import { useNotifications } from 'contexts/Notifications';
-import type { NotificationText } from 'contexts/Notifications/types';
-import { PolkadotIcon } from '@polkadot-cloud/react';
-import { getIdentityDisplay } from 'library/ValidatorList/Validator/Utils';
-import { useTheme } from 'contexts/Themes';
+import type { NotificationText } from 'static/NotificationsController/types';
+import { Polkicon } from '@polkadot-cloud/react';
+import { getIdentityDisplay } from 'library/ValidatorList/ValidatorItem/Utils';
 import type { PoolAccountProps } from '../types';
 import { Wrapper } from './Wrapper';
+import { NotificationsController } from 'static/NotificationsController';
 
 export const PoolAccount = ({
   address,
@@ -21,15 +20,13 @@ export const PoolAccount = ({
   batchIndex,
 }: PoolAccountProps) => {
   const { t } = useTranslation('pages');
-  const { addNotification } = useNotifications();
   const { meta } = useIdentities();
-  const { mode } = useTheme();
 
-  const identities = meta[batchKey]?.identities ?? [];
-  const supers = meta[batchKey]?.supers ?? [];
+  const identities = meta[batchKey]?.identities || [];
+  const supers = meta[batchKey]?.supers || [];
 
-  const identitiesSynced = identities.length > 0 ?? false;
-  const supersSynced = supers.length > 0 ?? false;
+  const identitiesSynced = identities.length > 0 || false;
+  const supersSynced = supers.length > 0 || false;
   const synced = identitiesSynced && supersSynced;
 
   const display = getIdentityDisplay(
@@ -58,26 +55,16 @@ export const PoolAccount = ({
         ) : synced && display !== null ? (
           <>
             <div className="icon">
-              <PolkadotIcon
-                dark={mode === 'dark'}
-                nocopy
-                address={address}
-                size={remToUnit('1.6rem')}
-              />
+              <Polkicon address={address} size={remToUnit('1.6rem')} />
             </div>
             <h4>{display}</h4>
           </>
         ) : (
           <>
             <div className="icon">
-              <PolkadotIcon
-                dark={mode === 'dark'}
-                nocopy
-                address={address}
-                size={remToUnit('1.6rem')}
-              />
+              <Polkicon address={address} size={remToUnit('1.6rem')} />
             </div>
-            <h4>{clipAddress(address)}</h4>
+            <h4>{ellipsisFn(address)}</h4>
           </>
         )}
         <div>
@@ -92,7 +79,7 @@ export const PoolAccount = ({
                 onClick={() => {
                   navigator.clipboard.writeText(address);
                   if (notification) {
-                    addNotification(notification);
+                    NotificationsController.emit(notification);
                   }
                 }}
               >

@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useApi } from 'contexts/Api';
 import { useBonded } from 'contexts/Bonded';
-import { useConnect } from 'contexts/Connect';
 import type { PayeeConfig, PayeeOptions } from 'contexts/Setup/types';
 import { useStaking } from 'contexts/Staking';
 import { Warning } from 'library/Form/Warning';
@@ -19,15 +18,16 @@ import { PayeeInput } from 'library/PayeeInput';
 import { SelectItems } from 'library/SelectItems';
 import { SelectItem } from 'library/SelectItems/Item';
 import { SubmitTx } from 'library/SubmitTx';
-import type { MaybeAccount } from 'types';
+import type { MaybeAddress } from 'types';
 import { useTxMeta } from 'contexts/TxMeta';
 import { useOverlay } from '@polkadot-cloud/react/hooks';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
 
 export const UpdatePayee = () => {
   const { t } = useTranslation('modals');
   const { api } = useApi();
   const { staking } = useStaking();
-  const { activeAccount } = useConnect();
+  const { activeAccount } = useActiveAccounts();
   const { notEnoughFunds } = useTxMeta();
   const { getBondedAccount } = useBonded();
   const { getPayeeItems } = usePayeeConfig();
@@ -43,10 +43,10 @@ export const UpdatePayee = () => {
   };
 
   // Store the current user-inputted custom payout account.
-  const [account, setAccount] = useState<MaybeAccount>(payee.account);
+  const [account, setAccount] = useState<MaybeAddress>(payee.account);
 
   // Store the currently selected payee option.
-  const [selected, setSelected]: any = useState<PayeeConfig>(DefaultSelected);
+  const [selected, setSelected] = useState<PayeeConfig>(DefaultSelected);
 
   // update setup progress with payee config.
   const handleChangeDestination = (destination: PayeeOptions) => {
@@ -57,7 +57,7 @@ export const UpdatePayee = () => {
   };
 
   // update setup progress with payee account.
-  const handleChangeAccount = (newAccount: MaybeAccount) => {
+  const handleChangeAccount = (newAccount: MaybeAddress) => {
     setSelected({
       destination: selected?.destination ?? null,
       account: newAccount,
@@ -79,10 +79,10 @@ export const UpdatePayee = () => {
     const payeeToSubmit = !isComplete()
       ? 'Staked'
       : selected.destination === 'Account'
-      ? {
-          Account: selected.account,
-        }
-      : selected.destination;
+        ? {
+            Account: selected.account,
+          }
+        : selected.destination;
 
     tx = api.tx.staking.setPayee(payeeToSubmit);
     return tx;
@@ -95,7 +95,6 @@ export const UpdatePayee = () => {
     callbackSubmit: () => {
       setModalStatus('closing');
     },
-    callbackInBlock: () => {},
   });
 
   // Reset selected value on account change.

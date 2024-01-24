@@ -2,33 +2,29 @@
 
 import { useTranslation } from 'react-i18next';
 import { useBondedPools } from 'contexts/Pools/BondedPools';
-import type { BondedPool } from 'contexts/Pools/types';
 import { useStaking } from 'contexts/Staking';
 import type { AnyFunction, AnyJson } from 'types';
+import type { AnyFilter } from 'library/Filter/types';
+import type { BondedPool } from 'contexts/Pools/BondedPools/types';
 
 export const usePoolFilters = () => {
   const { t } = useTranslation('library');
-  const { meta } = useBondedPools();
+  const { poolsNominations } = useBondedPools();
   const { getNominationsStatusFromTargets } = useStaking();
   const { getPoolNominationStatusCode } = useBondedPools();
 
   /*
-   * include active pools.
-   * Iterates through the supplied list and refers to the meta
-   * batch of the list to filter those list items that are
-   * actively nominating.
+   * Include active pools.
    * Returns the updated filtered list.
    */
-  const includeActive = (list: any, batchKey: string) => {
-    // get pool targets from nominations meta batch
-    const nominations = meta[batchKey]?.nominations ?? [];
-    if (!nominations) {
+  const includeActive = (list: AnyFilter) => {
+    if (!Object.keys(poolsNominations).length) {
       return list;
     }
-    let i = -1;
+
     const filteredList = list.filter((p: BondedPool) => {
-      i++;
-      const targets = nominations[i]?.targets ?? [];
+      const nominations = poolsNominations[p.id];
+      const targets = nominations?.targets || [];
       const status = getPoolNominationStatusCode(
         getNominationsStatusFromTargets(p.addresses.stash, targets)
       );
@@ -38,22 +34,17 @@ export const usePoolFilters = () => {
   };
 
   /*
-   * dont include active pools.
-   * Iterates through the supplied list and refers to the meta
-   * batch of the list to filter those list items that are
-   * actively nominating.
+   * Dont include active pools.
    * Returns the updated filtered list.
    */
-  const excludeActive = (list: any, batchKey: string) => {
-    // get pool targets from nominations meta batch
-    const nominations = meta[batchKey]?.nominations ?? [];
-    if (!nominations) {
+  const excludeActive = (list: AnyFilter) => {
+    if (!Object.keys(poolsNominations).length) {
       return list;
     }
-    let i = -1;
+
     const filteredList = list.filter((p: BondedPool) => {
-      i++;
-      const targets = nominations[i]?.targets ?? [];
+      const nominations = poolsNominations[p.id];
+      const targets = nominations?.targets || [];
       const status = getPoolNominationStatusCode(
         getNominationsStatusFromTargets(p.addresses.stash, targets)
       );
@@ -67,7 +58,7 @@ export const usePoolFilters = () => {
    * Iterates through the supplied list and checks whether state is locked.
    * Returns the updated filtered list.
    */
-  const includeLocked = (list: any) =>
+  const includeLocked = (list: AnyFilter) =>
     list.filter((p: BondedPool) => p.state.toLowerCase() === 'Blocked');
 
   /*
@@ -75,7 +66,7 @@ export const usePoolFilters = () => {
    * Iterates through the supplied list and checks whether state is destroying.
    * Returns the updated filtered list.
    */
-  const includeDestroying = (list: any) =>
+  const includeDestroying = (list: AnyFilter) =>
     list.filter((p: BondedPool) => p.state === 'Destroying');
 
   /*
@@ -83,7 +74,7 @@ export const usePoolFilters = () => {
    * Iterates through the supplied list and checks whether state is locked.
    * Returns the updated filtered list.
    */
-  const excludeLocked = (list: any) =>
+  const excludeLocked = (list: AnyFilter) =>
     list.filter((p: BondedPool) => p.state !== 'Blocked');
 
   /*
@@ -91,7 +82,7 @@ export const usePoolFilters = () => {
    * Iterates through the supplied list and checks whether state is destroying.
    * Returns the updated filtered list.
    */
-  const excludeDestroying = (list: any) =>
+  const excludeDestroying = (list: AnyFilter) =>
     list.filter((p: BondedPool) => p.state !== 'Destroying');
 
   // includes to be listed in filter overlay.
@@ -135,20 +126,19 @@ export const usePoolFilters = () => {
   const applyFilter = (
     includes: string[] | null,
     excludes: string[] | null,
-    list: AnyJson,
-    batchKey: string
+    list: AnyJson
   ) => {
     if (!excludes && !includes) {
       return list;
     }
     if (includes) {
       for (const fn of getFiltersFromKey(includes, 'include')) {
-        list = fn(list, batchKey);
+        list = fn(list);
       }
     }
     if (excludes) {
       for (const fn of getFiltersFromKey(excludes, 'exclude')) {
-        list = fn(list, batchKey);
+        list = fn(list);
       }
     }
     return list;

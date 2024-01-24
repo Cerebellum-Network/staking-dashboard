@@ -3,15 +3,15 @@
 
 import { faBars, faGripVertical } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { clipAddress, isNotZero, planckToUnit } from '@polkadot-cloud/utils';
+import { ellipsisFn, isNotZero, planckToUnit } from '@polkadot-cloud/utils';
 import BigNumber from 'bignumber.js';
 import { formatDistance, fromUnixTime } from 'date-fns';
 import { motion } from 'framer-motion';
-import React, { useEffect, useRef, useState } from 'react';
+import { Component, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DefaultLocale, ListItemsPerBatch, ListItemsPerPage } from 'consts';
 import { useApi } from 'contexts/Api';
-import { useNetworkMetrics } from 'contexts/Network';
+import { useNetworkMetrics } from 'contexts/NetworkMetrics';
 import { useBondedPools } from 'contexts/Pools/BondedPools';
 import { StakingContext } from 'contexts/Staking';
 import { useTheme } from 'contexts/Themes';
@@ -23,6 +23,7 @@ import { Identity } from 'library/ListItem/Labels/Identity';
 import { PoolIdentity } from 'library/ListItem/Labels/PoolIdentity';
 import { locales } from 'locale';
 import type { AnySubscan } from 'types';
+import { useNetwork } from 'contexts/Network';
 import { ItemWrapper } from '../Wrappers';
 import type { PayoutListProps } from '../types';
 import { PayoutListProvider, usePayoutList } from './context';
@@ -36,10 +37,10 @@ export const PayoutListInner = ({
 }: PayoutListProps) => {
   const { i18n, t } = useTranslation('pages');
   const { mode } = useTheme();
+  const { isReady } = useApi();
   const {
-    isReady,
-    network: { units, unit, colors },
-  } = useApi();
+    networkData: { units, unit, colors },
+  } = useNetwork();
   const { activeEra } = useNetworkMetrics();
   const { listFormat, setListFormat } = usePayoutList();
   const { validators } = useValidators();
@@ -52,7 +53,7 @@ export const PayoutListInner = ({
   const [renderIteration, _setRenderIteration] = useState<number>(1);
 
   // manipulated list (ordering, filtering) of payouts
-  const [payouts, setPayouts] = useState(initialPayouts);
+  const [payouts, setPayouts] = useState<AnySubscan>(initialPayouts);
 
   // is this the initial fetch
   const [fetched, setFetched] = useState<boolean>(false);
@@ -108,7 +109,7 @@ export const PayoutListInner = ({
   }
 
   if (!payouts.length) {
-    return <></>;
+    return null;
   }
 
   return (
@@ -142,15 +143,15 @@ export const PayoutListInner = ({
               p.event_id === 'PaidOut'
                 ? t('payouts.poolClaim')
                 : p.event_id === 'Rewarded'
-                ? t('payouts.payout')
-                : p.event_id;
+                  ? t('payouts.payout')
+                  : p.event_id;
 
             const labelClass =
               p.event_id === 'PaidOut'
                 ? 'claim'
                 : p.event_id === 'Rewarded'
-                ? 'reward'
-                : undefined;
+                  ? 'reward'
+                  : undefined;
 
             // get validator if it exists
             const validator = validators.find(
@@ -158,15 +159,13 @@ export const PayoutListInner = ({
             );
 
             // get pool if it exists
-            const pool = bondedPools.find(
-              ({ id }) => String(id) === String(p.pool_id)
-            );
+            const pool = bondedPools.find(({ id }) => id === p.pool_id);
 
             const batchIndex = validator
               ? validators.indexOf(validator)
               : pool
-              ? bondedPools.indexOf(pool)
-              : 0;
+                ? bondedPools.indexOf(pool)
+                : 0;
 
             return (
               <motion.div
@@ -207,30 +206,20 @@ export const PayoutListInner = ({
                     <div className="row">
                       <div>
                         <div>
-                          {label === t('payouts.payout') && (
-                            <>
-                              {batchIndex > 0 ? (
-                                <Identity address={p.validator_stash} />
-                              ) : (
-                                <div>{clipAddress(p.validator_stash)}</div>
-                              )}
-                            </>
-                          )}
-                          {label === t('payouts.poolClaim') && (
-                            <>
-                              {pool ? (
-                                <PoolIdentity
-                                  batchKey="bonded_pools"
-                                  batchIndex={batchIndex}
-                                  pool={pool}
-                                />
-                              ) : (
-                                <h4>
-                                  {t('payouts.fromPool')} {p.pool_id}
-                                </h4>
-                              )}
-                            </>
-                          )}
+                          {label === t('payouts.payout') &&
+                            (batchIndex > 0 ? (
+                              <Identity address={p.validator_stash} />
+                            ) : (
+                              <div>{ellipsisFn(p.validator_stash)}</div>
+                            ))}
+                          {label === t('payouts.poolClaim') &&
+                            (pool ? (
+                              <PoolIdentity pool={pool} />
+                            ) : (
+                              <h4>
+                                {t('payouts.fromPool')} {p.pool_id}
+                              </h4>
+                            ))}
                           {label === t('payouts.slashed') && (
                             <h4>{t('payouts.deductedFromBond')}</h4>
                           )}
@@ -269,7 +258,7 @@ export const PayoutList = (props: PayoutListProps) => (
   </PayoutListProvider>
 );
 
-export class PayoutListShouldUpdate extends React.Component {
+export class PayoutListShouldUpdate extends Component {
   static contextType = StakingContext;
 
   render() {
