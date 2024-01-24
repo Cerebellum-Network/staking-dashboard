@@ -5,7 +5,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PageCategories, PagesConfig } from 'config/pages';
-import { PolkadotUrl } from 'consts';
+import { CereUrl } from 'consts';
 import { useBonded } from 'contexts/Bonded';
 import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
 import { useSetup } from 'contexts/Setup';
@@ -145,7 +145,7 @@ export const Main = () => {
     <>
       <LogoWrapper
         $minimised={sideMenuMinimised}
-        onClick={() => window.open(PolkadotUrl, '_blank')}
+        onClick={() => window.open(CereUrl, '_blank')}
       >
         {sideMenuMinimised ? (
           <networkData.brand.icon

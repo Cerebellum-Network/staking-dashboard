@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useHelp } from 'contexts/Help';
 import { useNetworkMetrics } from 'contexts/NetworkMetrics';
 import { useStaking } from 'contexts/Staking';
-import { useSubscan } from 'contexts/Plugins/Subscan';
+import { useCereStats } from 'contexts/CereStats';
 import { CardHeaderWrapper, CardWrapper } from 'library/Card/Wrappers';
 import { EraPoints as EraPointsGraph } from 'library/Graphs/EraPoints';
 import { formatSize } from 'library/Graphs/Utils';
@@ -30,7 +30,7 @@ export const ValidatorMetrics = () => {
   } = useNetwork();
   const { options } = useOverlay().modal.config;
   const { address, identity } = options;
-  const { fetchEraPoints } = useSubscan();
+  const { fetchEraPoints }: any = useCereStats();
   const { activeEra } = useNetworkMetrics();
   const {
     eraStakers: { stakers },
@@ -108,7 +108,7 @@ export const ValidatorMetrics = () => {
         className="body"
         style={{ position: 'relative', marginTop: '0.5rem' }}
       >
-        <PluginLabel plugin="subscan" />
+        <PluginLabel plugin="cereStats" />
         <CardWrapper
           className="transparent"
           style={{
@@ -125,8 +125,8 @@ export const ValidatorMetrics = () => {
           <div ref={ref} style={{ minHeight }}>
             <StatusLabel
               status="active_service"
-              statusFor="subscan"
-              title={t('subscanDisabled')}
+              statusFor="cereStats"
+              title={t('Cere Stats Disabled')}
             />
             <GraphWrapper
               style={{

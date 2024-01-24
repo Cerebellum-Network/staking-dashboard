@@ -119,7 +119,6 @@ export const GenerateNominations = ({
   const fetchNominationsForMethod = () => {
     if (method) {
       const newNominations = fetchFromMethod(method);
-
       // update component state
       setNominations([...newNominations]);
       setFetching(false);

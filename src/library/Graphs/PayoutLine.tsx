@@ -16,7 +16,7 @@ import { Line } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
 import { useStaking } from 'contexts/Staking';
-import { useSubscan } from 'contexts/Plugins/Subscan';
+import { useCereStats } from 'contexts/CereStats';
 import { useTheme } from 'contexts/Themes';
 import { useUi } from 'contexts/UI';
 import { graphColors } from 'styles/graphs';
@@ -49,7 +49,7 @@ export const PayoutLine = ({
   const { mode } = useTheme();
   const { isSyncing } = useUi();
   const { inSetup } = useStaking();
-  const { payouts, poolClaims } = useSubscan();
+  const { payouts, poolClaims } = useCereStats();
   const { unit, units, colors } = useNetwork().networkData;
   const { membership: poolMembership } = usePoolMemberships();
 

@@ -17,6 +17,7 @@
     "visualizer": "vite-bundle-visualizer"
   },
   "dependencies": {
+    "@apollo/client": "^3.7.14",
     "@dotlottie/player-component": "^2.7.5",
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/free-brands-svg-icons": "^6.5.1",

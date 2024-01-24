@@ -36,9 +36,9 @@ export const useInflation = () => {
             .multipliedBy(BIGNUMBER_MILLION)
             .dividedBy(totalIssuance)
             .toNumber() / BIGNUMBER_MILLION.toNumber();
-    const idealStake =
-      stakeTarget -
-      Math.min(auctionMax, numAuctions.toNumber()) * auctionAdjust;
+    // The idealStake is equal to stakeTarget since
+    // Cere Network doesn't provide auctionMax, numAuctions and auctionAdjust so far.
+    const idealStake = stakeTarget;
     const idealInterest = maxInflation / idealStake;
     const inflation =
       100 *

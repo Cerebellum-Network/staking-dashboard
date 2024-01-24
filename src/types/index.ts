@@ -17,7 +17,12 @@ declare global {
   }
 }
 
-export type NetworkName = 'polkadot' | 'kusama' | 'westend';
+export enum NetworkName { 
+  CereTestnet = 'Cere Testnet',
+  CereQanet = 'Cere Qanet',
+  CereDevnet = 'Cere Devnet',
+  Cere = 'Cere',
+};
 
 export type Networks = Record<string, Network>;
 
@@ -38,6 +43,7 @@ export interface Network {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   colors: Record<NetworkColor, { [key in Theme]: string }>;
   subscanEndpoint: string;
+  cereStatsEndpoint: string;
   unit: string;
   units: number;
   ss58: number;
@@ -106,7 +112,7 @@ export type MaybeAddress = string | null;
 export type MaybeString = string | null;
 
 // list of available plugins.
-export type Plugin = 'subscan' | 'binance_spot' | 'tips' | 'polkawatch';
+export type Plugin = 'cereStats';
 
 // track the status of a syncing / fetching process.
 export type Sync = 'unsynced' | 'syncing' | 'synced';

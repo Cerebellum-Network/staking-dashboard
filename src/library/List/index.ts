@@ -62,7 +62,6 @@ export const PaginationWrapper = styled.div<PaginationWrapperProps>`
     display: flex;
     flex: 1;
   }
-
   > div:last-child {
     display: flex;
     justify-content: flex-end;

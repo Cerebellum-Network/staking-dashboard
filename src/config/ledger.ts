@@ -2,18 +2,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import type { LedgerApp } from 'contexts/Hardware/Ledger/types';
-import KusamaSVG from 'img/appIcons/kusama.svg?react';
-import PolkadotSVG from 'img/appIcons/polkadot.svg?react';
+import { NetworkName } from 'types';
+import CereSVG from 'img/cere_logo.svg?react';
 
 export const LedgerApps: LedgerApp[] = [
   {
-    network: 'polkadot',
-    appName: 'Polkadot',
-    Icon: PolkadotSVG,
-  },
-  {
-    network: 'kusama',
-    appName: 'Kusama',
-    Icon: KusamaSVG,
+    network: NetworkName.Cere,
+    appName: 'Cere Netowrk',
+    Icon: CereSVG,
   },
 ];
