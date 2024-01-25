@@ -27,7 +27,7 @@ export const Ledger = () => {
   const url = 'ledger.com';
 
   // Only render on Polkadot and Kusama networks.
-  if (!['polkadot', 'kusama'].includes(network)) {
+  if (!['Cere'].includes(network)) {
     return null;
   }
 
@@ -43,12 +43,10 @@ export const Ledger = () => {
           </div>
           <div className="row margin">
             <ButtonText
-              text={network === 'polkadot' ? 'BETA' : 'EXPERIMENTAL'}
+              text={network === 'Cere' ? 'BETA' : 'EXPERIMENTAL'}
               disabled
               marginRight
-              iconLeft={
-                network === 'polkadot' ? undefined : faExclamationTriangle
-              }
+              iconLeft={network === 'Cere' ? undefined : faExclamationTriangle}
               style={{ opacity: 0.5 }}
             />
             <ButtonText

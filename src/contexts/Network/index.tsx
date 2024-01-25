@@ -57,10 +57,11 @@ export const NetworkProvider = ({ children }: { children: ReactNode }) => {
 
   // Store the initial active network.
   const initialNetwork = getInitialNetwork();
-  const [network, setNetwork] = useState<NetworkState>({
+  const networkState: NetworkState = {
     name: initialNetwork,
     meta: NetworkList[initialNetwork],
-  });
+  };
+  const [network, setNetwork] = useState<NetworkState>(networkState);
 
   return (
     <NetworkContext.Provider

@@ -159,11 +159,11 @@ export const BalanceChart = () => {
             value={minDecimalPlaces(totalBalance.toFormat(), 2)}
             zeroDecimals={2}
           />
-          <span className="note">
+          {/* <span className="note">
             {plugins.includes('binance_spot') ? (
               <>&nbsp;{usdFormatter.format(freeFiat.toNumber())}</>
             ) : null}
-          </span>
+          </span> */}
         </h2>
       </CardHeaderWrapper>
 

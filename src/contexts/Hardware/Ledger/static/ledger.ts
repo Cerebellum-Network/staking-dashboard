@@ -20,7 +20,9 @@ export class Ledger {
 
   // Initialise ledger transport, initialise app, and return with device info.
   static initialise = async (appName: string) => {
+    console.log('About to create transport');
     this.transport = await TransportWebHID.create();
+    console.log('Finished');
     const app = newSubstrateApp(Ledger.transport, appName);
     const { productName } = this.transport.device;
     return { app, productName };

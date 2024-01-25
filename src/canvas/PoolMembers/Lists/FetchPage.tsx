@@ -85,11 +85,11 @@ export const MembersListInner = ({
 
   // Refetch list when page changes.
   useEffect(() => {
-    if (pluginEnabled('subscan')) {
+    if (pluginEnabled('cereStats')) {
       setFetchedPoolMembersApi('unsynced');
       setPoolMembersApi([]);
     }
-  }, [page, activeAccount, pluginEnabled('subscan')]);
+  }, [page, activeAccount, pluginEnabled('cereStats')]);
 
   // Refetch list when network changes.
   useEffect(() => {

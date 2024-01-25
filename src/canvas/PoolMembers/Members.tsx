@@ -78,7 +78,7 @@ export const Members = () => {
       )}
 
       <CardWrapper className="transparent">
-        {pluginEnabled('subscan') ? (
+        {pluginEnabled('cereStats') ? (
           <FetchPageMemberList
             {...membersListProps}
             memberCount={selectedPoolMemberCount}

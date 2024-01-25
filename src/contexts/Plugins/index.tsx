@@ -25,13 +25,13 @@ export const PluginsProvider = ({ children }: { children: ReactNode }) => {
     ) as Plugin[];
 
     // if fiat is disabled, remove binance_spot service
-    const DISABLE_FIAT = Number(import.meta.env.VITE_DISABLE_FIAT ?? 0);
-    if (DISABLE_FIAT && localPlugins.includes('binance_spot')) {
-      const index = localPlugins.indexOf('binance_spot');
-      if (index !== -1) {
-        localPlugins.splice(index, 1);
-      }
-    }
+    // const DISABLE_FIAT = Number(import.meta.env.VITE_DISABLE_FIAT ?? 0);
+    // if (DISABLE_FIAT && localPlugins.includes('binance_spot')) {
+    //   const index = localPlugins.indexOf('binance_spot');
+    //   if (index !== -1) {
+    //     localPlugins.splice(index, 1);
+    //   }
+    // }
     return localPlugins;
   };
 

@@ -5,7 +5,6 @@ import { ModalPadding } from '@polkadot-cloud/react';
 import { useTranslation } from 'react-i18next';
 import { usePlugins } from 'contexts/Plugins';
 import { Title } from 'library/Modal/Title';
-import { StatusButton } from 'library/StatusButton';
 import { ContentWrapper } from '../Networks/Wrapper';
 
 export const Settings = () => {
@@ -21,7 +20,7 @@ export const Settings = () => {
       <ModalPadding>
         <ContentWrapper>
           <h4>{t('togglePlugins')}</h4>
-          <StatusButton
+          {/* <StatusButton
             checked={plugins.includes('subscan')}
             label="Subscan API"
             onClick={() => togglePlugin('subscan')}
@@ -37,15 +36,15 @@ export const Settings = () => {
               label={t('binanceApi')}
               onClick={() => togglePlugin('binance_spot')}
             />
-          )}
+          )} */}
 
           <h4>{t('toggleFeatures')}</h4>
 
-          <StatusButton
+          {/* <StatusButton
             checked={plugins.includes('tips')}
             label={t('dashboardTips')}
             onClick={() => togglePlugin('tips')}
-          />
+          /> */}
         </ContentWrapper>
       </ModalPadding>
     </>

@@ -58,10 +58,10 @@ export const PoolMembersProvider = ({ children }: { children: ReactNode }) => {
     unsubscribeAndResetMeta();
   }, [activeAccount]);
 
-  // Initial setup for fetching members if Subscan is not enabled. Ensure poolMembers are reset if
-  // subscan is disabled.
+  // Initial setup for fetching members if cereStats is not enabled. Ensure poolMembers are reset if
+  // cereStats is disabled.
   useEffectIgnoreInitial(() => {
-    if (!pluginEnabled('subscan')) {
+    if (!pluginEnabled('cereStats')) {
       if (isReady) {
         fetchPoolMembers();
       }
@@ -72,7 +72,7 @@ export const PoolMembersProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       unsubscribe();
     };
-  }, [network, isReady, pluginEnabled('subscan')]);
+  }, [network, isReady, pluginEnabled('cereStats')]);
 
   const unsubscribe = () => {
     unsubscribeAndResetMeta();
@@ -295,8 +295,8 @@ export const PoolMembersProvider = ({ children }: { children: ReactNode }) => {
 
   // Removes a member from the member list and updates state.
   const removePoolMember = (who: MaybeAddress) => {
-    // If Subscan is enabled, update API state, otherwise, update node state.
-    if (pluginEnabled('subscan')) {
+    // If cereStats is enabled, update API state, otherwise, update node state.
+    if (pluginEnabled('cereStats')) {
       setPoolMembersApi(poolMembersApi.filter((p) => p.who !== who) ?? []);
     } else {
       setPoolMembersNode(poolMembersNode.filter((p) => p.who !== who) ?? []);
@@ -306,7 +306,7 @@ export const PoolMembersProvider = ({ children }: { children: ReactNode }) => {
   // Adds a record to poolMembers.
   // Currently only used when an account joins or creates a pool.
   const addToPoolMembers = (member: { who: string; poolId: number }) => {
-    if (!member || pluginEnabled('subscan')) {
+    if (!member || pluginEnabled('cereStats')) {
       return;
     }
 

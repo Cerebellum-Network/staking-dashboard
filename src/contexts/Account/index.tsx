@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useEffect, useRef, useState } from 'react';
-import { AnyApi, AnyMetaBatch } from 'types';
+import type { AnyApi, AnyMetaBatch } from 'types';
 import { setStateWithRef } from 'Utils';
 import { useApi } from '../Api';
 import { defaultAccountContext } from './defaults';
-import { AccountContextInterface } from './types';
+import type { AccountContextInterface } from './types';
 
 // context definition
 export const AccountContext = React.createContext<AccountContextInterface>(
@@ -32,15 +32,14 @@ export const AccountProvider = ({
   const accountSubsRef = useRef(accountSubs);
 
   // unsubscribe from any validator meta batches
-  useEffect(() => {
-    return () => {
-      Object.values(accountSubsRef.current).map((batch: AnyMetaBatch) => {
-        return Object.entries(batch).map(([, v]: AnyApi) => {
-          return v();
-        });
-      });
-    };
-  }, []);
+  useEffect(
+    () => () => {
+      Object.values(accountSubsRef.current).map((batch: AnyMetaBatch) =>
+        Object.entries(batch).map(([, v]: AnyApi) => v())
+      );
+    },
+    []
+  );
 
   /*
     Fetches a new batch of subscribed accounts metadata. Stores the returning

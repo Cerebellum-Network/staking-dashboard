@@ -43,7 +43,7 @@ export const Headers = () => {
     if (pageFromUri(pathname, 'overview') === 'pools') {
       if (
         !bondedPools.length ||
-        (!poolMembersNode.length && !pluginEnabled('subscan'))
+        (!poolMembersNode.length && !pluginEnabled('cereStats'))
       ) {
         return true;
       }

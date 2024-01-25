@@ -8,7 +8,7 @@ import { Title } from 'library/Modal/Title';
 import { useOverlay } from '@polkadot-cloud/react/hooks';
 
 export const DismissTips = () => {
-  const { t } = useTranslation('tips');
+  const { t } = useTranslation('cereStats');
   const { togglePlugin } = usePlugins();
   const { setModalStatus } = useOverlay().modal;
 
@@ -31,7 +31,7 @@ export const DismissTips = () => {
               marginRight
               text={t('module.disableTips')}
               onClick={() => {
-                togglePlugin('tips');
+                togglePlugin('cereStats'); // ToDo
                 setModalStatus('closing');
               }}
             />

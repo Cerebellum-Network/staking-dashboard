@@ -89,14 +89,14 @@ export const SubscanProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [activeAccount]);
 
-  // Reset payouts on subscan plugin not enabled.
+  // Reset payouts on cereStats plugin not enabled.
   useEffectIgnoreInitial(() => {
-    if (!plugins.includes('subscan')) {
+    if (!plugins.includes('cereStats')) {
       resetPayouts();
     } else if (isReady && isNotZero(activeEra.index)) {
       handleFetchPayouts();
     }
-  }, [plugins.includes('subscan'), isReady, activeEra]);
+  }, [plugins.includes('cereStats'), isReady, activeEra]);
 
   // Fetch payouts as soon as network is ready.
   useEffectIgnoreInitial(() => {
@@ -133,7 +133,7 @@ export const SubscanProvider = ({ children }: { children: ReactNode }) => {
   /* fetchPayouts
    * fetches payout history from Subscan.
    * Fetches a total of 300 records from 3 asynchronous requests.
-   * Also checks if subscan service is active *after* the fetch has resolved
+   * Also checks if cereStats service is active *after* the fetch has resolved
    * as the user could have turned off the service while payouts were fetching.
    * Stores resulting payouts in context state.
    */
@@ -141,8 +141,8 @@ export const SubscanProvider = ({ children }: { children: ReactNode }) => {
     let newClaimedPayouts: AnySubscan[] = [];
     let newUnclaimedPayouts: AnySubscan[] = [];
 
-    // fetch results if subscan is enabled
-    if (activeAccount && pluginEnabled('subscan')) {
+    // fetch results if cereStats is enabled
+    if (activeAccount && pluginEnabled('cereStats')) {
       // fetch 1 page of results
       const results = await Promise.all([
         handleFetch(0, ApiEndpoints.subscanRewardSlash, 100, {
@@ -152,8 +152,8 @@ export const SubscanProvider = ({ children }: { children: ReactNode }) => {
       ]);
 
       // user may have turned off service while results were fetching.
-      // test again whether subscan service is still active.
-      if (pluginEnabled('subscan')) {
+      // test again whether cereStats service is still active.
+      if (pluginEnabled('cereStats')) {
         for (const result of results) {
           if (!result?.data?.list) {
             break;
@@ -190,15 +190,15 @@ export const SubscanProvider = ({ children }: { children: ReactNode }) => {
   /* fetchPoolClaims
    * fetches claim history from Subscan.
    * Fetches a total of 300 records from 3 asynchronous requests.
-   * Also checks if subscan service is active *after* the fetch has resolved
+   * Also checks if cereStats service is active *after* the fetch has resolved
    * as the user could have turned off the service while payouts were fetching.
    * Stores resulting claims in context state.
    */
   const fetchPoolClaims = async () => {
     let newPoolClaims: AnySubscan[] = [];
 
-    // fetch results if subscan is enabled
-    if (activeAccount && pluginEnabled('subscan')) {
+    // fetch results if cereStats is enabled
+    if (activeAccount && pluginEnabled('cereStats')) {
       // fetch 1 page of results
       const results = await Promise.all([
         handleFetch(0, ApiEndpoints.subscanPoolRewards, 100, {
@@ -207,8 +207,8 @@ export const SubscanProvider = ({ children }: { children: ReactNode }) => {
       ]);
 
       // user may have turned off service while results were fetching.
-      // test again whether subscan service is still active.
-      if (pluginEnabled('subscan')) {
+      // test again whether cereStats service is still active.
+      if (pluginEnabled('cereStats')) {
         for (const result of results) {
           // check incorrectly formatted result object
           if (!result?.data?.list) {
@@ -231,12 +231,12 @@ export const SubscanProvider = ({ children }: { children: ReactNode }) => {
 
   /* fetchEraPoints
    * fetches recent era point history for a particular address.
-   * Also checks if subscan service is active *after* the fetch has resolved
+   * Also checks if cereStats service is active *after* the fetch has resolved
    * as the user could have turned off the service while payouts were fetching.
    * returns eraPoints
    */
   const fetchEraPoints = async (address: string, era: number) => {
-    if (address === '' || !plugins.includes('subscan')) {
+    if (address === '' || !plugins.includes('cereStats')) {
       return [];
     }
     const res = await handleFetch(0, ApiEndpoints.subscanEraStat, 100, {
@@ -244,7 +244,7 @@ export const SubscanProvider = ({ children }: { children: ReactNode }) => {
     });
 
     if (res.message === 'Success') {
-      if (pluginEnabled('subscan')) {
+      if (pluginEnabled('cereStats')) {
         if (res.data?.list !== null) {
           const list = [];
           for (let i = era; i > era - 100; i--) {
@@ -265,11 +265,11 @@ export const SubscanProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /* fetchPoolDetails
-   * Also checks if subscan service is active *after* the fetch has resolved
+   * Also checks if cereStats service is active *after* the fetch has resolved
    * as the user could have turned off the service while payouts were fetching.
    */
   const fetchPoolDetails = async (poolId: number) => {
-    if (!plugins.includes('subscan')) {
+    if (!plugins.includes('cereStats')) {
       return [];
     }
     const res: Response = await fetch(
@@ -290,11 +290,11 @@ export const SubscanProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /* fetchPoolMembers
-   * Also checks if subscan service is active *after* the fetch has resolved
+   * Also checks if cereStats service is active *after* the fetch has resolved
    * as the user could have turned off the service while payouts were fetching.
    */
   const fetchPoolMembers = async (poolId: number, page: number) => {
-    if (!plugins.includes('subscan')) {
+    if (!plugins.includes('cereStats')) {
       return [];
     }
     const res = await handleFetch(
@@ -307,7 +307,7 @@ export const SubscanProvider = ({ children }: { children: ReactNode }) => {
     );
 
     if (res.message === 'Success') {
-      if (pluginEnabled('subscan')) {
+      if (pluginEnabled('cereStats')) {
         if (res.data?.list !== null) {
           const result = res.data?.list || [];
           const list: AnySubscan = [];

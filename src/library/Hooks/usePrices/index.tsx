@@ -71,13 +71,13 @@ export const usePrices = () => {
 
   // servie toggle
   useEffect(() => {
-    if (plugins.includes('binance_spot')) {
-      if (priceHandle) {
-        initiatePriceInterval();
-      }
-    } else if (priceHandle) {
-      clearInterval(priceHandle);
-    }
+    // if (plugins.includes('binance_spot')) {
+    //   if (priceHandle) {
+    //     initiatePriceInterval();
+    //   }
+    // } else if (priceHandle) {
+    //   clearInterval(priceHandle);
+    // }
   }, [plugins]);
 
   return pricesRef.current;

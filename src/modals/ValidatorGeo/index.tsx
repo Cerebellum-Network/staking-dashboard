@@ -33,7 +33,7 @@ export const ValidatorGeo = () => {
   const [analyticsAvailable, setAnalyticsAvailable] = useState<boolean>(true);
   const { pluginEnabled } = usePlugins();
 
-  const enabled = pluginEnabled('polkawatch');
+  const enabled = pluginEnabled('cereStats');
 
   // In Small Screens we will display the most relevant chart.
   // For now, we are not going to complicate the UI.
@@ -72,7 +72,7 @@ export const ValidatorGeo = () => {
         className="body"
         style={{ position: 'relative', marginTop: '0.5rem' }}
       >
-        <PluginLabel plugin="polkawatch" />
+        <PluginLabel plugin="cereStats" />
         <CardWrapper
           className="transparent"
           style={{
@@ -100,7 +100,7 @@ export const ValidatorGeo = () => {
             {!enabled || analyticsAvailable ? (
               <StatusLabel
                 status="active_service"
-                statusFor="polkawatch"
+                statusFor="cereStats"
                 title={t('polkawatchDisabled')}
               />
             ) : (

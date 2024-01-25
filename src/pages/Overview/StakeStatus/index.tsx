@@ -11,7 +11,8 @@ import { StatusWrapper } from './Wrappers';
 
 export const StakeStatus = () => {
   const { plugins } = usePlugins();
-  const showTips = plugins.includes('tips');
+  // const showTips = plugins.includes('tips'); // ToDo
+  const showTips = undefined;
 
   return (
     <CardWrapper style={{ padding: 0 }}>

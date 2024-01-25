@@ -35,7 +35,7 @@ export const Tip = ({ title, description, page }: TipProps) => {
             marginRight
             text={t('module.disableTips', { ns: 'tips' })}
             onClick={() => {
-              togglePlugin('tips');
+              togglePlugin('cereStats'); //ToDo
               closePrompt();
             }}
           />

@@ -84,7 +84,7 @@ export const NetworkBar = () => {
         </section>
         <section>
           <div className="hide-small">
-            {plugins.includes('binance_spot') && (
+            {/* {plugins.includes('binance_spot') && (
               <>
                 <div className="stat">
                   <span
@@ -104,7 +104,7 @@ export const NetworkBar = () => {
                   1 {networkData.api.unit} / {prices.lastPrice} USD
                 </div>
               </>
-            )}
+            )} */}
 
             <div className="stat last">
               <FontAwesomeIcon icon={faHive} />

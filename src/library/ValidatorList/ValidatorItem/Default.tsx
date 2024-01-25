@@ -74,7 +74,8 @@ export const Default = ({
     },
   });
 
-  if (pluginEnabled('polkawatch')) {
+  if (pluginEnabled('cereStats')) {
+    //ToDo
     menuItems.push({
       icon: <FontAwesomeIcon icon={faGlobe} transform="shrink-3" />,
       wrap: null,

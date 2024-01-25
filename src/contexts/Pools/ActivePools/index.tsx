@@ -492,7 +492,7 @@ export const ActivePoolsProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     // If `Subscan` plugin is enabled, fetch member count directly from the API.
-    if (pluginEnabled('subscan') && !fetchingMemberCount.current) {
+    if (pluginEnabled('cereStats') && !fetchingMemberCount.current) {
       fetchingMemberCount.current = true;
       const poolDetails = await fetchPoolDetails(selectedActivePool.id);
       fetchingMemberCount.current = false;

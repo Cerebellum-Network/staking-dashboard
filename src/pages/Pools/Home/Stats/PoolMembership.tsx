@@ -17,8 +17,8 @@ export const PoolMembershipStat = () => {
       membership === null
         ? t('pools.notInPool')
         : isOwner()
-        ? `${t('pools.ownerOfPool')} ${membership.poolId}`
-        : `${t('pools.inPool')} ${membership.poolId}`,
+          ? `${t('pools.ownerOfPool')} ${membership.poolId}`
+          : `${t('pools.inPool')} ${membership.poolId}`,
     unit: '',
     helpKey: 'Pool Membership',
   };

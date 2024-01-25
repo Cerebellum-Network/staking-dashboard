@@ -17,12 +17,15 @@ declare global {
   }
 }
 
-export enum NetworkName { 
-  CereTestnet = 'Cere Testnet',
-  CereQanet = 'Cere Qanet',
-  CereDevnet = 'Cere Devnet',
-  Cere = 'Cere',
-};
+export type NetworkName =
+  | 'Cere'
+  | 'Cere Testnet'
+  | 'Cere Qanet'
+  | 'Cere Devnet';
+// CereTestnet = 'Cere Testnet',
+// CereQanet = 'Cere Qanet',
+// CereDevnet = 'Cere Devnet',
+// Cere = 'Cere',
 
 export type Networks = Record<string, Network>;
 
