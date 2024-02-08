@@ -12,7 +12,6 @@ import { CommunitySectionsProvider, useCommunitySections } from './context';
 export const CommunityInner = ({ page }: PageProps) => {
   const { t } = useTranslation('base');
   const { activeSection } = useCommunitySections();
-  const { t } = useTranslation('base');
 
   const { key } = page;
 

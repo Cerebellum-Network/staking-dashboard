@@ -20,10 +20,6 @@ export const ParaValidator = ({ address }: ParaValidatorProps) => {
     return null;
   }
 
-  if (!sessionParachain?.includes(address || '')) {
-    return <></>;
-  }
-
   return (
     <div className="label">
       <TooltipTrigger

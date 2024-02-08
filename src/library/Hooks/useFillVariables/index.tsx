@@ -49,10 +49,6 @@ export const useFillVariables = () => {
             '{EXISTENTIAL_DEPOSIT}',
             planckToUnit(existentialDeposit, networkData.units).toFormat(),
           ],
-          [
-            '{EXISTENTIAL_DEPOSIT}',
-            String(planckBnToUnit(existentialDeposit, network.units)),
-          ],
         ];
 
         for (const varToVal of varsToValues) {

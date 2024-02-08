@@ -117,9 +117,6 @@ export const UnlockChunks = () => {
       window.removeEventListener('resize', resizeCallback);
     };
   }, []);
-  const resizeCallback = () => {
-    setModalHeight(getModalHeight());
-  };
 
   return (
     <ModalSection type="carousel">

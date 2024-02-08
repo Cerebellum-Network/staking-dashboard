@@ -101,7 +101,7 @@ export const useFetchMehods = () => {
       [
         'all_commission',
         'blocked_nominations',
-        includeTestnet ? '' : 'missing_identity',
+        'missing_identity',
         'in_session',
       ],
       waiting

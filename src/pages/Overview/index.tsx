@@ -27,20 +27,6 @@ export const Overview = () => {
 
   const PAYOUTS_HEIGHT = 380;
 
-  let formatFrom = new Date();
-  let formatTo = new Date();
-  let formatOpts = {};
-  if (lastReward !== null) {
-    formatFrom = fromUnixTime(
-      lastReward?.block_timestamp ?? getUnixTime(new Date())
-    );
-    formatTo = new Date();
-    formatOpts = {
-      addSuffix: true,
-      locale: locales[i18n.resolvedLanguage],
-    };
-  }
-
   return (
     <>
       <PageTitle title={t('overview.overview')} />

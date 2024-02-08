@@ -4,12 +4,10 @@
 import { useTranslation } from 'react-i18next';
 import { useValidators } from 'contexts/Validators/ValidatorEntries';
 import { Text } from 'library/StatBoxList/Text';
-import { useTranslation } from 'react-i18next';
 
 export const AverageCommissionStat = () => {
   const { t } = useTranslation('pages');
   const { avgCommission } = useValidators();
-  const { t } = useTranslation('pages');
 
   const params = {
     label: t('validators.averageCommission'),

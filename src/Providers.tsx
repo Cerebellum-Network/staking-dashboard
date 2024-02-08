@@ -97,7 +97,7 @@ export const Providers = () => {
     PromptProvider,
     MigrateProvider,
     FiltersProvider,
-    CereStatsProvider
+    CereStatsProvider,
   ];
 
   return withProviders(providers, ThemedRouter);

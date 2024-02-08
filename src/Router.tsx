@@ -44,7 +44,6 @@ export const RouterInner = () => {
   const { accountsInitialised } = useOtherAccounts();
   const { activeAccount, setActiveAccount } = useActiveAccounts();
   const { sideMenuOpen, sideMenuMinimised, setContainerRefs } = useUi();
-  const { t } = useTranslation('base');
 
   // Scroll to top of the window on every page change or network change.
   useEffect(() => {

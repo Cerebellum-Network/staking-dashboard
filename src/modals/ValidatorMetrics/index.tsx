@@ -64,12 +64,7 @@ export const ValidatorMetrics = () => {
     if (!plugins.includes('subscan')) {
       return;
     }
-    setList(
-      await fetchEraPoints(
-        address,
-        activeEra.index.toNumber()
-      )
-    );
+    setList(await fetchEraPoints(address, activeEra.index.toNumber()));
   };
 
   useEffect(() => {
@@ -135,7 +130,7 @@ export const ValidatorMetrics = () => {
           <div ref={ref} style={{ minHeight }}>
             <StatusLabel
               status="active_service"
-              statusFor="cereStats"
+              statusFor="cerestats"
               title="Cere Stats Disabled"
             />
             <GraphWrapper

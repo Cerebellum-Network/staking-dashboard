@@ -108,14 +108,6 @@ export const ActivePoolsProvider = ({ children }: { children: ReactNode }) => {
   const getSelectedPoolTargets = () =>
     targetsRef.current[Number(selectedPoolId) ?? -1] || defaults.targets;
 
-  // when we are subscribed to all active pools, syncing is considered
-  // completed.
-  useEffect(() => {
-    if (unsubNominationsRef.current.length === accountPools.length) {
-      setStateWithRef(Sync.Synced, setSynced, syncedRef);
-    }
-  }, [unsubNominationsRef.current]);
-
   // handle active pool subscriptions
   const handlePoolSubscriptions = async () => {
     if (accountPools.length) {

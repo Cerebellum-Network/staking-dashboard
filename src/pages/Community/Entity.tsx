@@ -21,7 +21,6 @@ export const Entity = () => {
   const { network } = useNetwork();
   const { validators: allValidators } = useValidators();
   const { setActiveSection, activeItem } = useCommunitySections();
-  const { t } = useTranslation('pages');
 
   const { name, validators: entityAllValidators } = activeItem;
   const validators = entityAllValidators[network] ?? [];

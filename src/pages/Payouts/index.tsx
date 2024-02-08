@@ -23,7 +23,6 @@ import { PayoutList } from './PayoutList';
 import { LastEraPayoutStat } from './Stats/LastEraPayout';
 import { useSubscanData } from 'library/Hooks/useSubscanData';
 import { SubscanController } from 'static/SubscanController';
-import { useCereStats } from '../../contexts/CereStats';
 import { locales } from 'locale';
 
 export const Payouts = ({ page: { key } }: PageProps) => {
@@ -37,9 +36,8 @@ export const Payouts = ({ page: { key } }: PageProps) => {
     'unclaimedPayouts',
     'poolClaims',
   ]);
-  // const { payouts, poolClaims } = useCereStats(); // ToDo 
+  // const { payouts, poolClaims } = useCereStats(); // ToDo
   const notStaking = !isSyncing && inSetup();
-  const { i18n, t } = useTranslation();
 
   const [payoutsList, setPayoutLists] = useState<AnySubscan>();
   const [fromDate, setFromDate] = useState<string | undefined>();
@@ -108,7 +106,7 @@ export const Payouts = ({ page: { key } }: PageProps) => {
             {!plugins.includes('cerestats') ? (
               <StatusLabel
                 status="active_service"
-                statusFor="cereStats"
+                statusFor="cerestats"
                 title={t('payouts.cereStatsDisabled', { ns: 'pages' })}
                 topOffset="30%"
               />
