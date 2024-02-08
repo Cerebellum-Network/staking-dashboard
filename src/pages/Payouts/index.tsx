@@ -23,6 +23,7 @@ import { PayoutList } from './PayoutList';
 import { LastEraPayoutStat } from './Stats/LastEraPayout';
 import { useSubscanData } from 'library/Hooks/useSubscanData';
 import { SubscanController } from 'static/SubscanController';
+import { useCereStats } from '../../contexts/CereStats';
 import { locales } from 'locale';
 
 export const Payouts = ({ page: { key } }: PageProps) => {
@@ -36,9 +37,13 @@ export const Payouts = ({ page: { key } }: PageProps) => {
     'unclaimedPayouts',
     'poolClaims',
   ]);
+  // const { payouts, poolClaims } = useCereStats(); // ToDo 
   const notStaking = !isSyncing && inSetup();
+  const { i18n, t } = useTranslation();
 
-  const [payoutsList, setPayoutLists] = useState<AnySubscan>([]);
+  const [payoutsList, setPayoutLists] = useState<AnySubscan>();
+  const [fromDate, setFromDate] = useState<string | undefined>();
+  const [toDate, setToDate] = useState<string | undefined>();
 
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref?.current || undefined);
@@ -100,11 +105,11 @@ export const Payouts = ({ page: { key } }: PageProps) => {
             </h2>
           </CardHeaderWrapper>
           <div ref={ref} className="inner" style={{ minHeight }}>
-            {!plugins.includes('subscan') ? (
+            {!plugins.includes('cerestats') ? (
               <StatusLabel
                 status="active_service"
-                statusFor="subscan"
-                title={t('payouts.subscanDisabled', { ns: 'pages' })}
+                statusFor="cereStats"
+                title={t('payouts.cereStatsDisabled', { ns: 'pages' })}
                 topOffset="30%"
               />
             ) : (

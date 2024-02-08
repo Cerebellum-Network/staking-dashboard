@@ -64,7 +64,7 @@ export const HomeInner = () => {
 
   // Back to tab 0 if not in a pool & on members tab.
   useEffect(() => {
-    if (!selectedActivePool) {
+    if (!selectedActivePool && [1].includes(activeTab)) {
       setActiveTab(0);
     }
   }, [selectedActivePool]);

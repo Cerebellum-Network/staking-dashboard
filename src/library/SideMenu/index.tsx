@@ -7,7 +7,7 @@ import { capitalizeFirstLetter } from '@polkadot-cloud/utils';
 import throttle from 'lodash.throttle';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SideMenuStickyThreshold } from 'consts';
+import { CereUrl, SideMenuStickyThreshold } from 'consts';
 import { useApi } from 'contexts/Api';
 import { useHelp } from 'contexts/Help';
 import { useTheme } from 'contexts/Themes';
@@ -79,7 +79,7 @@ export const SideMenu = () => {
         <Heading title={t('support')} minimised={sideMenuMinimised} />
         <Secondary
           onClick={() => {
-            openHelp(null);
+            openHelp(CereUrl);
           }}
           name={t('resources')}
           minimised={sideMenuMinimised}
@@ -131,7 +131,7 @@ export const SideMenu = () => {
           type="button"
           onClick={() =>
             window.open(
-              'https://github.com/paritytech/polkadot-staking-dashboard',
+              'https://github.com/Cerebellum-Network/staking-dashboard/',
               '_blank'
             )
           }

@@ -33,12 +33,13 @@ export const Payouts = () => {
     },
   } = useNetwork();
   const { plugins } = usePlugins();
-  const { getData, injectBlockTimestamp } = useSubscanData([
+  const { getData, injectBlockTimestamp } = useSubscanData([ // ToDo replace with cere stats data
     'payouts',
     'unclaimedPayouts',
     'poolClaims',
   ]);
   const notStaking = !isSyncing && inSetup();
+  const { t } = useTranslation('pages');
 
   // Get data safely from subscan hook.
   const data = getData(['payouts', 'unclaimedPayouts', 'poolClaims']);
@@ -103,10 +104,10 @@ export const Payouts = () => {
         </h2>
       </CardHeaderWrapper>
       <div className="inner" ref={graphInnerRef} style={{ minHeight }}>
-        {!plugins.includes('subscan') ? (
+        {!plugins.includes('cerestats') ? (
           <StatusLabel
             status="active_service"
-            statusFor="subscan"
+            statusFor="cereStats"
             title={t('overview.subscanDisabled')}
             topOffset="37%"
           />

@@ -37,6 +37,17 @@ export const Networks = () => {
   // Likely never going to happen; here just to be safe.
   useEffect(() => setModalResize(), [isBraveBrowser]);
 
+  const posRef = useRef(null);
+
+  const tooltipText = 'Undergoing Maintenance';
+
+  const toggleTooltip = () => {
+    if (!open) {
+      setTooltipMeta(tooltipText);
+      setTooltipPosition(posRef);
+    }
+  };
+
   return (
     <>
       <Title title={t('networks')} icon={faGlobe} />

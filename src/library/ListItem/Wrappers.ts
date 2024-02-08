@@ -136,7 +136,6 @@ export const Labels = styled.div`
         margin: 0 0.45rem;
       }
     }
-
     &.button-with-text {
       margin-right: 0;
 

@@ -36,7 +36,7 @@ declare global {
   }
 }
 
-export type NetworkName = 'polkadot' | 'kusama' | 'westend';
+export type NetworkName = 'polkadot' | 'kusama' | 'westend' | 'Cere' | 'Cere Devnet' | 'Cere Testnet' | 'Cere Qanet' ;
 
 export type Networks = Record<string, Network>;
 
@@ -124,7 +124,7 @@ export type MaybeAddress = string | null;
 export type MaybeString = string | null;
 
 // list of available plugins.
-export type Plugin = 'subscan' | 'binance_spot' | 'tips' | 'polkawatch';
+export type Plugin = 'subscan' | 'binance_spot' | 'tips' | 'polkawatch | cerestats'; // ToDo
 
 // track the status of a syncing / fetching process.
 export type Sync = 'unsynced' | 'syncing' | 'synced';

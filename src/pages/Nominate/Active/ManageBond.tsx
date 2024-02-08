@@ -121,7 +121,7 @@ export const ManageBond = () => {
             }
             text={String(totalUnlockChunks ?? 0)}
           />
-        </ButtonRow>
+        </ButtonRowWrapper>
       </CardHeaderWrapper>
       <BondedChart
         active={planckToUnit(active, units)}

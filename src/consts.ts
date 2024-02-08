@@ -8,9 +8,9 @@ import type { Plugin } from 'types';
  * Global Constants
  */
 export const AppVersion = '1.1.3';
-export const DappName = 'Polkadot Staking Dashboard';
-export const PolkadotUrl = 'https://polkadot.network/features/staking/';
-export const DefaultNetwork = 'polkadot';
+export const DappName = 'Cere Staking Dashboard';
+export const CereUrl = 'https://cere.network';
+export const DefaultNetwork = 'cereMainnet';
 export const ManualSigners = ['ledger', 'vault'];
 /*
  * Data Structure Helpers
@@ -33,7 +33,7 @@ export const TipsThresholdMedium = 1200;
  * Available plugins
  */
 export const PluginsList: Plugin[] = [
-  'subscan',
+  'cereStats', // ToDo
   'binance_spot',
   'tips',
   'polkawatch',
@@ -63,9 +63,9 @@ export const DefaultParams = {
   auctionAdjust: 0,
   auctionMax: 0,
   falloff: 0.05,
-  maxInflation: 0.1,
-  minInflation: 0.025,
-  stakeTarget: 0.5,
+  stakeTarget: 0.2,
+  maxInflation: 0.05,
+  minInflation: 0.0001,
 };
 
 /*

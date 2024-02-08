@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useHelp } from 'contexts/Help';
 import { useStaking } from 'contexts/Staking';
 import { CardHeaderWrapper, CardWrapper } from 'library/Card/Wrappers';
+import { useCereStats } from 'contexts/CereStats';
 import { EraPoints as EraPointsGraph } from 'library/Graphs/EraPoints';
 import { formatSize } from 'library/Graphs/Utils';
 import { GraphWrapper } from 'library/Graphs/Wrapper';
@@ -20,7 +21,7 @@ import { useOverlay } from '@polkadot-cloud/react/hooks';
 import { PluginLabel } from 'library/PluginLabel';
 import { useNetwork } from 'contexts/Network';
 import type { AnyJson } from 'types';
-import { SubscanController } from 'static/SubscanController';
+const { fetchEraPoints }: any = useCereStats();
 import { usePlugins } from 'contexts/Plugins';
 import { useApi } from 'contexts/Api';
 
@@ -64,7 +65,7 @@ export const ValidatorMetrics = () => {
       return;
     }
     setList(
-      await SubscanController.handleFetchEraPoints(
+      await fetchEraPoints(
         address,
         activeEra.index.toNumber()
       )
@@ -134,8 +135,8 @@ export const ValidatorMetrics = () => {
           <div ref={ref} style={{ minHeight }}>
             <StatusLabel
               status="active_service"
-              statusFor="subscan"
-              title={t('subscanDisabled')}
+              statusFor="cereStats"
+              title="Cere Stats Disabled"
             />
             <GraphWrapper
               style={{

@@ -23,6 +23,7 @@ export const ClosurePrompts = () => {
   const { isBonding, selectedActivePool, isDepositor, poolNominations } =
     useActivePools();
   const { getTransferOptions } = useTransferOptions();
+  const { t } = useTranslation('pages');
 
   const { state, memberCounter } = selectedActivePool?.bondedPool || {};
   const { active, totalUnlockChunks } = getTransferOptions(activeAccount).pool;

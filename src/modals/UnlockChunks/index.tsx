@@ -110,6 +110,17 @@ export const UnlockChunks = () => {
     };
   }, []);
 
+  // resize this modal on window resize
+  useEffect(() => {
+    window.addEventListener('resize', resizeCallback);
+    return () => {
+      window.removeEventListener('resize', resizeCallback);
+    };
+  }, []);
+  const resizeCallback = () => {
+    setModalHeight(getModalHeight());
+  };
+
   return (
     <ModalSection type="carousel">
       <ModalFixedTitle ref={headerRef}>

@@ -34,6 +34,12 @@ export const Wrapper = styled.div<MinimisedProps>`
     background: var(--gradient-side-menu);
     transition: all var(--transition-duration);
     border-radius: 0.75rem;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   section {

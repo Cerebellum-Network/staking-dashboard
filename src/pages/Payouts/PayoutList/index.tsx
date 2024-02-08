@@ -43,6 +43,7 @@ export const PayoutListInner = ({
   const { listFormat, setListFormat } = usePayoutList();
   const { validators } = useValidators();
   const { bondedPools } = useBondedPools();
+  const { i18n, t } = useTranslation('pages');
 
   // current page
   const [page, setPage] = useState<number>(1);

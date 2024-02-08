@@ -23,6 +23,7 @@ export const Announcements = () => {
   const { rewardAccountBalance } = selectedActivePool || {};
   const { totalRewardsClaimed } = selectedActivePool?.rewardPool || {};
   const { existentialDeposit } = consts;
+  const { t } = useTranslation('pages');
 
   // calculate the latest reward account balance
   const rewardPoolBalance = BigNumber.max(
@@ -59,6 +60,7 @@ export const Announcements = () => {
   };
 
   const announcements = [];
+  const unit = network.unit;
 
   announcements.push({
     class: 'neutral',

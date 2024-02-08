@@ -81,14 +81,14 @@
         "Epoch",
         [
           "An epoch is another name for a session in {NETWORK_NAME}. Each era is divided into 6 epochs during which validators are assigned as block producers to specific time frames or slots.",
-          "1 epoch is currently 4 hours in Polkadot."
+          "1 epoch is currently 4 hours in Cere Network."
         ]
       ],
       "era": [
         "Era",
         [
           "At the end of each era, validators are rewarded {NETWORK_UNIT} based on how many era points they accumulated in that era. This {NETWORK_UNIT} reward is then distributed amongst the nominators of the validator via a payout.",
-          "1 era is currently 24 hours in Polkadot."
+          "1 era is currently 24 hours in Cere Network."
         ]
       ],
       "eraPoints": [
@@ -254,10 +254,10 @@
           "This does not mean that you were not nominating or generating rewards in that period - only that the payout for that period was not yet made."
         ]
       ],
-      "polkadotVault": [
-        "Polkadot Vault",
+      "cereVault": [
+        "Cere Vault",
         [
-          "Polkadot Vault (formerly Parity Signer) is a cold storage solution that allows you to use a phone in airplane mode as an air-gapped wallet.",
+          "Cere Vault (formerly Parity Signer) is a cold storage solution that allows you to use a phone in airplane mode as an air-gapped wallet.",
           "The Vault app is not technically a wallet, as it does not allow to transfer funds.",
           "It is more of a key-chain tool that will enable you the create, manage, and restore accounts."
         ]
@@ -402,7 +402,7 @@
       "createPools": "Creating Nomination Pools",
       "howToUse": "How to Use the Staking Dashboard: Overview",
       "rebonding": "Rebonding",
-      "stakeDot": "Staking your DOT",
+      "stakeCere": "Staking your CERE",
       "unbondingTokens": "Unbonding Your Tokens"
     },
     "modal": {
