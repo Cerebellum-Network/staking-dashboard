@@ -31,10 +31,23 @@ const useApolloClient = (endpoint: Network['cereStatsEndpoint']) => {
   return client;
 };
 
+// Define the type of the parameter
+interface ActiveEraData {
+  era: number;
+  reward_point: RewardPoint; // You might want to change `any` to a more specific type if possible
+}
+
+interface RewardPoint {
+  era: number;
+}
+
 const useFetchEraPoints = (
   client: ApolloClient<NormalizedCacheObject> | null
 ) => {
-  const fetchEraPoints = async (address: string, activeEraIndex: number) => {
+  const fetchEraPoints = async (
+    address: string,
+    activeEraIndex: number
+  ): Promise<ActiveEraData[]> => {
     if (!address || !client) {
       return [];
     }
@@ -52,16 +65,6 @@ const useFetchEraPoints = (
     });
 
     if (data?.era_points !== null) {
-      // Define the type of the parameter
-      interface ActiveEraData {
-        era: number;
-        reward_point: RewardPoint; // You might want to change `any` to a more specific type if possible
-      }
-
-      interface RewardPoint {
-        era: number;
-      }
-
       const list: ActiveEraData[] = [];
       // Set a constant for the number of eras we want to display
       const ERAS_TO_SHOW = 100;

@@ -157,7 +157,8 @@ const westend = {
 
 // Determine if the testnet should be included based on the REACT_APP_INCLUDE_TESTNET environment variable
 // By default, includeTestnet is true or undefined unless REACT_APP_INCLUDE_TESTNET is explicitly set to 'false'
-const includeTestnet = process.env.REACT_APP_INCLUDE_TESTNET !== 'false';
+// const includeTestnet = process.env.REACT_APP_INCLUDE_TESTNET !== 'false'; ToDo
+const includeTestnet = true;
 
 /*
  * Network Configuration
