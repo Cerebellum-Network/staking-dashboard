@@ -6,7 +6,11 @@ import type { Network } from '../../types';
 import { useNetwork } from 'contexts/Network';
 import { useActiveAccounts } from 'contexts/ActiveAccounts';
 import { defaultCereStatsContext } from './defaults';
-import type { CereStatsContextInterface } from './types';
+import type {
+  CereStatsContextInterface,
+  RewardPoint,
+  ActiveEraData,
+} from './types';
 
 const useApolloClient = (endpoint: Network['cereStatsEndpoint']) => {
   const [client, setClient] =
@@ -30,16 +34,6 @@ const useApolloClient = (endpoint: Network['cereStatsEndpoint']) => {
 
   return client;
 };
-
-// Define the type of the parameter
-interface ActiveEraData {
-  era: number;
-  reward_point: RewardPoint; // You might want to change `any` to a more specific type if possible
-}
-
-interface RewardPoint {
-  era: number;
-}
 
 const useFetchEraPoints = (
   client: ApolloClient<NormalizedCacheObject> | null

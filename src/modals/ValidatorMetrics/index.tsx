@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useHelp } from 'contexts/Help';
 import { useStaking } from 'contexts/Staking';
 import { CardHeaderWrapper, CardWrapper } from 'library/Card/Wrappers';
-// import { useCereStats } from 'contexts/CereStats';
+import { useCereStats } from 'contexts/CereStats';
 import { EraPoints as EraPointsGraph } from 'library/Graphs/EraPoints';
 import { formatSize } from 'library/Graphs/Utils';
 import { GraphWrapper } from 'library/Graphs/Wrapper';
@@ -21,18 +21,16 @@ import { useOverlay } from '@polkadot-cloud/react/hooks';
 import { PluginLabel } from 'library/PluginLabel';
 import { useNetwork } from 'contexts/Network';
 import type { AnyJson } from 'types';
-// const { fetchEraPoints }: CereStatsContextInterface = useCereStats();
-// import { usePlugins } from 'contexts/Plugins';
-// import type { CereStatsContextInterface } from 'contexts/CereStats/types';
-
-// import { useApi } from 'contexts/Api';
+import type { CereStatsContextInterface } from 'contexts/CereStats/types';
+import { useApi } from 'contexts/Api';
 
 export const ValidatorMetrics = () => {
   const { t } = useTranslation('modals');
   const {
     networkData: { units, unit },
   } = useNetwork();
-  // const { activeEra } = useApi();
+  const { fetchEraPoints }: CereStatsContextInterface = useCereStats();
+  const { activeEra } = useApi();
   // const { plugins } = usePlugins();
   const { options } = useOverlay().modal.config;
   const { address, identity } = options;
@@ -63,12 +61,12 @@ export const ValidatorMetrics = () => {
   const { width, height, minHeight } = formatSize(size, 300);
 
   const handleEraPoints = async () => {
-    // const _list: any[] = [];
-    // const _list: any[] = await fetchEraPoints( // ToDo
-    //   address,
-    //   activeEra.index.toNumber()
-    // );
-    setList([]);
+    const _list = await fetchEraPoints(
+      // ToDo
+      address,
+      activeEra.index.toNumber()
+    );
+    setList(_list);
   };
 
   useEffect(() => {
