@@ -18,6 +18,7 @@
     "visualizer": "vite-bundle-visualizer"
   },
   "dependencies": {
+    "@apollo/client": "^3.7.14",
     "@dotlottie/player-component": "^2.7.0",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
     "@fortawesome/free-brands-svg-icons": "^6.4.2",
@@ -44,6 +45,7 @@
     "chroma-js": "^2.4.2",
     "date-fns": "^2.29.3",
     "framer-motion": "^10.16.3",
+    "graphql": "^16.6.0",
     "i18next": "^23.6.0",
     "i18next-browser-languagedetector": "^7.1.0",
     "lodash.throttle": "^4.1.1",
@@ -58,7 +60,8 @@
     "react-qr-reader": "^2.2.1",
     "react-router-dom": "^6.17.0",
     "react-scroll": "^1.9.0",
-    "styled-components": "^6.1.0"
+    "styled-components": "^6.1.0",
+    "subscriptions-transport-ws": "^0.11.0"
   },
   "devDependencies": {
     "@ledgerhq/logs": "^6.10.1",

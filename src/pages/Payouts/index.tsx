@@ -53,7 +53,7 @@ export const Payouts = ({ page }: PageProps) => {
       </StatBoxList>
       <PageRow>
         <CardWrapper>
-          <PluginLabel plugin="subscan" />
+          <PluginLabel plugin="cereStats" />
           <CardHeaderWrapper>
             <h4>
               {t('payouts.payoutHistory', { ns: 'pages' })}
@@ -76,7 +76,7 @@ export const Payouts = ({ page }: PageProps) => {
             </h2>
           </CardHeaderWrapper>
           <div className="inner" ref={ref} style={{ minHeight }}>
-            {!plugins.includes('subscan') ? (
+            {!plugins.includes('cereStats') ? (
               <StatusLabel
                 status="active_service"
                 statusFor="subscan"

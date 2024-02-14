@@ -49,6 +49,7 @@ import { useActiveAccounts } from 'contexts/ActiveAccounts';
 import { DappName } from 'consts';
 import { ImportedAccountsProvider } from 'contexts/Connect/ImportedAccounts';
 import { PoolPerformanceProvider } from 'contexts/Pools/PoolPerformance';
+import { CereStatsProvider } from './contexts/CereStats';
 
 // Embed providers from hook.
 export const Providers = () => {
@@ -102,6 +103,7 @@ export const Providers = () => {
     OverlayProvider,
     PromptProvider,
     MigrateProvider,
+    CereStatsProvider,
   ];
 
   return <>{withProviders(providers, ThemedRouter)}</>;

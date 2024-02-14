@@ -12,7 +12,7 @@ import BigNumber from 'bignumber.js';
 import { formatDistance, fromUnixTime, getUnixTime } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { DefaultLocale } from 'consts';
-import { useSubscan } from 'contexts/Plugins/Subscan';
+import { useCereStats } from 'contexts/CereStats';
 import { CardHeaderWrapper, CardWrapper } from 'library/Card/Wrappers';
 import { formatRewardsForGraphs } from 'library/Graphs/Utils';
 import { StatBoxList } from 'library/StatBoxList';
@@ -39,7 +39,7 @@ export const Overview = () => {
       brand: { token: Token },
     },
   } = useNetwork();
-  const { payouts, poolClaims, unclaimedPayouts } = useSubscan();
+  const { payouts, poolClaims, unclaimedPayouts } = useCereStats();
 
   const { lastReward } = formatRewardsForGraphs(
     new Date(),

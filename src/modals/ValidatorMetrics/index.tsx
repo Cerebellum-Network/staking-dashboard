@@ -4,6 +4,7 @@
 import { ButtonHelp, ModalPadding, Polkicon } from '@polkadot-cloud/react';
 import { ellipsisFn, planckToUnit } from '@polkadot-cloud/utils';
 import BigNumber from 'bignumber.js';
+import { useCereStats } from 'contexts/CereStats';
 import { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHelp } from 'contexts/Help';
@@ -27,9 +28,9 @@ export const ValidatorMetrics = () => {
   const {
     networkData: { units, unit },
   } = useNetwork();
+  const { fetchEraPoints } = useCereStats();
   const { options } = useOverlay().modal.config;
   const { address, identity } = options;
-  const { fetchEraPoints }: any = useSubscan();
   const { activeEra } = useNetworkMetrics();
   const {
     eraStakers: { stakers },

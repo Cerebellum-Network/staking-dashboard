@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { DefaultLocale } from 'consts';
 import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
 import { useStaking } from 'contexts/Staking';
-import { useSubscan } from 'contexts/Plugins/Subscan';
+import { useCereStats } from 'contexts/CereStats';
 import { useTheme } from 'contexts/Themes';
 import { useUi } from 'contexts/UI';
 import { locales } from 'locale';
@@ -47,7 +47,7 @@ export const PayoutBar = ({ days, height }: PayoutBarProps) => {
   const { inSetup } = useStaking();
   const { membership } = usePoolMemberships();
   const { unit, units, colors } = useNetwork().networkData;
-  const { payouts, poolClaims, unclaimedPayouts } = useSubscan();
+  const { payouts, poolClaims, unclaimedPayouts } = useCereStats();
   const notStaking = !isSyncing && inSetup() && !membership;
 
   // remove slashes from payouts (graph does not support negative values).
