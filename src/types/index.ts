@@ -100,7 +100,7 @@ export type MaybeAddress = string | null;
 export type MaybeString = string | null;
 
 // list of available plugins.
-export type Plugin = 'subscan' | 'binance_spot' | 'tips' | 'polkawatch' | 'cerestats'; // ToDo
+export type Plugin = 'subscan' | 'binance_spot' | 'tips' | 'polkawatch' | 'cereStats'; // ToDo
 
 // track the status of a syncing / fetching process.
 export type Sync = 'unsynced' | 'syncing' | 'synced';
