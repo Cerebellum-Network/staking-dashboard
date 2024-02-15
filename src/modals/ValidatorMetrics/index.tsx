@@ -21,7 +21,6 @@ import { useOverlay } from '@polkadot-cloud/react/hooks';
 import { PluginLabel } from 'library/PluginLabel';
 import { useNetwork } from 'contexts/Network';
 import type { AnyJson } from 'types';
-const { fetchEraPoints }: any = useCereStats();
 import { usePlugins } from 'contexts/Plugins';
 import { useApi } from 'contexts/Api';
 
@@ -30,6 +29,7 @@ export const ValidatorMetrics = () => {
   const {
     networkData: { units, unit },
   } = useNetwork();
+  const { fetchEraPoints } = useCereStats();
   const { activeEra } = useApi();
   const { plugins } = usePlugins();
   const { options } = useOverlay().modal.config;

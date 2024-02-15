@@ -5,7 +5,7 @@ import CereLogoSvg from 'img/cere_logo.svg?react';
 import type { NetworkName, Networks } from 'types';
 import BigNumber from 'bignumber.js';
 
-const CereMainnet: NetworkName = 'Cere';
+const CereMainnet: NetworkName = 'Cere Mainnet';
 const CereTestnet: NetworkName = 'Cere Testnet';
 const CereDevnet: NetworkName = 'Cere Devnet';
 const CereQanet: NetworkName = 'Cere Qanet';
@@ -42,7 +42,8 @@ const cereMainnet = {
     lightClient: 'Cere',
     defaultRpcEndpoint: 'Cere',
     rpcEndpoints: {
-      Cere: 'wss://archive.mainnet.cere.network/ws',
+      // Cere: 'wss://archive.mainnet.cere.network/ws',
+      Cere: 'ws://127.0.0.1:9944',
     },
   },
   subscanEndpoint: '',
@@ -157,7 +158,8 @@ const westend = {
 
 // Determine if the testnet should be included based on the REACT_APP_INCLUDE_TESTNET environment variable
 // By default, includeTestnet is true or undefined unless REACT_APP_INCLUDE_TESTNET is explicitly set to 'false'
-const includeTestnet = process.env.REACT_APP_INCLUDE_TESTNET !== 'false';
+// const includeTestnet = process.env.REACT_APP_INCLUDE_TESTNET !== 'false';
+const includeTestnet = true;
 
 /*
  * Network Configuration
@@ -180,7 +182,7 @@ export const PagedRewardsStartEra: Record<NetworkName, BigNumber | null> = {
   polkadot: null,
   kusama: null,
   westend: new BigNumber(7167),
-  Cere: null,
+  'Cere Mainnet': null,
   'Cere Devnet': null,
   'Cere Testnet': null,
   'Cere Qanet': null,

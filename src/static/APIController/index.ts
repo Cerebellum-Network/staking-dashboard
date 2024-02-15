@@ -252,7 +252,7 @@ export class APIController {
       this.api.consts.babe.epochDuration,
       this.api.consts.balances.existentialDeposit,
       this.api.consts.staking.historyDepth,
-      this.api.consts.fastUnstake.deposit,
+      // this.api.consts.fastUnstake.deposit,
       this.api.consts.nominationPools.palletId,
     ];
     // DEPRECATION: Paged Rewards
@@ -289,8 +289,8 @@ export class APIController {
     const resultNetworkMetrics = await this.api.queryMulti([
       // Network metrics.
       this.api.query.balances.totalIssuance,
-      this.api.query.auctions.auctionCounter,
-      this.api.query.paraSessionInfo.earliestStoredSession,
+      // this.api.query.auctions.auctionCounter,
+      // this.api.query.paraSessionInfo.earliestStoredSession,
       this.api.query.fastUnstake.erasToCheckPerBlock,
       this.api.query.staking.minimumActiveStake,
       // Nomination pool configs.
@@ -354,74 +354,70 @@ export class APIController {
         historyDepth: resultConsts[7]
           ? this.stringToBigNumber(resultConsts[7].toString())
           : new BigNumber(0),
-        fastUnstakeDeposit: resultConsts[8]
-          ? this.stringToBigNumber(resultConsts[8].toString())
-          : new BigNumber(0),
-        poolsPalletId: resultConsts[9]
-          ? resultConsts[9].toU8a()
+        fastUnstakeDeposit: new BigNumber(0),
+        poolsPalletId: resultConsts[8]
+          ? resultConsts[8].toU8a()
           : new Uint8Array(0),
-        maxExposurePageSize: resultConsts[10]
-          ? this.stringToBigNumber(resultConsts[10].toString())
+        maxExposurePageSize: resultConsts[9]
+          ? this.stringToBigNumber(resultConsts[9].toString())
           : NetworkList[this.network].maxExposurePageSize,
       },
       networkMetrics: {
         totalIssuance: new BigNumber(resultNetworkMetrics[0].toString()),
-        auctionCounter: new BigNumber(resultNetworkMetrics[1].toString()),
-        earliestStoredSession: new BigNumber(
-          resultNetworkMetrics[2].toString()
-        ),
+        auctionCounter: new BigNumber('0'.toString()),
+        earliestStoredSession: new BigNumber('0'.toString()),
         fastUnstakeErasToCheckPerBlock: Number(
-          rmCommas(resultNetworkMetrics[3].toString())
+          rmCommas(resultNetworkMetrics[1].toString())
         ),
-        minimumActiveStake: new BigNumber(resultNetworkMetrics[4].toString()),
+        minimumActiveStake: new BigNumber(resultNetworkMetrics[2].toString()),
       },
       activeEra,
       poolsConfig: {
         counterForPoolMembers: this.stringToBigNumber(
-          resultNetworkMetrics[5].toString()
+          resultNetworkMetrics[3].toString()
         ),
         counterForBondedPools: this.stringToBigNumber(
-          resultNetworkMetrics[6].toString()
+          resultNetworkMetrics[4].toString()
         ),
         counterForRewardPools: this.stringToBigNumber(
-          resultNetworkMetrics[7].toString()
+          resultNetworkMetrics[5].toString()
         ),
-        lastPoolId: this.stringToBigNumber(resultNetworkMetrics[8].toString()),
+        lastPoolId: this.stringToBigNumber(resultNetworkMetrics[6].toString()),
         maxPoolMembers,
         maxPoolMembersPerPool,
         maxPools,
         minCreateBond: this.stringToBigNumber(
-          resultNetworkMetrics[12].toString()
+          resultNetworkMetrics[10].toString()
         ),
         minJoinBond: this.stringToBigNumber(
-          resultNetworkMetrics[13].toString()
+          resultNetworkMetrics[11].toString()
         ),
         globalMaxCommission: Number(
-          String(resultNetworkMetrics[14]?.toHuman() || '100%').slice(0, -1)
+          String(resultNetworkMetrics[12]?.toHuman() || '100%').slice(0, -1)
         ),
       },
       stakingMetrics: {
         totalNominators: this.stringToBigNumber(
-          resultNetworkMetrics[15].toString()
+          resultNetworkMetrics[13].toString()
         ),
         totalValidators: this.stringToBigNumber(
-          resultNetworkMetrics[16].toString()
+          resultNetworkMetrics[14].toString()
         ),
         maxValidatorsCount: this.stringToBigNumber(
-          resultNetworkMetrics[17].toString()
+          resultNetworkMetrics[15].toString()
         ),
         validatorCount: this.stringToBigNumber(
+          resultNetworkMetrics[16].toString()
+        ),
+        lastReward: this.stringToBigNumber(resultNetworkMetrics[17].toString()),
+        lastTotalStake: this.stringToBigNumber(
           resultNetworkMetrics[18].toString()
         ),
-        lastReward: this.stringToBigNumber(resultNetworkMetrics[19].toString()),
-        lastTotalStake: this.stringToBigNumber(
-          resultNetworkMetrics[20].toString()
-        ),
         minNominatorBond: this.stringToBigNumber(
-          resultNetworkMetrics[21].toString()
+          resultNetworkMetrics[19].toString()
         ),
         totalStaked: this.stringToBigNumber(
-          resultNetworkMetrics[22].toString()
+          resultNetworkMetrics[20].toString()
         ),
       },
     };
@@ -475,20 +471,20 @@ export class APIController {
       const unsub = await this.api.queryMulti(
         [
           this.api.query.balances.totalIssuance,
-          this.api.query.auctions.auctionCounter,
-          this.api.query.paraSessionInfo.earliestStoredSession,
+          // this.api.query.auctions.auctionCounter,
+          // this.api.query.paraSessionInfo.earliestStoredSession,
           this.api.query.fastUnstake.erasToCheckPerBlock,
           this.api.query.staking.minimumActiveStake,
         ],
         (result) => {
           const networkMetrics = {
             totalIssuance: new BigNumber(result[0].toString()),
-            auctionCounter: new BigNumber(result[1].toString()),
-            earliestStoredSession: new BigNumber(result[2].toString()),
+            auctionCounter: new BigNumber('0'.toString()),
+            earliestStoredSession: new BigNumber('0'.toString()),
             fastUnstakeErasToCheckPerBlock: Number(
-              rmCommas(result[3].toString())
+              rmCommas(result[1].toString())
             ),
-            minimumActiveStake: new BigNumber(result[4].toString()),
+            minimumActiveStake: new BigNumber(result[2].toString()),
           };
 
           document.dispatchEvent(

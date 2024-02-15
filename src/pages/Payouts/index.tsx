@@ -40,8 +40,6 @@ export const Payouts = ({ page: { key } }: PageProps) => {
   const notStaking = !isSyncing && inSetup();
 
   const [payoutsList, setPayoutLists] = useState<AnySubscan>();
-  const [fromDate, setFromDate] = useState<string | undefined>();
-  const [toDate, setToDate] = useState<string | undefined>();
 
   const ref = useRef<HTMLDivElement>(null);
   const size = useSize(ref?.current || undefined);

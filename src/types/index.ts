@@ -40,7 +40,7 @@ export type NetworkName =
   | 'polkadot'
   | 'kusama'
   | 'westend'
-  | 'Cere'
+  | 'Cere Mainnet'
   | 'Cere Devnet'
   | 'Cere Testnet'
   | 'Cere Qanet';

@@ -6,7 +6,11 @@ import type { Network } from '../../types';
 import { useNetwork } from 'contexts/Network';
 import { useActiveAccounts } from 'contexts/ActiveAccounts';
 import { defaultCereStatsContext } from './defaults';
-import type { CereStatsContextInterface } from './types';
+import type {
+  CereStatsContextInterface,
+  RewardPoint,
+  ActiveEraData,
+} from './types';
 
 const useApolloClient = (endpoint: Network['cereStatsEndpoint']) => {
   const [client, setClient] =
@@ -52,16 +56,6 @@ const useFetchEraPoints = (
     });
 
     if (data?.era_points !== null) {
-      // Define the type of the parameter
-      interface ActiveEraData {
-        era: number;
-        reward_point: RewardPoint; // You might want to change `any` to a more specific type if possible
-      }
-
-      interface RewardPoint {
-        era: number;
-      }
-
       const list: ActiveEraData[] = [];
       // Set a constant for the number of eras we want to display
       const ERAS_TO_SHOW = 100;

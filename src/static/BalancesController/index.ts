@@ -142,12 +142,13 @@ export class BalancesController {
     { data: accountData, nonce }: AnyApi,
     locksResult: AnyApi
   ): void => {
+    console.warn(accountData);
     this.balances[address] = {
       nonce: nonce.toNumber(),
       balance: {
         free: this.stringToBigNumber(accountData.free.toString()),
         reserved: this.stringToBigNumber(accountData.reserved.toString()),
-        frozen: this.stringToBigNumber(accountData.frozen.toString()),
+        frozen: this.stringToBigNumber(accountData['feeFrozen'].toString()),
       },
       locks: locksResult
         .toHuman()

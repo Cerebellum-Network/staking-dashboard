@@ -5,7 +5,7 @@
 import { NetworkList } from 'config/networks';
 
 export const defaultNetworkContext = {
-  network: NetworkList.cereMainnet.name,
-  networkData: NetworkList.cereMainnet,
+  network: NetworkList.cereDevnet.name,
+  networkData: NetworkList.cereDevnet,
   switchNetwork: () => {},
 };
