@@ -6,7 +6,7 @@ import PolkadotSVG from 'img/appIcons/polkadot.svg?react';
 
 export const LedgerApps: LedgerApp[] = [
   {
-    network: 'Cere Mainnet',
+    network: 'cereMainnet',
     appName: 'Polkadot',
     Icon: PolkadotSVG,
   },

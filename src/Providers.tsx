@@ -53,6 +53,8 @@ import { CereStatsProvider } from './contexts/CereStats';
 
 // Embed providers from hook.
 export const Providers = () => {
+  const networkAllData = useNetwork();
+  console.warn(networkAllData);
   const {
     network,
     networkData: { ss58 },

@@ -5,11 +5,11 @@
   "license": "GPL-3.0-only",
   "private": false,
   "scripts": {
-    "build": "tsc && vite build --base '/'",
+    "build": "tsc && vite build --base './'",
     "build:pages": "tsc && vite build --base '/polkadot-staking-dashboard/'",
     "clear": "rm -rf node_modules build tsconfig.tsbuildinfo",
     "deploy:pages": "yarn build:pages && gh-pages -d build",
-    "dev": "vite",
+    "dev": "vite --base './'",
     "lint": "eslint . --fix && npx prettier --write . && npx prettier --write ./.scripts && node ./.scripts/localeOrderKeys.cjs",
     "locale:order": "node ./.scripts/localeOrderKeys.cjs",
     "locale:validate": "node ./.scripts/localeValidate.cjs",

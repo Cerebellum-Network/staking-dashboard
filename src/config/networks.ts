@@ -5,10 +5,10 @@ import CereLogoSvg from 'img/cere_logo.svg?react';
 import type { NetworkName, Networks } from 'types';
 import BigNumber from 'bignumber.js';
 
-const CereMainnet: NetworkName = 'Cere Mainnet';
-const CereTestnet: NetworkName = 'Cere Testnet';
-const CereDevnet: NetworkName = 'Cere Devnet';
-const CereQanet: NetworkName = 'Cere Qanet';
+const CereMainnet: NetworkName = 'cereMainnet';
+const CereTestnet: NetworkName = 'cereTestnet';
+const CereDevnet: NetworkName = 'cereDevnet';
+const CereQanet: NetworkName = 'cereQanet';
 
 const cereMainnet = {
   name: CereMainnet,

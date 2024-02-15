@@ -13,10 +13,10 @@ declare global {
 }
 
 export type NetworkName =
-  | 'Cere Mainnet'
-  | 'Cere Testnet'
-  | 'Cere Devnet'
-  | 'Cere Qanet';
+  | 'cereMainnet'
+  | 'cereTestnet'
+  | 'cereDevnet'
+  | 'cereQanet';
 
 export type Networks = Record<string, Network>;
 

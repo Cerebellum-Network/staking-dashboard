@@ -11,7 +11,7 @@ import type { Plugin } from 'types';
 export const AppVersion = '1.0.8';
 export const DappName = 'Cere Staking Dashboard';
 export const CereUrl = 'https://cere.network';
-export const DefaultNetwork = 'Cere Mainnet';
+export const DefaultNetwork = 'cereMainnet';
 export const ManualSigners = ['ledger', 'vault'];
 /*
  * Data Structure Helpers

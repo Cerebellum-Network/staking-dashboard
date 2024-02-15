@@ -10,6 +10,8 @@ import type { NetworkState } from 'contexts/Api/types';
 import type { NetworkContextInterface } from './types';
 import { defaultNetworkContext } from './defaults';
 
+console.log('Default network context');
+console.log(defaultNetworkContext);
 export const NetworkProvider = ({
   children,
 }: {
@@ -43,9 +45,12 @@ export const NetworkProvider = ({
 
   // handle network switching
   const switchNetwork = (name: NetworkName) => {
+    console.warn(`Switching network to name: ${name}`);
+    console.warn(NetworkList);
+
     setNetwork({
       name,
-      meta: NetworkList[name],
+      meta: NetworkList.cereMainnet,
     });
 
     // update url `n` if needed.
@@ -54,9 +59,11 @@ export const NetworkProvider = ({
 
   // Store the initial active network.
   const initialNetwork = getInitialNetwork();
+  console.warn('Initial network');
+  console.warn(NetworkList);
   const [network, setNetwork] = useState<NetworkState>({
     name: initialNetwork,
-    meta: NetworkList[initialNetwork],
+    meta: NetworkList.cereMainnet,
   });
 
   return (
