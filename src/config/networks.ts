@@ -42,8 +42,7 @@ const cereMainnet = {
     lightClient: 'Cere',
     defaultRpcEndpoint: 'Cere',
     rpcEndpoints: {
-      // Cere: 'wss://archive.mainnet.cere.network/ws',
-      Cere: 'ws://127.0.0.1:9944',
+      Cere: 'wss://archive.mainnet.cere.network/ws',
     },
   },
   subscanEndpoint: '',
