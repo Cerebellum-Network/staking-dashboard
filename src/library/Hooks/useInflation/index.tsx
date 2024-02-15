@@ -13,23 +13,13 @@ export const useInflation = () => {
   const { metrics } = useNetworkMetrics();
   const { staking } = useStaking();
   const { lastTotalStake } = staking;
-  const { totalIssuance, auctionCounter } = metrics;
+  const { totalIssuance } = metrics;
 
-  const {
-    auctionAdjust,
-    auctionMax,
-    falloff,
-    maxInflation,
-    minInflation,
-    stakeTarget,
-  } = params;
+  const { falloff, maxInflation, minInflation, stakeTarget } = params;
 
   const BIGNUMBER_MILLION = new BigNumber(1_000_000);
 
-  const calculateInflation = (
-    totalStaked: BigNumber,
-    numAuctions: BigNumber
-  ) => {
+  const calculateInflation = (totalStaked: BigNumber) => {
     const stakedFraction =
       totalStaked.isZero() || totalIssuance.isZero()
         ? 0
@@ -37,7 +27,7 @@ export const useInflation = () => {
             .multipliedBy(BIGNUMBER_MILLION)
             .dividedBy(totalIssuance)
             .toNumber() / BIGNUMBER_MILLION.toNumber();
-    
+
     // The idealStake is equal to stakeTarget since
     // Cere Network doesn't provide auctionMax, numAuctions and auctionAdjust so far.
     const idealStake = stakeTarget;
@@ -60,5 +50,5 @@ export const useInflation = () => {
     };
   };
 
-  return calculateInflation(lastTotalStake, auctionCounter);
+  return calculateInflation(lastTotalStake);
 };

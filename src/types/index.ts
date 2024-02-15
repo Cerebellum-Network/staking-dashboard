@@ -12,7 +12,11 @@ declare global {
   }
 }
 
-export type NetworkName = 'Cere Mainnet' | 'Cere Testnet' | 'Cere Devnet' | 'Cere Qanet';
+export type NetworkName =
+  | 'Cere Mainnet'
+  | 'Cere Testnet'
+  | 'Cere Devnet'
+  | 'Cere Qanet';
 
 export type Networks = Record<string, Network>;
 
@@ -29,6 +33,7 @@ export interface Network {
     defaultRpcEndpoint: string;
     rpcEndpoints: Record<string, string>;
   };
+  cereStatsEndpoint: string;
   namespace: string;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   colors: Record<NetworkColor, { [key in Theme]: string }>;
@@ -100,7 +105,12 @@ export type MaybeAddress = string | null;
 export type MaybeString = string | null;
 
 // list of available plugins.
-export type Plugin = 'subscan' | 'binance_spot' | 'tips' | 'polkawatch' | 'cereStats'; // ToDo
+export type Plugin =
+  | 'subscan'
+  | 'binance_spot'
+  | 'tips'
+  | 'polkawatch'
+  | 'cereStats'; // ToDo
 
 // track the status of a syncing / fetching process.
 export type Sync = 'unsynced' | 'syncing' | 'synced';

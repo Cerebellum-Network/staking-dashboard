@@ -4,7 +4,7 @@
 import { NetworkList } from 'config/networks';
 
 export const defaultNetworkContext = {
-  network: NetworkList.polkadot.name,
-  networkData: NetworkList.polkadot,
+  network: NetworkList.cereMainnet.name,
+  networkData: NetworkList.cereMainnet,
   switchNetwork: () => {},
 };
