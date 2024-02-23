@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-import { Networks } from 'types';
-import { DEFAULT_PARAMS } from 'consts';
-import { ReactComponent as CereLogoSvg } from 'img/cere_logo.svg';
+import { WellKnownChain } from '@polkadot/rpc-provider/substrate-connect';
+import { DefaultParams } from 'consts';
 import { ReactComponent as CereIconSvg } from 'img/cere_icon.svg';
+import { ReactComponent as CereLogoSvg } from 'img/cere_logo.svg';
+import { Networks } from 'types';
 
 const cereMainnet = {
   name: 'Cere',
@@ -15,12 +16,19 @@ const cereMainnet = {
       light: '#Ec8f6e',
       dark: '#Ec8f6e',
     },
+    stroke: {
+      light: 'rgb(236, 110, 121)',
+      dark: 'rgb(183, 174, 255)',
+    },
     transparent: {
       light: 'rgb(236,110,121,0.05)',
       dark: 'rgb(236,110,121, 0.05)',
     },
   },
-  endpoint: 'wss://archive.mainnet.cere.network/ws',
+  endpoints: {
+    rpc: 'wss://archive.mainnet.cere.network/ws',
+    lightClient: WellKnownChain.polkadot,
+  },
   subscanEndpoint: '',
   cereStatsEndpoint: 'wss://hasura.stats.cere.network/v1/graphql',
   unit: 'CERE',
@@ -45,14 +53,37 @@ const cereMainnet = {
   features: {
     pools: false,
   },
-  params: DEFAULT_PARAMS,
+  params: DefaultParams,
 };
 
 const cereTestnet = {
   ...cereMainnet,
   name: 'Cere Testnet',
-  endpoint: 'wss://archive.testnet.cere.network/ws',
-  cereStatsEndpoint: 'wss://hasura.stats.dev.cere.network/v1/graphql',
+  endpoints: {
+    rpc: 'wss://archive.testnet.cere.network/ws',
+    lightClient: WellKnownChain.polkadot,
+  },
+  cereStatsEndpoint: 'wss://stats-hasura.network-dev.aws.cere.io/v1/graphql',
+};
+
+const cereDevnet = {
+  ...cereMainnet,
+  name: 'Cere Devnet',
+  endpoints: {
+    rpc: 'wss://archive.devnet.cere.network/ws',
+    lightClient: WellKnownChain.polkadot,
+  },
+  cereStatsEndpoint: 'wss://stats-hasura.network-dev.aws.cere.io/v1/graphql',
+};
+
+const cereQAnet = {
+  ...cereMainnet,
+  name: 'Cere Qanet',
+  endpoints: {
+    rpc: 'wss://archive.qanet.cere.network/ws',
+    lightClient: WellKnownChain.polkadot,
+  },
+  cereStatsEndpoint: 'wss://stats-hasura.network-dev.aws.cere.io/v1/graphql',
 };
 
 // Determine if the testnet should be included based on the REACT_APP_INCLUDE_TESTNET environment variable
@@ -65,4 +96,6 @@ const includeTestnet = process.env.REACT_APP_INCLUDE_TESTNET !== 'false';
 export const NETWORKS: Networks = {
   cereMainnet,
   ...(includeTestnet ? { cereTestnet } : {}),
+  cereDevnet,
+  cereQAnet,
 };

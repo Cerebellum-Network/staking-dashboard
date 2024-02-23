@@ -1,13 +1,15 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { bnToU8a, u8aConcat } from '@polkadot/util';
 import BN from 'bn.js';
-import React, { useState, useEffect, useRef } from 'react';
+import { EmptyH256, ModPrefix, U32Opts } from 'consts';
 import { PoolConfigState, PoolsConfigContextState } from 'contexts/Pools/types';
+import React, { useEffect, useRef, useState } from 'react';
 import { AnyApi } from 'types';
 import { rmCommas, setStateWithRef } from 'Utils';
-import * as defaults from './defaults';
 import { useApi } from '../../Api';
+import * as defaults from './defaults';
 
 export const PoolsConfigContext = React.createContext<PoolsConfigContextState>(
   defaults.defaultPoolsConfigContext
@@ -20,11 +22,8 @@ export const PoolsConfigProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { api, network, isReady } = useApi();
-  const { features } = network;
-
-  // whether pools are enabled
-  const [enabled, setEnabled] = useState(0);
+  const { api, network, isReady, consts } = useApi();
+  const { poolsPalletId } = consts;
 
   // store pool metadata
   const [poolsConfig, setPoolsConfig] = useState<PoolConfigState>({
@@ -33,24 +32,25 @@ export const PoolsConfigProvider = ({
   });
   const poolsConfigRef = useRef(poolsConfig);
 
-  // disable pools if network does not support them
-  useEffect(() => {
-    if (features.pools) {
-      setEnabled(1);
-    } else {
-      setEnabled(0);
-      unsubscribe();
-    }
-  }, [network]);
+  // get favorite pools from local storage
+  const getFavorites = () => {
+    const _favorites = localStorage.getItem(
+      `${network.name.toLowerCase()}_favorite_pools`
+    );
+    return _favorites !== null ? JSON.parse(_favorites) : [];
+  };
+
+  // stores the user's favorite pools
+  const [favorites, setFavorites] = useState<string[]>(getFavorites());
 
   useEffect(() => {
-    if (isReady && enabled) {
+    if (isReady) {
       subscribeToPoolConfig();
     }
     return () => {
       unsubscribe();
     };
-  }, [network, isReady, enabled]);
+  }, [network, isReady]);
 
   const unsubscribe = () => {
     if (poolsConfigRef.current.unsub !== null) {
@@ -67,6 +67,7 @@ export const PoolsConfigProvider = ({
         api.query.nominationPools.counterForPoolMembers,
         api.query.nominationPools.counterForBondedPools,
         api.query.nominationPools.counterForRewardPools,
+        api.query.nominationPools.lastPoolId,
         api.query.nominationPools.maxPoolMembers,
         api.query.nominationPools.maxPoolMembersPerPool,
         api.query.nominationPools.maxPools,
@@ -77,6 +78,7 @@ export const PoolsConfigProvider = ({
         _counterForPoolMembers,
         _counterForBondedPools,
         _counterForRewardPools,
+        _lastPoolId,
         _maxPoolMembers,
         _maxPoolMembersPerPool,
         _maxPools,
@@ -104,6 +106,7 @@ export const PoolsConfigProvider = ({
               counterForPoolMembers: _counterForPoolMembers.toBn(),
               counterForBondedPools: _counterForBondedPools.toBn(),
               counterForRewardPools: _counterForRewardPools.toBn(),
+              lastPoolId: _lastPoolId.toBn(),
               maxPoolMembers: _maxPoolMembers,
               maxPoolMembersPerPool: _maxPoolMembersPerPool,
               maxPools: _maxPools,
@@ -127,10 +130,69 @@ export const PoolsConfigProvider = ({
     );
   };
 
+  /*
+   * Adds a favorite validator.
+   */
+  const addFavorite = (address: string) => {
+    const _favorites: any = Object.assign(favorites);
+    if (!_favorites.includes(address)) {
+      _favorites.push(address);
+    }
+
+    localStorage.setItem(
+      `${network.name.toLowerCase()}_favorite_pools`,
+      JSON.stringify(_favorites)
+    );
+    setFavorites([..._favorites]);
+  };
+
+  /*
+   * Removes a favorite validator if they exist.
+   */
+  const removeFavorite = (address: string) => {
+    let _favorites = Object.assign(favorites);
+    _favorites = _favorites.filter(
+      (validator: string) => validator !== address
+    );
+    localStorage.setItem(
+      `${network.name.toLowerCase()}_favorite_pools`,
+      JSON.stringify(_favorites)
+    );
+    setFavorites([..._favorites]);
+  };
+
+  // Helper: generates pool stash and reward accounts. assumes poolsPalletId is synced.
+  const createAccounts = (poolId: number) => {
+    const poolIdBN = new BN(poolId);
+    return {
+      stash: createAccount(poolIdBN, 0),
+      reward: createAccount(poolIdBN, 1),
+    };
+  };
+
+  const createAccount = (poolId: BN, index: number): string => {
+    if (!api) return '';
+    return api.registry
+      .createType(
+        'AccountId32',
+        u8aConcat(
+          ModPrefix,
+          poolsPalletId,
+          new Uint8Array([index]),
+          bnToU8a(poolId, U32Opts),
+          EmptyH256
+        )
+      )
+      .toString();
+  };
+
   return (
     <PoolsConfigContext.Provider
       value={{
-        enabled,
+        addFavorite,
+        removeFavorite,
+        createAccounts,
+        favorites,
         stats: poolsConfigRef.current.stats,
       }}
     >

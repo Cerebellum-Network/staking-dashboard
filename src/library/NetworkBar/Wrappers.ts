@@ -1,10 +1,10 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import styled from 'styled-components';
+import { SideMenuStickyThreshold } from 'consts';
 import { motion } from 'framer-motion';
-import { textSecondary, backgroundNetworkBar, networkColor } from 'theme';
-import { SIDE_MENU_STICKY_THRESHOLD } from 'consts';
+import styled from 'styled-components';
+import { backgroundNetworkBar, networkColor, textSecondary } from 'theme';
 
 export const Wrapper = styled(motion.div)`
   width: 100%;
@@ -21,7 +21,7 @@ export const Wrapper = styled(motion.div)`
   z-index: 6;
   backdrop-filter: blur(4px);
   position: relative;
-  @media (min-width: ${SIDE_MENU_STICKY_THRESHOLD + 1}px) {
+  @media (min-width: ${SideMenuStickyThreshold + 1}px) {
     position: fixed;
   }
 `;
@@ -107,7 +107,6 @@ export const NetworkInfo = styled(motion.div)`
   width: 100%;
   background: ${networkColor};
   flex: 1;
-  box-sizing: border-box;
   display: flex;
   flex-flow: column nowrap;
   justify-content: flex-start;
@@ -132,7 +131,6 @@ export const NetworkInfo = styled(motion.div)`
 
     > div,
     > button {
-      padding: 0.25rem 1.5rem 0.25rem;
       background: rgba(0, 0, 0, 0.1);
       margin-right: 1rem;
       border-radius: 0.5rem;
@@ -144,9 +142,12 @@ export const NetworkInfo = styled(motion.div)`
         margin-right: 0;
       }
     }
+    > div,
+    > span {
+      padding: 1rem;
+    }
     h3 {
       margin: 0.25rem 0;
-      font-variation-settings: 'wght' 575;
       color: #f1f1f1;
       padding: 0.2rem 0;
 

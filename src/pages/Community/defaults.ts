@@ -3,11 +3,12 @@
 
 export const item = {
   name: '',
-  Thumbnail: null,
+  thumbnail: null,
   validators: [],
 };
 
 export const defaultContext = {
+  // eslint-disable-next-line
   setActiveSection: (t: number) => {},
   activeSection: 0,
 };

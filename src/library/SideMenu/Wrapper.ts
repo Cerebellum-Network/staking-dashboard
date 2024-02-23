@@ -1,23 +1,21 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import {
+  SideMenuMaximisedWidth,
+  SideMenuMinimisedWidth,
+  SideMenuStickyThreshold,
+} from 'consts';
 import styled from 'styled-components';
 import {
-  SIDE_MENU_MAXIMISED_WIDTH,
-  SIDE_MENU_MINIMISED_WIDTH,
-  SIDE_MENU_STICKY_THRESHOLD,
-} from 'consts';
-import {
-  textSecondary,
   backgroundOverlay,
-  networkColor,
-  modalBackground,
   borderPrimary,
+  networkColor,
+  textSecondary,
 } from 'theme';
 import { MinimisedProps } from './types';
 
 export const Wrapper = styled.div<MinimisedProps>`
-  box-sizing: border-box;
   border-radius: ${(props) => (props.minimised ? '0.7rem' : 0)};
   background: none;
   padding: 1rem 1rem 1rem 1.25rem;
@@ -29,13 +27,19 @@ export const Wrapper = styled.div<MinimisedProps>`
   backdrop-filter: blur(4px);
   width: ${(props) =>
     props.minimised
-      ? `${SIDE_MENU_MINIMISED_WIDTH}px`
-      : `${SIDE_MENU_MAXIMISED_WIDTH}px`};
+      ? `${SideMenuMinimisedWidth}px`
+      : `${SideMenuMaximisedWidth}px`};
 
-  @media (max-width: ${SIDE_MENU_STICKY_THRESHOLD}px) {
+  @media (max-width: ${SideMenuStickyThreshold}px) {
     background: ${backgroundOverlay};
     transition: all 0.2s;
     border-radius: 0.75rem;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   section {
@@ -53,9 +57,10 @@ export const Wrapper = styled.div<MinimisedProps>`
         position: relative;
         color: ${textSecondary};
         transition: color 0.2s;
-        margin-right: ${(props) => (props.minimised ? 0 : '0.25rem')};
         margin-top: ${(props) => (props.minimised ? '1.25rem' : 0)};
+        margin-right: ${(props) => (props.minimised ? 0 : '1rem')};
         opacity: 0.75;
+        padding: 0.1rem;
 
         path {
           fill: ${textSecondary};
@@ -78,32 +83,9 @@ export const LogoWrapper = styled.button<MinimisedProps>`
   margin-bottom: ${(props) => (props.minimised ? '1.5rem' : '1rem')};
   position: relative;
 
-  > .beta {
-    color: ${networkColor};
-    position: absolute;
-    top: -7px;
-    font-size: 0.7rem;
-  }
-
-  > .beta-min {
-    color: ${networkColor};
-    background: ${modalBackground};
-    position: absolute;
-    right: 0px;
-    z-index: 2;
-    font-size: 0.6rem;
-    padding: 0.1rem 0.45rem;
-    border-radius: 0.5rem;
-  }
   ellipse {
     fill: ${networkColor};
   }
-`;
-
-export const PalettePosition = styled.div`
-  position: absolute;
-  right: 10px;
-  top: -150px;
 `;
 
 export const Separator = styled.div`

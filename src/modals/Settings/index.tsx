@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useUi } from 'contexts/UI';
+import { Title } from 'library/Modal/Title';
 import { StatusButton } from 'library/StatusButton';
 import { PaddingWrapper } from '../Wrappers';
 
@@ -12,25 +13,38 @@ export const Settings = () => {
   const DISABLE_FIAT = Number(process.env.REACT_APP_DISABLE_FIAT ?? 0);
 
   return (
-    <PaddingWrapper>
-      <h2>Toggle Services</h2>
-      <StatusButton
-        checked={services.includes('subscan')}
-        label="Subscan API"
-        onClick={() => {
-          toggleService('subscan');
-        }}
-      />
-      {!DISABLE_FIAT && (
+    <>
+      <Title title="Settings" />
+      <PaddingWrapper>
+        <h4>Toggle Services</h4>
         <StatusButton
-          checked={services.includes('binance_spot')}
-          label="Binance Spot API"
+          checked={services.includes('subscan')}
+          label="Subscan API"
           onClick={() => {
-            toggleService('binance_spot');
+            toggleService('subscan');
           }}
         />
-      )}
-    </PaddingWrapper>
+        {!DISABLE_FIAT && (
+          <StatusButton
+            checked={services.includes('binance_spot')}
+            label="Binance Spot API"
+            onClick={() => {
+              toggleService('binance_spot');
+            }}
+          />
+        )}
+
+        <h4>Toggle Features</h4>
+
+        <StatusButton
+          checked={services.includes('tips')}
+          label="Dashboard Tips"
+          onClick={() => {
+            toggleService('tips');
+          }}
+        />
+      </PaddingWrapper>
+    </>
   );
 };
 

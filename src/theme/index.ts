@@ -3,10 +3,11 @@
 
 import theme from 'styled-theming';
 import {
-  defaultThemes,
   cardThemes,
+  defaultThemes,
   networkColors,
   networkColorsSecondary,
+  networkColorsStroke,
   networkColorsTransparent,
 } from './default';
 
@@ -25,6 +26,8 @@ export const textSecondary: theme.ThemeSet = theme(
 );
 
 export const textInvert: theme.ThemeSet = theme(v, defaultThemes.text.invert);
+
+export const textWarning: theme.ThemeSet = theme(v, defaultThemes.text.warning);
 
 export const textDanger: theme.ThemeSet = theme(v, defaultThemes.text.danger);
 
@@ -55,6 +58,11 @@ export const backgroundNetworkBar: theme.ThemeSet = theme(
 export const backgroundDropdown: theme.ThemeSet = theme(
   v,
   defaultThemes.background.dropdown
+);
+
+export const backgroundModalItem: theme.ThemeSet = theme(
+  v,
+  defaultThemes.background.modalitem
 );
 
 export const backgroundValidator: theme.ThemeSet = theme(
@@ -106,14 +114,24 @@ export const backgroundToggle: theme.ThemeSet = theme(
   defaultThemes.buttons.toggle.background
 );
 
-export const buttonAssistantBackground: theme.ThemeSet = theme(
+export const buttonHelpBackground: theme.ThemeSet = theme(
   v,
-  defaultThemes.buttons.assistant.background
+  defaultThemes.buttons.help.background
 );
 
 export const buttonHoverBackground: theme.ThemeSet = theme(
   v,
   defaultThemes.buttons.hover.background
+);
+
+export const buttonDisabledBackground: theme.ThemeSet = theme(
+  v,
+  defaultThemes.buttons.disabled.background
+);
+
+export const buttonDisabledText: theme.ThemeSet = theme(
+  v,
+  defaultThemes.buttons.disabled.text
 );
 
 // labels
@@ -156,26 +174,63 @@ export const modalBackground: theme.ThemeSet = theme(
   defaultThemes.modal.background
 );
 
-// assistant
+// overlay
 
-export const assistantBackground: theme.ThemeSet = theme(
+export const overlayBackground: theme.ThemeSet = theme(
   v,
-  defaultThemes.assistant.background
+  defaultThemes.overlay.background
 );
 
-export const assistantButton: theme.ThemeSet = theme(
+// help
+
+export const helpButton: theme.ThemeSet = theme(
   v,
-  defaultThemes.assistant.button.background
+  defaultThemes.help.button.background
 );
 
-export const assistantLink: theme.ThemeSet = theme(
+// status colors
+
+export const danger: theme.ThemeSet = theme(
   v,
-  defaultThemes.assistant.link
+  defaultThemes.status.danger.solid
+);
+
+export const dangerTransparent: theme.ThemeSet = theme(
+  v,
+  defaultThemes.status.danger.transparent
+);
+
+export const warning: theme.ThemeSet = theme(
+  v,
+  defaultThemes.status.warning.solid
+);
+
+export const warningTransparent: theme.ThemeSet = theme(
+  v,
+  defaultThemes.status.warning.transparent
+);
+
+export const success: theme.ThemeSet = theme(
+  v,
+  defaultThemes.status.success.solid
+);
+
+export const successTransparent: theme.ThemeSet = theme(
+  v,
+  defaultThemes.status.success.transparent
 );
 
 // shadow
 
-export const shadowColor: theme.ThemeSet = theme(v, defaultThemes.shadow);
+export const shadowColor: theme.ThemeSet = theme(
+  v,
+  defaultThemes.shadow.primary
+);
+
+export const shadowColorSecondary: theme.ThemeSet = theme(
+  v,
+  defaultThemes.shadow.secondary
+);
 
 /* Aggregates all card configurations and serves the currently
  * active card style via the theming context.
@@ -197,6 +252,8 @@ export const networkColorSecondary: theme.ThemeSet = theme(
   n,
   networkColorsSecondary
 );
+
+export const networkColorStroke: theme.ThemeSet = theme(n, networkColorsStroke);
 
 export const networkColorTransparent: theme.ThemeSet = theme(
   n,

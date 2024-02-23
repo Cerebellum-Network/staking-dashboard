@@ -1,9 +1,9 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { textPrimary, buttonPrimaryBackground, backgroundToggle } from 'theme';
+import styled from 'styled-components';
+import { backgroundToggle, buttonPrimaryBackground, textPrimary } from 'theme';
 
 export const Wrapper = styled.div`
   display: flex;
@@ -15,12 +15,10 @@ export const Wrapper = styled.div`
 
 export const FixedContentWrapper = styled.div`
   padding-top: 1rem;
-  box-sizing: border-box;
-  flex-basis: 50%;
+  width: 100%;
 `;
 
 export const CardsWrapper = styled(motion.div)`
-  box-sizing: border-box;
   width: 200%;
   display: flex;
   flex-flow: row nowrap;
@@ -29,20 +27,18 @@ export const CardsWrapper = styled(motion.div)`
 `;
 
 export const ContentWrapper = styled.div`
-  box-sizing: border-box;
   border-radius: 1rem;
   display: flex;
   flex-flow: column nowrap;
   flex-basis: 50%;
   min-width: 50%;
   height: auto;
-  padding: 0 1rem 1rem 1rem;
-  flex-grow: 1;
+  flex: 1;
+  max-height: 100%;
+  padding: 0 1.25rem 1rem 1.25rem;
 
   .items {
-    box-sizing: border-box;
     position: relative;
-    box-sizing: border-box;
     padding: 0.5rem 0 1.5rem 0;
     border-bottom: none;
     width: auto;
@@ -61,7 +57,6 @@ export const ContentWrapper = styled.div`
 
     .action-button {
       background: ${buttonPrimaryBackground};
-      box-sizing: border-box;
       padding: 1rem;
       cursor: pointer;
       margin-bottom: 1rem;

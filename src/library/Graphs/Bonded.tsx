@@ -1,23 +1,26 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Doughnut } from 'react-chartjs-2';
-import { defaultThemes, networkColors } from 'theme/default';
+import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import { useApi } from 'contexts/Api';
 import { useTheme } from 'contexts/Themes';
+import { Doughnut } from 'react-chartjs-2';
+import { defaultThemes, networkColors } from 'theme/default';
 import { humanNumber } from 'Utils';
-import { GraphWrapper } from './Wrappers';
 import { BondedProps } from './types';
+import { GraphWrapper } from './Wrappers';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export const Bonded = (props: BondedProps) => {
+export const Bonded = ({
+  active,
+  free,
+  unlocking,
+  unlocked,
+  inactive,
+}: BondedProps) => {
   const { mode } = useTheme();
   const { network } = useApi();
-
-  const { active, unlocking, unlocked, inactive } = props;
-  const { free } = props;
 
   // graph data
   let graphActive = active;
@@ -56,6 +59,7 @@ export const Bonded = (props: BondedProps) => {
       tooltip: {
         displayColors: false,
         backgroundColor: defaultThemes.graphs.tooltip[mode],
+        titleColor: defaultThemes.text.invert[mode],
         bodyColor: defaultThemes.text.invert[mode],
         bodyFont: {
           weight: '600',
@@ -65,7 +69,7 @@ export const Bonded = (props: BondedProps) => {
             if (inactive) {
               return 'Inactive';
             }
-            return `${context.label}: ${
+            return `${
               context.parsed === -1 ? 0 : humanNumber(context.parsed)
             } ${network.unit}`;
           },
@@ -81,7 +85,7 @@ export const Bonded = (props: BondedProps) => {
         defaultThemes.graphs.inactive[mode],
       ]
     : [
-        defaultThemes.graphs.accent[mode],
+        networkColors[`${network.name}-${mode}`],
         defaultThemes.graphs.colors[0][mode],
         defaultThemes.graphs.colors[1][mode],
       ];

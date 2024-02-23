@@ -1,21 +1,22 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { motion } from 'framer-motion';
+import styled from 'styled-components';
 import {
-  textSecondary,
   buttonSecondaryBackground,
   networkColor,
   networkColorSecondary,
+  textSecondary,
 } from 'theme';
 import { ButtonProps, ButtonWrapperProps } from './types';
 
-export const ButtonRow = styled.div`
+export const ButtonRow = styled.div<{ verticalSpacing?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  margin-top: ${(props) => (props.verticalSpacing ? '1rem' : 0)};
 `;
 
 export const Wrapper = styled(motion.div)<ButtonWrapperProps>`
@@ -24,7 +25,7 @@ export const Wrapper = styled(motion.div)<ButtonWrapperProps>`
 
   > button {
     display: flex;
-    flex-flow: row wrap;
+    flex-flow: row nowrap;
     align-items: center;
     background: ${(props) =>
       props.type === 'invert-primary'
@@ -38,9 +39,8 @@ export const Wrapper = styled(motion.div)<ButtonWrapperProps>`
         : textSecondary};
 
     padding: ${(props) => props.padding};
-    border-radius: 0.75rem;
+    border-radius: 1.5rem;
     font-size: ${(props) => props.fontSize};
-    font-variation-settings: 'wght' 560;
     transition: opacity 0.2s;
 
     .space {
@@ -73,8 +73,8 @@ export const Button = (props: ButtonProps) => {
       whileTap={{ scale: !disabled ? 0.98 : 1 }}
       type={type}
       margin={inline ? '0' : '0 0.5rem'}
-      padding={small ? '0.4rem 0.8rem' : '0.52rem 1.2rem'}
-      fontSize={small ? '0.95rem' : '1.05rem'}
+      padding={small ? '0.42rem 0.9rem' : '0.52rem 1.2rem'}
+      fontSize={small ? '1rem' : '1.15rem'}
     >
       <button
         type="button"

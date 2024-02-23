@@ -1,50 +1,57 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useState, useEffect } from 'react';
+import BN from 'bn.js';
+import { DappName } from 'consts';
 import { useApi } from 'contexts/Api';
-import { useNotifications } from 'contexts/Notifications';
-import { useExtrinsics } from 'contexts/Extrinsics';
 import { useConnect } from 'contexts/Connect';
-import { DAPP_NAME } from 'consts';
+import { useExtensions } from 'contexts/Extensions';
+import { Extension } from 'contexts/Extensions/types';
+import { useExtrinsics } from 'contexts/Extrinsics';
+import { useNotifications } from 'contexts/Notifications';
+import { useTxFees } from 'contexts/TxFees';
+import { useEffect, useState } from 'react';
 import { AnyApi } from 'types';
-import { Extension } from 'contexts/Connect/types';
 import { UseSubmitExtrinsic, UseSubmitExtrinsicProps } from './types';
 
-export const useSubmitExtrinsic = (
-  extrinsic: UseSubmitExtrinsicProps
-): UseSubmitExtrinsic => {
-  // extract extrinsic info
-  const { tx, shouldSubmit, callbackSubmit, callbackInBlock } = extrinsic;
-
-  // if null account is provided, fallback to empty string
-  const { from } = extrinsic;
-  const submitAddress: string = from ?? '';
-
+export const useSubmitExtrinsic = ({
+  tx,
+  shouldSubmit,
+  callbackSubmit,
+  callbackInBlock,
+  from,
+}: UseSubmitExtrinsicProps): UseSubmitExtrinsic => {
   const { api } = useApi();
+  const { setTxFees, setSender, txFees } = useTxFees();
   const { addNotification } = useNotifications();
   const { addPending, removePending } = useExtrinsics();
-  const { getAccount, extensions } = useConnect();
+  const { extensions } = useExtensions();
+  const { getAccount } = useConnect();
+
+  // if null account is provided, fallback to empty string
+  const submitAddress: string = from ?? '';
 
   // whether the transaction is in progress
   const [submitting, setSubmitting] = useState(false);
 
-  // get the estimated fee for submitting the transaction
-  const [estimatedFee, setEstimatedFee] = useState(null);
-
   // calculate fee upon setup changes and initial render
   useEffect(() => {
+    setSender(from);
     calculateEstimatedFee();
-  }, [extrinsic]);
+  }, [tx]);
 
   const calculateEstimatedFee = async () => {
     if (tx === null) {
       return;
     }
     // get payment info
-    const info = await tx.paymentInfo(submitAddress);
-    // convert fee to unit
-    setEstimatedFee(info.partialFee.toHuman());
+    const { partialFee } = await tx.paymentInfo(submitAddress);
+    const partialFeeBn = new BN(partialFee.toString());
+
+    // give tx fees to global useTxFees context
+    if (partialFeeBn.toString() !== txFees.toString()) {
+      setTxFees(partialFeeBn);
+    }
   };
 
   // submit extrinsic
@@ -67,7 +74,7 @@ export const useSubmitExtrinsic = (
       throw new Error('wallet not found');
     } else {
       // summons extension popup if not already connected.
-      extension.enable(DAPP_NAME);
+      extension.enable(DappName);
     }
 
     // pre-submission state update
@@ -133,7 +140,6 @@ export const useSubmitExtrinsic = (
 
   return {
     submitTx,
-    estimatedFee,
     submitting,
   };
 };

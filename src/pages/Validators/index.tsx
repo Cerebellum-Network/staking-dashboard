@@ -1,57 +1,68 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StatBoxList } from 'library/StatBoxList';
 import { useApi } from 'contexts/Api';
 import { useValidators } from 'contexts/Validators';
 import { CardWrapper } from 'library/Graphs/Wrappers';
-import { ValidatorList } from 'library/ValidatorList';
 import { PageTitle } from 'library/PageTitle';
+import { StatBoxList } from 'library/StatBoxList';
+import { ValidatorList } from 'library/ValidatorList';
+import { useTranslation } from 'react-i18next';
 import { PageRowWrapper } from 'Wrappers';
-import ActiveEraStatBox from '../Overview/Stats/ActiveEra';
-import TotalValidatorsStatBox from './Stats/TotalValidators';
-import ActiveValidatorsStatBox from './Stats/ActiveValidators';
 import { PageProps } from '../types';
+import ActiveValidatorsStatBox from './Stats/ActiveValidators';
+import AverageCommissionStatBox from './Stats/AverageCommission';
+import TotalValidatorsStatBox from './Stats/TotalValidators';
 
 export const Validators = (props: PageProps) => {
   const { page } = props;
-  const { title } = page;
+  const { key } = page;
 
   const { isReady } = useApi();
   const { validators } = useValidators();
+  const { t } = useTranslation();
+  const defaultFilters = {
+    includes: ['active'],
+    excludes: ['all_commission', 'blocked_nominations', 'missing_identity'],
+  };
 
   return (
     <>
-      <PageTitle title={title} />
+      <PageTitle title={t(key, { ns: 'base' })} />
       <StatBoxList>
         <TotalValidatorsStatBox />
         <ActiveValidatorsStatBox />
-        <ActiveEraStatBox />
+        <AverageCommissionStatBox />
       </StatBoxList>
       <PageRowWrapper className="page-padding" noVerticalSpacer>
         <CardWrapper>
           {!isReady ? (
             <div className="item">
-              <h3>Connecting...</h3>
+              <h3>{t('validators.connecting', { ns: 'pages' })}</h3>
             </div>
           ) : (
             <>
               {validators.length === 0 && (
                 <div className="item">
-                  <h3>Fetching validators...</h3>
+                  <h3>
+                    {t('validators.fetching_validators', { ns: 'pages' })}
+                  </h3>
                 </div>
               )}
 
               {validators.length > 0 && (
                 <ValidatorList
+                  bondType="stake"
                   validators={validators}
                   batchKey="validators_browse"
-                  title="Network Validators"
+                  title={t('validators.network_validators', { ns: 'pages' })}
                   selectable={false}
+                  defaultFilters={defaultFilters}
                   allowMoreCols
                   allowFilters
+                  allowSearch
                   pagination
-                  toggleFavourites
+                  toggleFavorites
                 />
               )}
             </>

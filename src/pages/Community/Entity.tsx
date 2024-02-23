@@ -1,44 +1,45 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useState, useEffect } from 'react';
-import { PageRowWrapper, GoBackWrapper } from 'Wrappers';
-import Button from 'library/Button';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { useValidators } from 'contexts/Validators';
-import ValidatorList from 'library/ValidatorList';
-import { CardWrapper } from 'library/Graphs/Wrappers';
+import { ButtonSecondary } from '@rossbulat/polkadot-dashboard-ui';
 import { useApi } from 'contexts/Api';
-import { shuffle } from 'Utils';
-import { ItemsWrapper } from './Wrappers';
-import { Item } from './Item';
+import { useValidators } from 'contexts/Validators';
+import { CardWrapper } from 'library/Graphs/Wrappers';
+import ValidatorList from 'library/ValidatorList';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { PageRowWrapper, TopBarWrapper } from 'Wrappers';
 import { useCommunitySections } from './context';
+import { Item } from './Item';
+import { ItemsWrapper } from './Wrappers';
 
 export const Entity = () => {
   const { isReady, network } = useApi();
   const { validators: allValidators, removeValidatorMetaBatch } =
     useValidators();
   const { setActiveSection, activeItem } = useCommunitySections();
+  const { t } = useTranslation('pages');
 
   const { name, validators: entityAllValidators } = activeItem;
   const validators = entityAllValidators[network.name.toLowerCase()] ?? [];
 
   // include validators that exist in `erasStakers`
-  const [shuffledValidators, setShuffledValidators] = useState(
-    shuffle(allValidators.filter((v) => validators.includes(v.address)))
+  const [activeValidators, setActiveValidators] = useState(
+    allValidators.filter((v) => validators.includes(v.address))
   );
 
   useEffect(() => {
-    setShuffledValidators(
+    setActiveValidators(
       allValidators.filter((v) => validators.includes(v.address))
     );
   }, [allValidators, network]);
 
   useEffect(() => {
     removeValidatorMetaBatch(batchKey);
-    const newShuffledValidators = shuffle([...shuffledValidators]);
-    setShuffledValidators(shuffle(newShuffledValidators));
-  }, [name, network]);
+    const newValidators = [...activeValidators];
+    setActiveValidators(newValidators);
+  }, [name, activeItem, network]);
 
   const container = {
     hidden: { opacity: 0 },
@@ -54,45 +55,47 @@ export const Entity = () => {
   const batchKey = 'community_entity_validators';
 
   return (
-    <PageRowWrapper className="page-padding">
-      <GoBackWrapper>
-        <Button
-          inline
-          title="Go Back"
-          icon={faChevronLeft}
-          transform="shrink-3"
+    <PageRowWrapper className="page-padding" noVerticalSpacer>
+      <TopBarWrapper>
+        <ButtonSecondary
+          lg
+          text={t('community.go_back')}
+          iconLeft={faChevronLeft}
+          iconTransform="shrink-3"
           onClick={() => setActiveSection(0)}
         />
-      </GoBackWrapper>
+      </TopBarWrapper>
       <ItemsWrapper variants={container} initial="hidden" animate="show">
         <Item item={activeItem} actionable={false} />
       </ItemsWrapper>
       <CardWrapper>
         {!isReady ? (
           <div className="item">
-            <h3>Connecting...</h3>
+            <h3>{t('community.connecting')}</h3>
           </div>
         ) : (
           <>
-            {shuffledValidators.length === 0 && (
+            {activeValidators.length === 0 && (
               <div className="item">
                 <h3>
                   {validators.length
-                    ? 'Fetching validators...'
-                    : 'This entity contains no validators.'}
+                    ? t('community.fetching_validators')
+                    : t('community.no_validators')}
                 </h3>
               </div>
             )}
-            {shuffledValidators.length > 0 && (
+            {activeValidators.length > 0 && (
               <ValidatorList
-                validators={shuffledValidators}
+                bondType="stake"
+                validators={activeValidators}
                 batchKey={batchKey}
-                title={`${name}'s Validators`}
+                title={`${name} ${t('community.validators')}`}
                 selectable={false}
                 allowMoreCols
                 pagination
-                toggleFavourites
+                toggleFavorites
                 allowFilters
+                refetchOnListUpdate
               />
             )}
           </>

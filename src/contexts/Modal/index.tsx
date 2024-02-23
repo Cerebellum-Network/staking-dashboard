@@ -1,7 +1,8 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState, useEffect } from 'react';
+import { useTxFees } from 'contexts/TxFees';
+import React, { useEffect, useState } from 'react';
 import { defaultModalContext } from './defaults';
 import { ModalConfig, ModalContextInterface, ModalContextState } from './types';
 
@@ -15,6 +16,8 @@ export const useModal = () => React.useContext(ModalContext);
 
 // wrapper component to provide components with context
 export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
+  const { notEnoughFunds } = useTxFees();
+
   const [state, setState] = useState<ModalContextState>({
     status: 0,
     modal: DEFAULT_MODAL_COMPONENT,
@@ -26,7 +29,7 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     setResize();
-  }, [state.status]);
+  }, [state.status, notEnoughFunds]);
 
   const setStatus = (newStatus: number) => {
     const _state = {

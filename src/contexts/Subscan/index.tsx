@@ -1,10 +1,10 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState, useEffect } from 'react';
-import { API_ENDPOINTS, API_SUBSCAN_KEY } from 'consts';
+import { ApiEndpoints, ApiSubscanKey } from 'consts';
 import { UIContextInterface } from 'contexts/UI/types';
-import { AnySubscan } from 'types';
+import React, { useEffect, useState } from 'react';
+import { AnyApi, AnySubscan } from 'types';
 import { useApi } from '../Api';
 import { useConnect } from '../Connect';
 import { useUi } from '../UI';
@@ -71,8 +71,14 @@ export const SubscanProvider = ({
 
       // fetch 3 pages of results
       const results = await Promise.all([
-        handleFetch(activeAccount, 0, API_ENDPOINTS.subscanRewardSlash),
-        handleFetch(activeAccount, 1, API_ENDPOINTS.subscanRewardSlash),
+        handleFetch(activeAccount, 0, ApiEndpoints.subscanRewardSlash, {
+          is_stash: true,
+          claimed_filter: 'claimed',
+        }),
+        handleFetch(activeAccount, 1, ApiEndpoints.subscanRewardSlash, {
+          is_stash: true,
+          claimed_filter: 'claimed',
+        }),
       ]);
 
       // user may have turned off service while results were fetching.
@@ -82,7 +88,11 @@ export const SubscanProvider = ({
           if (!result?.data?.list) {
             break;
           }
-          _payouts = _payouts.concat(result.data.list);
+          // ensure no payouts have block_timestamp of 0
+          const list = result.data.list.filter(
+            (l: AnyApi) => l.block_timestamp !== 0
+          );
+          _payouts = _payouts.concat(list);
         }
         setPayouts(_payouts);
       }
@@ -97,10 +107,6 @@ export const SubscanProvider = ({
    * Stores resulting claims in context state.
    */
   const fetchPoolClaims = async () => {
-    if (!network.features.pools) {
-      setPoolClaims([]);
-      return;
-    }
     if (activeAccount === null || !services.includes('subscan')) {
       setPoolClaims([]);
       return;
@@ -112,8 +118,8 @@ export const SubscanProvider = ({
 
       // fetch 3 pages of results
       const results = await Promise.all([
-        handleFetch(activeAccount, 0, API_ENDPOINTS.subscanPoolRewards),
-        handleFetch(activeAccount, 1, API_ENDPOINTS.subscanPoolRewards),
+        handleFetch(activeAccount, 0, ApiEndpoints.subscanPoolRewards),
+        handleFetch(activeAccount, 1, ApiEndpoints.subscanPoolRewards),
       ]);
 
       // user may have turned off service while results were fetching.
@@ -125,11 +131,14 @@ export const SubscanProvider = ({
             break;
           }
           // check list has records
-          const { list } = result.data;
-          if (!list.length) {
+          if (!result.data.list.length) {
             break;
           }
-          _poolClaims = _poolClaims.concat(result.data.list);
+          // ensure no payouts have block_timestamp of 0
+          const list = result.data.list.filter(
+            (l: AnyApi) => l.block_timestamp !== 0
+          );
+          _poolClaims = _poolClaims.concat(list);
         }
         setPoolClaims(_poolClaims);
       }
@@ -147,7 +156,7 @@ export const SubscanProvider = ({
       return [];
     }
 
-    const res = await handleFetch(address, 0, API_ENDPOINTS.subscanEraStat);
+    const res = await handleFetch(address, 0, ApiEndpoints.subscanEraStat);
 
     if (res.message === 'Success') {
       if (getServices().includes('subscan')) {
@@ -177,18 +186,21 @@ export const SubscanProvider = ({
   const handleFetch = async (
     address: string,
     page: number,
-    endpoint: string
+    endpoint: string,
+    body: AnyApi = {}
   ): Promise<AnySubscan> => {
+    const bodyJson = {
+      row: 100,
+      page,
+      address,
+      ...body,
+    };
     const res: Response = await fetch(network.subscanEndpoint + endpoint, {
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': API_SUBSCAN_KEY,
+        'X-API-Key': ApiSubscanKey,
       },
-      body: JSON.stringify({
-        row: 100,
-        page,
-        address,
-      }),
+      body: JSON.stringify(bodyJson),
       method: 'POST',
     });
     const resJson: AnySubscan = await res.json();

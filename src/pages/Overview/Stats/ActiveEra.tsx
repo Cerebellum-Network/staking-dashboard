@@ -1,23 +1,27 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import moment from 'moment';
 import { useNetworkMetrics } from 'contexts/Network';
 import { useSessionEra } from 'contexts/SessionEra';
+import { format, fromUnixTime } from 'date-fns';
 import { useEraTimeLeft } from 'library/Hooks/useEraTimeLeft';
 import { Pie } from 'library/StatBoxList/Pie';
+import { locales } from 'locale';
+import { useTranslation } from 'react-i18next';
 
 const ActiveEraStatBox = () => {
   const { metrics } = useNetworkMetrics();
   const { sessionEra } = useSessionEra();
   const eraTimeLeft = useEraTimeLeft();
+  const { i18n, t } = useTranslation('pages');
 
-  // format era time left
-  const _timeleft = moment.duration(eraTimeLeft * 1000, 'milliseconds');
-  const timeleft = `${_timeleft.hours()}:${_timeleft.minutes()}:${_timeleft.seconds()}`;
+  const _timeleft = fromUnixTime(eraTimeLeft);
+  const timeleft = format(_timeleft, 'kk:mm:ss', {
+    locale: locales[i18n.resolvedLanguage],
+  });
 
   const params = {
-    label: 'Active Era',
+    label: t('overview.active_era'),
     stat: {
       value: metrics.activeEra.index,
       unit: '',
@@ -27,10 +31,7 @@ const ActiveEraStatBox = () => {
       value2: sessionEra.eraLength - sessionEra.eraProgress,
     },
     tooltip: metrics.activeEra.index === 0 ? undefined : timeleft,
-    assistant: {
-      page: 'validators',
-      key: 'Era',
-    },
+    helpKey: 'Era',
   };
   return <Pie {...params} />;
 };

@@ -13,7 +13,6 @@ export interface StakingMetrics {
   maxNominatorsCount: BN;
   maxValidatorsCount: BN;
   minNominatorBond: BN;
-  historyDepth: BN;
   payee: string | null;
   unsub: { (): void } | null;
 }
@@ -36,6 +35,7 @@ export interface StakingTargets {
 
 export interface StakingContextInterface {
   getNominationsStatus: () => any;
+  getNominationsStatusFromTargets: (w: MaybeAccount, t: [any]) => any;
   setTargets: (t: any) => any;
   hasController: () => boolean;
   getControllerNotImported: (a: MaybeAccount) => any;

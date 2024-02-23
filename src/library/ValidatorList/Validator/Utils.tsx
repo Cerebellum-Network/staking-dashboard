@@ -1,4 +1,4 @@
-// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { u8aToString, u8aUnwrapBytes } from '@polkadot/util';
@@ -47,9 +47,9 @@ export const getIdentityDisplay = (_identity: any, _superIdentity: any) => {
     <>
       {displayFinal}
       {superRawAsBytes !== '' ? (
-        <span> / {superRawAsBytes}</span>
+        <span>/ {superRawAsBytes}</span>
       ) : superRaw !== null ? (
-        <span> / {superRaw}</span>
+        <span>/ {superRaw}</span>
       ) : null}
     </>
   );

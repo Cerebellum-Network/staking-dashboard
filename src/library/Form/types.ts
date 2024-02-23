@@ -1,18 +1,19 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExternalAccount, ExtensionAccount } from 'contexts/Connect/types';
-import { BondOptions } from 'contexts/Balances/types';
+import BN from 'bn.js';
+import { Balance } from 'contexts/Balances/types';
+import { ExtensionAccount, ExternalAccount } from 'contexts/Connect/types';
 
 export interface ExtensionAccountItem extends ExtensionAccount {
   active?: boolean;
   alert?: string;
-  bondOptions?: BondOptions;
+  balance?: Balance;
 }
 export interface ExternalAccountItem extends ExternalAccount {
   active?: boolean;
   alert?: string;
-  bondOptions?: BondOptions;
+  balance?: Balance;
 }
 export type ImportedAccountItem = ExtensionAccountItem | ExternalAccountItem;
 
@@ -39,27 +40,51 @@ export interface AccountSelectProps {
   value: InputItem;
 }
 
-export interface BondInputProps {
-  setters: any;
-  value: any;
-  task: string;
-  defaultValue: number;
-  disabled: boolean;
-  freeToBond: number;
-  freeToUnbondToMin: number;
-}
-
-export interface BondInputWithFeedbackProps {
+export interface BondFeedbackProps {
+  syncing?: boolean;
   setters: any;
   bondType: string;
-  defaultBond: number;
-  unbond: boolean;
-  nominating?: boolean;
+  defaultBond: number | null;
+  inSetup?: boolean;
   listenIsValid: { (v: boolean): void } | { (): void };
   warnings?: string[];
+  disableTxFeeUpdate?: boolean;
+  setLocalResize?: () => void;
+  txFees: BN;
+  maxWidth?: boolean;
 }
 
-export interface BondStatusBarProps {
+export interface BondInputProps {
+  syncing?: boolean;
+  setters: any;
+  value: any;
+  defaultValue: number | string;
+  disabled: boolean;
+  freeBalance: number;
+  disableTxFeeUpdate?: boolean;
+}
+
+export interface UnbondFeedbackProps {
+  setters: any;
+  bondType: string;
+  defaultBond: number | null;
+  inSetup?: boolean;
+  listenIsValid: { (v: boolean): void } | { (): void };
+  warnings?: string[];
+  setLocalResize?: () => void;
+  txFees: BN;
+}
+
+export interface UnbondInputProps {
+  active: BN;
+  freeToUnbondToMin: number;
+  defaultValue: number | string;
+  disabled: boolean;
+  setters: any;
+  value: any;
+}
+
+export interface NominateStatusBarProps {
   value: number;
 }
 

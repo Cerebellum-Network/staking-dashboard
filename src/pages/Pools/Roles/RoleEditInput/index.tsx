@@ -1,14 +1,17 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React from 'react';
 import { useConnect } from 'contexts/Connect';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { isValidAddress } from 'Utils';
 import { Wrapper } from './Wrapper';
 
-export const RoleEditInput = ({ setRoleEdit, roleEdit }: any) => {
+export const RoleEditInput = ({ setRoleEdit, roleKey, roleEdit }: any) => {
   const { formatAccountSs58 } = useConnect();
-  const getRoleEdit = (newAddress: string) => {
+  const { t } = useTranslation('pages');
+
+  const processRoleEdit = (newAddress: string) => {
     let edit = {
       newAddress,
       valid: newAddress === '', // empty address is valid and removes the role
@@ -32,17 +35,17 @@ export const RoleEditInput = ({ setRoleEdit, roleEdit }: any) => {
   const handleChange = (e: React.FormEvent<HTMLInputElement>) => {
     const newValue = e.currentTarget.value;
     // set value on key change
-    const edit = getRoleEdit(newValue);
-    setRoleEdit(edit);
+    const edit = processRoleEdit(newValue);
+    setRoleEdit(roleKey, edit);
   };
 
   let label;
   let labelClass;
   if (!roleEdit?.valid) {
-    label = 'Address Invalid';
+    label = t('pools.address_invalid');
     labelClass = 'danger';
   } else if (roleEdit?.reformatted) {
-    label = 'Address was reformatted';
+    label = t('pools.reformatted');
     labelClass = 'neutral';
   }
 
@@ -54,7 +57,7 @@ export const RoleEditInput = ({ setRoleEdit, roleEdit }: any) => {
             placeholder="Address"
             type="text"
             onChange={(e: React.FormEvent<HTMLInputElement>) => handleChange(e)}
-            value={roleEdit?.newAddress}
+            value={roleEdit?.newAddress ?? ''}
           />
         </section>
       </div>

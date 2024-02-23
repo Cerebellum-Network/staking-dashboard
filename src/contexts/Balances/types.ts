@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BN from 'bn.js';
-import { MaybeAccount } from 'types';
+import { AnyApi, MaybeAccount } from 'types';
 
 export interface UnlockChunk {
   era: number;
@@ -44,15 +44,6 @@ export interface BalancesAccount {
   nominations?: Nominations;
 }
 
-export interface BondOptions {
-  freeToBond: BN;
-  freeToUnbond: BN;
-  totalUnlocking: BN;
-  totalUnlocked: BN;
-  totalPossibleBond: BN;
-  totalUnlockChuncks: number;
-}
-
 export interface Nominations {
   targets: Targets;
   submittedIn: string | number;
@@ -68,11 +59,8 @@ export interface BalancesContextInterface {
   getAccountLocks: (address: MaybeAccount) => Array<Lock>;
   getBondedAccount: (address: MaybeAccount) => string | null;
   getAccountNominations: (address: MaybeAccount) => Targets;
-  getBondOptions: (address: MaybeAccount | null) => BondOptions;
   isController: (address: MaybeAccount) => boolean;
   accounts: Array<BalancesAccount>;
-  minReserve: BN;
   existentialAmount: BN;
-  reserveAmount: BN;
-  ledgers: any;
+  ledgers: AnyApi;
 }

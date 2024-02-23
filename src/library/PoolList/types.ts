@@ -3,10 +3,15 @@
 
 export interface PoolListProps {
   allowMoreCols?: string;
+  allowSearch?: boolean;
   pagination?: number;
   batchKey?: string;
   disableThrottle?: boolean;
   refetchOnListUpdate?: string;
   pools?: any;
   title?: string;
+  defaultFilters?: {
+    includes: Array<string> | null;
+    excludes: Array<string> | null;
+  };
 }

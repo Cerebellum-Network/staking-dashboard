@@ -1,17 +1,17 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { SideMenuStickyThreshold } from 'consts';
 import styled from 'styled-components';
-import { SIDE_MENU_STICKY_THRESHOLD } from 'consts';
 import {
-  textSecondary,
   backgroundSecondary,
-  cardBorder,
   borderPrimary,
+  cardBorder,
   cardShadow,
-  shadowColor,
   networkColor,
+  shadowColor,
   textPrimary,
+  textSecondary,
 } from 'theme';
 import {
   CardHeaderWrapperProps,
@@ -39,20 +39,27 @@ export const CardHeaderWrapper = styled.div<CardHeaderWrapperProps>`
     align-items: center;
     flex-grow: ${(props) => (props.withAction ? 1 : 0)};
 
-    .assistant-icon {
+    .help-icon {
       margin-left: 0.6rem;
     }
   }
   h4 {
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 0.6rem 0;
     display: flex;
     flex-flow: row wrap;
     align-items: center;
     justify-content: flex-start;
+    flex-grow: ${(props) => (props.withAction ? 1 : 0)};
 
-    .assistant-icon {
+    .help-icon {
       margin-left: 0.5rem;
     }
+  }
+
+  > div {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
   }
 `;
 
@@ -63,7 +70,6 @@ export const CardHeaderWrapper = styled.div<CardHeaderWrapperProps>`
 export const CardWrapper = styled.div<CardWrapperProps>`
   border: ${cardBorder} ${borderPrimary};
   box-shadow: ${cardShadow} ${shadowColor};
-  box-sizing: border-box;
   padding: ${(props) =>
     props.noPadding ? '0rem' : props.transparent ? '0rem 0rem' : '1.2rem'};
   border-radius: 1.1rem;
@@ -84,7 +90,7 @@ export const CardWrapper = styled.div<CardWrapperProps>`
     background: none;
   `}
 
-  @media (max-width: ${SIDE_MENU_STICKY_THRESHOLD}px) {
+  @media (max-width: ${SideMenuStickyThreshold}px) {
     padding: ${(props) =>
       props.noPadding
         ? '0rem'
@@ -93,8 +99,20 @@ export const CardWrapper = styled.div<CardWrapperProps>`
         : '1rem 0.75rem'};
   }
 
-  @media (min-width: ${SIDE_MENU_STICKY_THRESHOLD + 1}px) {
+  @media (min-width: ${SideMenuStickyThreshold + 1}px) {
     height: ${(props) => (props.height ? `${props.height}px` : 'inherit')};
+  }
+
+  .content {
+    padding: 0 0.5rem;
+
+    h3 {
+      margin-bottom: 0.75rem;
+    }
+    h4 {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
   }
 
   .inner {
@@ -123,7 +141,6 @@ export const CardWrapper = styled.div<CardWrapperProps>`
 export const GraphWrapper = styled.div<GraphWrapperProps>`
   border: ${cardBorder} ${borderPrimary};
   box-shadow: ${cardShadow} ${shadowColor};
-  box-sizing: border-box;
   border-radius: 1rem;
   background: ${backgroundSecondary};
   display: flex;
@@ -152,7 +169,6 @@ export const GraphWrapper = styled.div<GraphWrapperProps>`
     right: 10px;
     top: 10px;
     font-size: 0.8rem;
-    font-variation-settings: 'wght' 550;
     background: ${networkColor};
     border-radius: 0.3rem;
     padding: 0.2rem 0.4rem;
@@ -168,14 +184,13 @@ export const GraphWrapper = styled.div<GraphWrapperProps>`
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
-      flex: 1;
     }
   }
 
   h2,
   h4 {
     margin: 0;
-    padding: 0.25rem 0;
+    padding: 0.25rem 0 0.5rem 0;
     display: flex;
     flex-flow: row wrap;
     align-content: flex-end;
@@ -186,8 +201,7 @@ export const GraphWrapper = styled.div<GraphWrapperProps>`
       color: ${textSecondary};
       font-size: 1.1rem;
       margin-top: 0.2rem;
-      margin-left: 0.1rem;
-      font-variation-settings: 'wght' 600;
+      margin-left: 0.3rem;
     }
   }
   h2 {
@@ -203,8 +217,17 @@ export const GraphWrapper = styled.div<GraphWrapperProps>`
     align-items: center;
     margin-top: 0.4rem;
 
-    .assistant-icon {
-      margin-left: 0.4rem;
+    .help-icon {
+      margin-left: 0.55rem;
+    }
+  }
+
+  h5 {
+    &.secondary {
+      color: ${textSecondary};
+      opacity: 0.7;
+      margin-bottom: 0;
+      margin-top: 1.5rem;
     }
   }
   .small_button {
@@ -221,9 +244,8 @@ export const GraphWrapper = styled.div<GraphWrapperProps>`
     padding: 1rem 1.5rem;
   }
   .graph_line {
-    margin-top: 1.5rem;
-    margin-left: 1rem;
-    padding: 1rem 1rem 0.5rem 1rem;
+    margin-top: 0.6rem;
+    padding: 0rem 1rem 0.5rem 0rem;
   }
   .graph_with_extra {
     width: 100%;
@@ -252,7 +274,6 @@ export const GraphWrapper = styled.div<GraphWrapperProps>`
     color: white;
     border-radius: 0.75rem;
     padding: 0.15rem 0.5rem;
-    font-variation-settings: 'wght' 550;
     &.pos {
       background: #3eb955;
     }

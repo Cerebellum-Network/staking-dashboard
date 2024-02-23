@@ -1,6 +1,7 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { u8aToString, u8aUnwrapBytes } from '@polkadot/util';
 import { useApi } from 'contexts/Api';
 import { useValidators } from 'contexts/Validators';
 import React, { useState } from 'react';
@@ -20,7 +21,7 @@ export const ValidatorFilterProvider = ({
   children: React.ReactNode;
 }) => {
   const { consts } = useApi();
-  const { meta, session } = useValidators();
+  const { meta, session, sessionParachain } = useValidators();
   const { maxNominatorRewardedPerValidator } = consts;
 
   // store validator filters that are currently active
@@ -40,6 +41,7 @@ export const ValidatorFilterProvider = ({
   /*
    * toggleAllValidaorFilters
    * Either turns all filters on or all filters off.
+   * This does not use the 'in_session' filter.
    */
   const toggleAllValidatorFilters = (toggle: number) => {
     if (toggle) {
@@ -100,6 +102,12 @@ export const ValidatorFilterProvider = ({
     }
     if (filter.includes('inactive')) {
       list = filterInactive(list);
+    }
+    if (filter.includes('not_parachain_validator')) {
+      list = filterNonParachainValidator(list);
+    }
+    if (filter.includes('in_session')) {
+      list = filterInSession(list);
     }
     return list;
   };
@@ -229,6 +237,38 @@ export const ValidatorFilterProvider = ({
   };
 
   /*
+   * filterNonParachainValidator
+   * Filters the supplied list and removes items that are inactive.
+   * Returns the updated filtered list.
+   */
+  const filterNonParachainValidator = (list: any) => {
+    // if list has not yet been populated, return original list
+    if ((sessionParachain?.length ?? 0) === 0) {
+      return list;
+    }
+    list = list.filter((validator: any) =>
+      sessionParachain.includes(validator.address)
+    );
+    return list;
+  };
+
+  /*
+   * filterInSession
+   * Filters the supplied list and removes items that are in the current session.
+   * Returns the updated filtered list.
+   */
+  const filterInSession = (list: any) => {
+    // if list has not yet been populated, return original list
+    if (session.list.length === 0) {
+      return list;
+    }
+    list = list.filter(
+      (validator: any) => !session.list.includes(validator.address)
+    );
+    return list;
+  };
+
+  /*
    * orderValidators
    * Sets the ordering key for orderValidators
    */
@@ -261,6 +301,74 @@ export const ValidatorFilterProvider = ({
     return orderedList;
   };
 
+  /*
+   * validatorSearchFilter
+   * Iterates through the supplied list and refers to the meta
+   * batch of the list to filter those list items that match
+   * the search term.
+   * Returns the updated filtered list.
+   */
+  const validatorSearchFilter = (
+    list: any,
+    batchKey: string,
+    searchTerm: string
+  ) => {
+    if (meta[batchKey] === undefined) {
+      return list;
+    }
+    const filteredList: any = [];
+    for (const validator of list) {
+      const batchIndex =
+        meta[batchKey].addresses?.indexOf(validator.address) ?? -1;
+
+      // if we cannot derive data, fallback to include validator in filtered list
+      if (batchIndex === -1) {
+        filteredList.push(validator);
+        continue;
+      }
+      const identities = meta[batchKey]?.identities ?? false;
+      if (!identities) {
+        filteredList.push(validator);
+        continue;
+      }
+      const supers = meta[batchKey]?.supers ?? false;
+      if (!supers) {
+        filteredList.push(validator);
+        continue;
+      }
+
+      const address = meta[batchKey].addresses[batchIndex];
+
+      const identity = identities[batchIndex] ?? '';
+      const identityRaw = identity?.info?.display?.Raw ?? '';
+      const identityAsBytes = u8aToString(u8aUnwrapBytes(identityRaw));
+      const identitySearch = (
+        identityAsBytes === '' ? identityRaw : identityAsBytes
+      ).toLowerCase();
+
+      const superIdentity = supers[batchIndex] ?? null;
+      const superIdentityRaw =
+        superIdentity?.identity?.info?.display?.Raw ?? '';
+      const superIdentityAsBytes = u8aToString(
+        u8aUnwrapBytes(superIdentityRaw)
+      );
+      const superIdentitySearch = (
+        superIdentityAsBytes === '' ? superIdentityRaw : superIdentityAsBytes
+      ).toLowerCase();
+
+      if (address.toLowerCase().includes(searchTerm.toLowerCase())) {
+        filteredList.push(validator);
+      }
+      if (
+        identitySearch.includes(searchTerm.toLowerCase()) ||
+        superIdentitySearch.includes(searchTerm.toLowerCase())
+      ) {
+        filteredList.push(validator);
+      }
+    }
+    return filteredList;
+  };
+
   return (
     <ValidatorFilterContext.Provider
       value={{
@@ -270,6 +378,7 @@ export const ValidatorFilterProvider = ({
         resetValidatorFilters,
         toggleFilterValidators,
         toggleAllValidatorFilters,
+        validatorSearchFilter,
         validatorFilters,
         validatorOrder,
       }}

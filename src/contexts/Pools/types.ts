@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BN from 'bn.js';
-import { AnyApi, AnyMetaBatch, MaybeAccount } from 'types';
+import { AnyApi, AnyJson, AnyMetaBatch, MaybeAccount, Sync } from 'types';
 
 // PoolsConfig types
 export interface PoolsConfigContextState {
-  enabled: number;
+  addFavorite: (a: string) => void;
+  removeFavorite: (a: string) => void;
+  createAccounts: (p: number) => PoolAddresses;
+  favorites: string[];
   stats: PoolStats;
 }
 
@@ -19,6 +22,7 @@ export interface PoolStats {
   counterForPoolMembers: BN;
   counterForBondedPools: BN;
   counterForRewardPools: BN;
+  lastPoolId: BN;
   maxPoolMembers: BN;
   maxPoolMembersPerPool: BN;
   maxPools: BN;
@@ -36,34 +40,44 @@ export interface PoolMembership {
   address: string;
   poolId: number;
   points: string;
-  rewardPoolTotalEarnings: string;
-  unbondingEras: any;
-  unlocking: any;
+  lastRecordedRewardCounter: string;
+  unbondingEras: { [key: number]: string };
+  unlocking: Array<{
+    era: number;
+    value: BN;
+  }>;
 }
 
 // BondedPool types
 export interface BondedPoolsContextState {
   fetchPoolsMetaBatch: (k: string, v: [], r?: boolean) => void;
-  createAccounts: (p: number) => PoolAddresses;
+  queryBondedPool: (p: number) => any;
   getBondedPool: (p: number) => BondedPool | null;
+  updateBondedPools: (p: Array<BondedPool>) => void;
+  addToBondedPools: (p: BondedPool) => void;
+  removeFromBondedPools: (p: number) => void;
+  getPoolNominationStatus: (n: MaybeAccount, o: MaybeAccount) => any;
+  getPoolNominationStatusCode: (t: NominationStatuses | null) => string;
+  getAccountRoles: (w: MaybeAccount) => any;
+  getAccountPools: (w: MaybeAccount) => any;
+  replacePoolRoles: (poolId: number, roleEdits: AnyJson) => void;
+  poolSearchFilter: (l: any, k: string, v: string) => void;
   bondedPools: Array<BondedPool>;
   meta: AnyMetaBatch;
 }
 
-export interface ActiveBondedPoolState {
-  pool: ActiveBondedPool | undefined;
-  unsub: AnyApi;
-}
-
-export interface ActiveBondedPool extends BondedPool {
-  roles: PoolRoles;
-  unclaimedReward: BN;
-  slashingSpansCount: 0;
+export interface ActivePool {
+  id: number;
+  addresses: PoolAddresses;
+  bondedPool: any;
+  rewardPool: any;
+  rewardAccountBalance: any;
+  unclaimedRewards: any;
 }
 
 export interface BondedPool {
   addresses: PoolAddresses;
-  id: number;
+  id: number | string;
   memberCounter: string;
   points: string;
   roles: {
@@ -77,23 +91,38 @@ export interface BondedPool {
 
 export type NominationStatuses = { [key: string]: string };
 
-export interface ActivePoolContextState {
+export interface ActivePoolsContextState {
   isBonding: () => boolean;
   isNominator: () => boolean;
   isOwner: () => boolean;
+  isMember: () => boolean;
   isDepositor: () => boolean;
+  isStateToggler: () => boolean;
   getPoolBondedAccount: () => MaybeAccount;
-  getPoolBondOptions: (a: MaybeAccount) => any;
   getPoolUnlocking: () => any;
+  getPoolRoles: () => PoolRoles;
   setTargets: (t: any) => void;
   getNominationsStatus: () => NominationStatuses;
-  activeBondedPool: ActiveBondedPool | undefined;
+  setSelectedPoolId: (p: string) => void;
+  selectedActivePool: ActivePool | null;
   targets: any;
   poolNominations: any;
+  synced: Sync;
+}
+
+// PoolMembers types
+export interface PoolMemberContext {
+  fetchPoolMembersMetaBatch: (k: string, v: [], r: boolean) => void;
+  queryPoolMember: (w: MaybeAccount) => any;
+  getMembersOfPool: (p: number) => any;
+  addToPoolMembers: (m: any) => void;
+  getPoolMember: (w: MaybeAccount) => any | null;
+  removePoolMember: (w: MaybeAccount) => void;
+  poolMembers: any;
+  meta: AnyMetaBatch;
 }
 
 // Misc types
-
 export interface PoolRoles {
   depositor: string;
   nominator: string;

@@ -1,14 +1,16 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { FunctionComponent, SVGProps } from 'react';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import type { WellKnownChain } from '@polkadot/rpc-provider/substrate-connect';
 import { PageProps } from 'pages/types';
+import React, { FunctionComponent, SVGProps } from 'react';
 
 export type Fn = () => void;
 
 export enum NetworkName {
   Polkadot = 'polkadot',
+  Kusama = 'kusama',
   Westend = 'westend',
 }
 
@@ -23,6 +25,10 @@ export interface Networks {
 
 export interface Network {
   name: string;
+  endpoints: {
+    rpc: string;
+    lightClient: WellKnownChain;
+  };
   colors: {
     primary: {
       light: string;
@@ -32,12 +38,15 @@ export interface Network {
       light: string;
       dark: string;
     };
+    stroke: {
+      light: string;
+      dark: string;
+    };
     transparent: {
       light: string;
       dark: string;
     };
   };
-  endpoint: string;
   subscanEndpoint: string;
   cereStatsEndpoint: string;
   unit: string;
@@ -64,32 +73,52 @@ export interface Network {
     unit: string;
     priceTicker: string;
   };
-  features: {
-    pools: boolean;
-  };
   params: { [key: string]: number };
 }
 
-export type PageCategories = Array<{
-  _id: number;
-  title: string;
-}>;
+export interface PageCategory {
+  id: number;
+  key: string;
+}
 
-export type PagesConfig = Array<{
+export type PageCategories = Array<PageCategory>;
+
+export interface PageItem {
   category: number;
-  title: string;
+  key: string;
   uri: string;
   hash: string;
   Entry: React.FC<PageProps>;
-  icon: IconDefinition;
-}>;
+  icon?: IconDefinition;
+  animate?: AnyJson;
+  action?: {
+    type: string;
+    status: string;
+    text?: string | undefined;
+  };
+}
+
+export type PagesConfig = Array<PageItem>;
 
 export type MaybeAccount = string | null;
+
+export type MaybeString = string | null;
 
 // any types to compress compiler warnings
 // eslint-disable-next-line
 export type AnyApi = any;
 // eslint-disable-next-line
+export type AnyJson = any;
+// eslint-disable-next-line
+export type AnyFunction = any;
+// eslint-disable-next-line
 export type AnyMetaBatch = any;
 // eslint-disable-next-line
 export type AnySubscan = any;
+
+// track the status of a syncing / fetching process.
+export enum Sync {
+  Unsynced,
+  Syncing,
+  Synced,
+}

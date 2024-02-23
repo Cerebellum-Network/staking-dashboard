@@ -1,14 +1,14 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { faCog, faGlasses } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useConnect } from 'contexts/Connect';
 import { ExternalAccount, ImportedAccount } from 'contexts/Connect/types';
-import { faGlasses, faCog } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ExtensionWrapper } from '../Wrappers';
-import { Wrapper } from './Wrapper';
 import { ReadOnlyInput } from '../ReadOnlyInput';
 import { ReadOnlyProps } from '../types';
+import { ExtensionWrapper } from '../Wrappers';
+import { Wrapper } from './Wrapper';
 
 export const ReadOnly = (props: ReadOnlyProps) => {
   const { setReadOnlyOpen, readOnlyOpen } = props;
@@ -74,17 +74,17 @@ export const ReadOnly = (props: ReadOnlyProps) => {
           )}
           <div className="accounts">
             {externalAccountsByUser.map((a: ExternalAccount, i: number) => (
-              <button
-                key={`user_external_account_${i}`}
-                type="button"
-                className="account"
-                onClick={() => {
-                  forgetAccount(a);
-                }}
-              >
+              <div key={`user_external_account_${i}`} className="account">
                 <div>{a.address}</div>
-                <div>Forget</div>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    forgetAccount(a);
+                  }}
+                >
+                  Forget
+                </button>
+              </div>
             ))}
           </div>
         </div>

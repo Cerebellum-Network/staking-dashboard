@@ -1,18 +1,18 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import styled from 'styled-components';
 import {
-  textSecondary,
-  borderPrimary,
-  backgroundSecondary,
-  cardBorder,
-  shadowColor,
-  cardShadow,
   backgroundDropdown,
-  buttonSecondaryBackground,
+  backgroundSecondary,
+  borderPrimary,
   buttonHoverBackground,
+  buttonSecondaryBackground,
+  cardBorder,
+  cardShadow,
+  shadowColor,
+  textSecondary,
 } from 'theme';
 
 const VERTICAL_THRESHOLD = 800;
@@ -30,7 +30,6 @@ export const ItemsWrapper = styled(motion.div)`
 `;
 
 export const ItemWrapper = styled(motion.div)`
-  box-sizing: border-box;
   flex-shrink: 0;
   flex-grow: 1;
   flex-basis: 100%;
@@ -38,7 +37,7 @@ export const ItemWrapper = styled(motion.div)`
 
   height: auto;
   @media (min-width: ${VERTICAL_THRESHOLD + 1}px) {
-    height: 10rem;
+    height: 8.8rem;
   }
 
   > .inner {
@@ -46,7 +45,6 @@ export const ItemWrapper = styled(motion.div)`
     background: ${backgroundSecondary};
     border: ${cardBorder} ${borderPrimary};
     box-shadow: ${cardShadow} ${shadowColor};
-    box-sizing: border-box;
     border-radius: 0.75rem;
     width: 100%;
     height: 100%;
@@ -61,18 +59,18 @@ export const ItemWrapper = styled(motion.div)`
 
     /* vertical validator thumbnail / content tiling */
     section {
-      box-sizing: border-box;
       display: flex;
       flex-flow: column wrap;
       padding: 0 1rem;
       overflow: hidden;
 
-      h2 {
+      h3 {
         display: flex;
         flex-flow: row wrap;
         align-items: center;
 
         > button {
+          font-size: 1.1rem;
           &.active {
             color: ${textSecondary};
             background: ${backgroundDropdown};
@@ -138,7 +136,6 @@ export const ItemWrapper = styled(motion.div)`
       }
 
       &:first-child {
-        box-sizing: border-box;
         flex-flow: row wrap;
         align-items: center;
         justify-content: flex-start;
@@ -160,9 +157,9 @@ export const ItemWrapper = styled(motion.div)`
         width: 100%;
         flex: 1;
 
-        h2 {
-          margin-top: 0.75rem;
-          margin-bottom: 0.9rem;
+        h3 {
+          margin-top: 0.5rem;
+          margin-bottom: 0.4rem;
         }
       }
     }
@@ -179,11 +176,11 @@ export const ItemWrapper = styled(motion.div)`
           align-items: center;
           justify-content: flex-start;
           height: 100%;
-          width: 9.5rem;
+          width: 7rem;
 
           svg {
-            width: 7rem;
-            height: 7rem;
+            width: 4.5rem;
+            height: 4.5rem;
           }
         }
         &:last-child {
@@ -197,7 +194,7 @@ export const ItemWrapper = styled(motion.div)`
           height: 100%;
           flex: 1;
 
-          h2 {
+          h3 {
             margin-top: 0.25rem;
           }
         }

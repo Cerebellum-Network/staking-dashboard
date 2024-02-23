@@ -3,40 +3,36 @@
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { motion } from 'framer-motion';
-import { ItemWrapper } from './Wrappers';
 import { ItemProps } from './types';
+import { ItemWrapper } from './Wrappers';
 
-export const Item = (props: ItemProps) => {
-  const { icon, label, transform, onClick } = props;
-  const disabled = props.disabled ?? false;
-
-  return (
-    <motion.button
-      disabled={disabled}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.99 }}
-      transition={{
-        duration: 0.3,
-      }}
-      onClick={() => {
-        onClick();
-      }}
-      style={{
-        opacity: disabled ? 0.5 : 1,
-      }}
-    >
-      <ItemWrapper active={props.active} style={{ width: props.width ?? 180 }}>
+export const Item = ({
+  disabled = false,
+  icon,
+  label,
+  transform,
+  onClick,
+}: ItemProps) => (
+  <motion.button
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.99 }}
+    transition={{
+      duration: 0.3,
+    }}
+    onClick={() => {
+      if (onClick !== undefined) onClick();
+    }}
+    disabled={disabled}
+  >
+    <ItemWrapper>
+      {icon ? (
         <div className="icon">
-          <FontAwesomeIcon
-            icon={icon}
-            transform={transform}
-            opacity={props.active ? 1 : 0.7}
-          />
+          <FontAwesomeIcon icon={icon} transform={transform} />
         </div>
-        <p>{label}</p>
-      </ItemWrapper>
-    </motion.button>
-  );
-};
+      ) : null}
+      <p>{label}</p>
+    </ItemWrapper>
+  </motion.button>
+);
 
 export default Item;

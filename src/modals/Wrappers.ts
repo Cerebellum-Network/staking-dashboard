@@ -1,17 +1,17 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import styled from 'styled-components';
 import {
-  textSecondary,
-  modalOverlayBackground,
-  modalBackground,
-  networkColor,
-  cardShadow,
-  shadowColor,
-  cardBorder,
   borderPrimary,
+  cardBorder,
+  cardShadow,
+  modalBackground,
+  modalOverlayBackground,
+  networkColor,
+  shadowColor,
+  textSecondary,
 } from 'theme';
 
 // Blurred background modal wrapper
@@ -24,8 +24,7 @@ export const ModalWrapper = styled(motion.div)`
   backdrop-filter: blur(4px);
 
   /* modal content wrapper */
-  .content_wrapper {
-    box-sizing: border-box;
+  > div {
     height: 100%;
     display: flex;
     flex-flow: row wrap;
@@ -47,24 +46,31 @@ export const ModalWrapper = styled(motion.div)`
 export const HeightWrapper = styled.div<{ size: string }>`
   border: ${cardBorder} ${borderPrimary};
   box-shadow: ${cardShadow} ${shadowColor};
-  transition: height 0.4s cubic-bezier(0.1, 1, 0.2, 1);
-  box-sizing: border-box;
+  transition: height 0.5s cubic-bezier(0.1, 1, 0.2, 1);
   width: 100%;
-  max-width: ${(props) => (props.size === 'large' ? '800px' : '600px')};
+  max-width: ${(props) =>
+    props.size === 'xl'
+      ? '1250px'
+      : props.size === 'large'
+      ? '800px'
+      : '600px'};
   max-height: 100%;
-  border-radius: 1rem;
+  border-radius: 1.5rem;
   z-index: 9;
   position: relative;
 `;
 
 // Modal content wrapper
 export const ContentWrapper = styled.div`
-  box-sizing: border-box;
   background: ${modalBackground};
   width: 100%;
   height: auto;
   overflow: hidden;
   position: relative;
+
+  a {
+    color: ${networkColor};
+  }
   .header {
     width: 100%;
     display: flex;
@@ -84,14 +90,21 @@ export const ContentWrapper = styled.div`
 `;
 
 // generic wrapper for modal padding
-export const PaddingWrapper = styled.div<{ verticalOnly?: boolean }>`
-  box-sizing: border-box;
+export const PaddingWrapper = styled.div<{
+  verticalOnly?: boolean;
+  horizontalOnly?: boolean;
+}>`
   display: flex;
   flex-flow: column wrap;
   align-items: flex-start;
   justify-content: flex-start;
   width: 100%;
-  padding: ${(props) => (props.verticalOnly ? '1rem 0' : '1rem')};
+  padding: ${(props) =>
+    props.verticalOnly
+      ? '1rem 0'
+      : props.horizontalOnly
+      ? '0 1rem'
+      : '1rem 1.25rem'};
 `;
 
 // modal header, used for extrinsics forms
@@ -118,7 +131,6 @@ export const FooterWrapper = styled.div`
   justify-content: flex-end;
   align-items: center;
   width: 100%;
-  margin-top: 1rem;
 
   h3 {
     color: ${textSecondary};
@@ -141,8 +153,15 @@ export const FooterWrapper = styled.div`
     flex-flow: row nowrap;
     justify-content: flex-start;
     align-items: center;
-    color: ${networkColor};
-    border: 1px solid ${networkColor};
+    &.primary {
+      color: white;
+      background: ${networkColor};
+      border: 1px solid ${networkColor};
+    }
+    &.secondary {
+      color: ${networkColor};
+      border: 1px solid ${networkColor};
+    }
 
     &:disabled {
       opacity: 0.25;

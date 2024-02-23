@@ -1,33 +1,35 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import moment from 'moment';
-import { Bar } from 'react-chartjs-2';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
   BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
   Title,
   Tooltip,
-  Legend,
 } from 'chart.js';
 import { useApi } from 'contexts/Api';
+import { useCereStats } from 'contexts/CereStats';
+import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
+import { useStaking } from 'contexts/Staking';
+import { useTheme } from 'contexts/Themes';
+import { useUi } from 'contexts/UI';
+import { format, fromUnixTime } from 'date-fns';
+import { locales } from 'locale';
+import { Bar } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
 import {
   defaultThemes,
   networkColors,
   networkColorsSecondary,
   networkColorsTransparent,
 } from 'theme/default';
-import { useTheme } from 'contexts/Themes';
-import { humanNumber } from 'Utils';
-import { useUi } from 'contexts/UI';
-import { useStaking } from 'contexts/Staking';
 import { AnySubscan } from 'types';
-import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
-import { useCereStats } from 'contexts/CereStats';
+import { humanNumber } from 'Utils';
 import { PayoutBarProps } from './types';
 import { formatRewardsForGraphs } from './Utils';
 
@@ -42,46 +44,52 @@ ChartJS.register(
   Legend
 );
 
-export const PayoutBar = (props: PayoutBarProps) => {
-  const { days, height } = props;
-
+export const PayoutBar = ({ days, height }: PayoutBarProps) => {
   const { mode } = useTheme();
-  const { network } = useApi();
+  const { name, unit, units } = useApi().network;
   const { isSyncing } = useUi();
   const { inSetup } = useStaking();
   const { membership } = usePoolMemberships();
   const { payouts, poolClaims } = useCereStats();
+  const { i18n } = useTranslation();
 
-  const { units } = network;
+  // remove slashes from payouts (graph does not support negative values).
+  const payoutsNoSlash = payouts.filter(
+    (p: AnySubscan) => p.event_id !== 'Slashed'
+  );
+
   const notStaking = !isSyncing && inSetup() && !membership;
+  const average = 1;
 
   const { payoutsByDay, poolClaimsByDay } = formatRewardsForGraphs(
     days,
+    average,
     units,
-    payouts,
+    payoutsNoSlash,
     poolClaims
   );
 
   // determine color for payouts
   const colorPayouts = notStaking
-    ? networkColorsTransparent[`${network.name}-${mode}`]
-    : defaultThemes.graphs.accent[mode];
+    ? networkColorsTransparent[`${name}-${mode}`]
+    : networkColors[`${name}-${mode}`];
 
   // determine color for poolClaims
   const colorPoolClaims = notStaking
-    ? networkColorsTransparent[`${network.name}-${mode}`]
-    : networkColorsSecondary[`${network.name}-${mode}`];
+    ? networkColorsTransparent[`${name}-${mode}`]
+    : networkColorsSecondary[`${name}-${mode}`];
 
   const data = {
     labels: payoutsByDay.map((item: AnySubscan) => {
-      return moment.unix(item.block_timestamp).format('Do MMM');
+      const dateObj = format(fromUnixTime(item.block_timestamp), 'do MMM', {
+        locale: locales[i18n.resolvedLanguage],
+      });
+      return `${dateObj}`;
     }),
     datasets: [
       {
         label: 'Payout',
-        data: payoutsByDay.map((item: AnySubscan) => {
-          return item.amount;
-        }),
+        data: payoutsByDay.map((item: AnySubscan) => item.amount),
         borderColor: colorPayouts,
         backgroundColor: colorPayouts,
         pointRadius: 0,
@@ -89,9 +97,7 @@ export const PayoutBar = (props: PayoutBarProps) => {
       },
       {
         label: 'Pool Claim',
-        data: poolClaimsByDay.map((item: AnySubscan) => {
-          return item.amount;
-        }),
+        data: poolClaimsByDay.map((item: AnySubscan) => item.amount),
         borderColor: colorPoolClaims,
         backgroundColor: colorPoolClaims,
         pointRadius: 0,
@@ -104,13 +110,12 @@ export const PayoutBar = (props: PayoutBarProps) => {
     responsive: true,
     maintainAspectRatio: false,
     barPercentage: 0.4,
-    maxBarThickness: 12,
+    maxBarThickness: 13,
     scales: {
       x: {
         stacked: true,
         grid: {
           display: false,
-          drawBorder: true,
         },
         ticks: {
           font: {
@@ -126,9 +131,11 @@ export const PayoutBar = (props: PayoutBarProps) => {
             size: 10,
           },
         },
+        border: {
+          display: false,
+        },
         grid: {
           color: defaultThemes.graphs.grid[mode],
-          borderColor: defaultThemes.transparent[mode],
         },
       },
     },
@@ -142,17 +149,14 @@ export const PayoutBar = (props: PayoutBarProps) => {
       tooltip: {
         displayColors: false,
         backgroundColor: defaultThemes.graphs.tooltip[mode],
+        titleColor: defaultThemes.text.invert[mode],
         bodyColor: defaultThemes.text.invert[mode],
         bodyFont: {
           weight: '600',
         },
         callbacks: {
-          title: () => {
-            return [];
-          },
-          label: (context: any) => {
-            return `${humanNumber(context.parsed.y)} ${network.unit}`;
-          },
+          title: () => [],
+          label: (context: any) => `${humanNumber(context.parsed.y)} ${unit}`,
         },
       },
     },
@@ -161,7 +165,7 @@ export const PayoutBar = (props: PayoutBarProps) => {
   return (
     <div
       style={{
-        height: height === undefined ? 'auto' : height,
+        height: height || 'auto',
       }}
     >
       <Bar options={options} data={data} />

@@ -2,11 +2,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BN from 'bn.js';
-import moment from 'moment';
-import React from 'react';
+import { useUi } from 'contexts/UI';
+import {
+  differenceInDays,
+  endOfDay,
+  endOfTomorrow,
+  fromUnixTime,
+  getDayOfYear,
+  getUnixTime,
+  getYear,
+  parse,
+  startOfDay,
+  subDays,
+} from 'date-fns';
 import throttle from 'lodash.throttle';
-import { planckBnToUnit } from 'Utils';
+import React from 'react';
 import { AnySubscan } from 'types';
+import { planckBnToUnit } from 'Utils';
 
 export const getSize = (element: any) => {
   const width = element?.offsetWidth;
@@ -15,6 +27,8 @@ export const getSize = (element: any) => {
 };
 
 export const useSize = (element: any) => {
+  const { containerRefs } = useUi();
+
   const [size, setSize] = React.useState(getSize(element));
 
   const throttleCallback = () => {
@@ -27,57 +41,75 @@ export const useSize = (element: any) => {
       leading: false,
     });
 
-    window.addEventListener('resize', resizeThrottle);
+    // listen to main interface resize if ref is available, otherwise
+    // fall back to window resize.
+    const listenFor = containerRefs?.mainInterface?.current ?? window;
+    listenFor.addEventListener('resize', resizeThrottle);
     return () => {
-      window.removeEventListener('resize', resizeThrottle);
+      listenFor.removeEventListener('resize', resizeThrottle);
     };
   });
   return size;
 };
 
-export const formatSize = (size: any, minHeight: number) => {
-  const width: string | number = size.width === undefined ? '100%' : size.width;
-  const height: number = size.height === undefined ? minHeight : size.height;
+interface FormatSizeIf {
+  width: string | number;
+  height: number;
+}
 
-  return {
-    width,
-    height,
-    minHeight,
-  };
-};
+export const formatSize = (
+  { width, height }: FormatSizeIf,
+  minHeight: number
+) => ({
+  width: width || '100%',
+  height: height || minHeight,
+  minHeight,
+});
 
-export const getGradient = (ctx: any, chartArea: any) => {
+interface GetGradientIf {
+  right: number;
+  left: number;
+  top: number;
+  bottom: number;
+}
+
+export const getGradient = (
+  ctx: any,
+  { right, left, top, bottom }: GetGradientIf
+) => {
   let width;
   let height;
   let gradient;
 
-  const chartWidth = chartArea.right - chartArea.left;
-  const chartHeight = chartArea.bottom - chartArea.top;
+  const chartWidth = right - left;
+  const chartHeight = bottom - top;
 
   if (!gradient || width !== chartWidth || height !== chartHeight) {
     // Create the gradient because this is either the first render
     // or the size of the chart has changed
     width = chartWidth;
     height = chartHeight;
-    gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+    gradient = ctx.createLinearGradient(0, bottom, 0, top);
     gradient.addColorStop(0, 'rgba(203, 37, 111, 0.9)');
     gradient.addColorStop(1, 'rgba(223, 81, 144, 0.7)');
   }
   return gradient;
 };
 
-// given payouts, calculate daily icome and fill missing days with zero amounts.
+// given payouts, calculate daily income and fill missing days with zero amounts.
 export const calculatePayoutsByDay = (
   payouts: any,
   maxDays: number,
+  average: number,
   units: number
 ) => {
-  if (!payouts.length) {
-    return payouts;
-  }
+  if (!payouts.length) return payouts;
+
+  // if we are taking an average, we will need extra days of data.
+  if (average > 1) maxDays += average;
 
   const payoutsByDay: any = [];
-  let curDay = 367;
+  let curDay = 366;
   let curYear = 3000;
   let curPayout = {
     amount: new BN(0),
@@ -85,21 +117,23 @@ export const calculatePayoutsByDay = (
   };
 
   // determine inactive days since last payout
-  const lastTs = moment.unix(payouts[0].block_timestamp);
+  const lastTs = fromUnixTime(payouts[0].block_timestamp);
 
   // test from start of day as to not duplicate today's payout entry
-  let daysSinceLast = moment().startOf('day').diff(lastTs, 'days');
+  let daysSinceLast = differenceInDays(startOfDay(new Date()), lastTs);
 
   // add inactive days
   if (daysSinceLast > 0) {
     daysSinceLast = daysSinceLast > maxDays ? maxDays : daysSinceLast;
-    let timestamp = moment().add(1, 'days').endOf('day');
+
+    let timestamp = endOfTomorrow();
+
     for (let i = 1; i <= daysSinceLast; i++) {
-      timestamp = timestamp.subtract(1, 'days');
+      timestamp = subDays(timestamp, 1);
       payoutsByDay.push({
         amount: 0,
         event_id: 'Reward',
-        block_timestamp: timestamp.unix(),
+        block_timestamp: getUnixTime(timestamp),
       });
     }
   }
@@ -117,16 +151,23 @@ export const calculatePayoutsByDay = (
       p++;
 
       // extract day and year from payout timestamp
-      const date = moment.unix(payout.block_timestamp);
-      const _day = date.dayOfYear();
-      const _year = date.year();
+      const date = fromUnixTime(payout.block_timestamp);
+      const _day = getDayOfYear(date);
+      const _year = getYear(date);
 
       // starting a new day
       if (_day < curDay || _year < curYear) {
         // check current day with previous, determine missing days
-        const prevTs = moment(`${curDay}/${curYear}`, 'DDD/YYYY').unix();
-        const thisTs = moment(`${_day}/${_year}`, 'DDD/YYYY').unix();
-        const gapDays = moment.unix(prevTs).diff(moment.unix(thisTs), 'days');
+        const prevTs = getUnixTime(
+          parse(`${pad(curDay, 3)}/${curYear}`, 'DDD/yyyy', new Date())
+        );
+        const thisTs = getUnixTime(
+          parse(`${pad(_day, 3)}/${_year}`, 'DDD/yyyy', new Date())
+        );
+        const gapDays = differenceInDays(
+          fromUnixTime(prevTs),
+          fromUnixTime(thisTs)
+        );
 
         // increment by `gap `days
         if (i !== 0) {
@@ -137,9 +178,11 @@ export const calculatePayoutsByDay = (
         }
 
         // get timestamp of end of day
-        const dayTs = moment(`${curDay}/${curYear}`, 'DDD/YYYY')
-          .endOf('day')
-          .unix();
+        const dayTs = getUnixTime(
+          endOfDay(
+            parse(`${pad(curDay, 3)}/${curYear}`, 'DDD/yyyy', new Date())
+          )
+        );
 
         // commit previous day payout
         if (i > 1) {
@@ -153,14 +196,14 @@ export const calculatePayoutsByDay = (
         // commit gap day payouts
         if (i !== 0) {
           // fill missing days
-          let gapDayTs = moment.unix(prevTs);
+          let gapDayTs = fromUnixTime(prevTs);
           if (gapDays > 1) {
             for (let j = 1; j < gapDays; j++) {
-              gapDayTs = gapDayTs.subtract(1, 'days');
+              gapDayTs = subDays(gapDayTs, 1);
               payoutsByDay.push({
                 amount: 0,
                 event_id: 'Reward',
-                block_timestamp: gapDayTs.unix(),
+                block_timestamp: getUnixTime(gapDayTs),
               });
             }
           }
@@ -182,16 +225,40 @@ export const calculatePayoutsByDay = (
       }
 
       // commit last payout
-      if (p === payouts.length) {
+      if (p === payouts.length)
         payoutsByDay.push({
           amount: planckBnToUnit(curPayout.amount, units),
           event_id: curPayout.amount.lt(new BN(0)) ? 'Slash' : 'Reward',
           block_timestamp: payout.block_timestamp,
         });
-      }
     }
   }
-  return payoutsByDay;
+
+  // if we don't need to take an average, just return the `payoutsByDay`.
+  if (average <= 1) return payoutsByDay;
+
+  // create moving average value over `average` days
+  const averagePayoutsByDay = [];
+  for (let i = 0; i < payoutsByDay.length; i++) {
+    let total = 0;
+    let num = 0;
+    for (let j = 0; j < average; j++) {
+      if (payoutsByDay[i + j]) {
+        total += payoutsByDay[i + j].amount;
+      }
+      // increase by one anyway to treat non-existent as zero value
+      num += 1;
+    }
+
+    averagePayoutsByDay.push({
+      amount: total / num,
+      event_id: payoutsByDay[i].event_id,
+      block_timestamp: payoutsByDay[i].block_timestamp,
+    });
+  }
+
+  // return an array with the expected number of items
+  return averagePayoutsByDay.slice(0, maxDays - average);
 };
 
 // fill in the backlog of days up to `maxDays`
@@ -202,20 +269,20 @@ export const prefillToMaxDays = (payoutsByDay: any, maxDays: number) => {
     // get earliest timestamp
     let timestamp;
     if (!payoutsByDay.length) {
-      timestamp = moment().endOf('day');
+      timestamp = endOfDay(new Date());
     } else {
-      timestamp = moment.unix(
+      timestamp = fromUnixTime(
         payoutsByDay[payoutsByDay.length - 1].block_timestamp
       );
     }
 
     // fill in remaining days
     for (let i = 0; i < remainingDays; i++) {
-      timestamp = timestamp.subtract(1, 'days');
+      timestamp = subDays(timestamp, 1);
       payoutsByDay.push({
         amount: 0,
         event_id: 'Reward',
-        block_timestamp: timestamp.unix(),
+        block_timestamp: getUnixTime(timestamp),
       });
     }
   }
@@ -225,22 +292,19 @@ export const prefillToMaxDays = (payoutsByDay: any, maxDays: number) => {
 // format rewards and return last payment
 export const formatRewardsForGraphs = (
   days: number,
+  average: number,
   units: number,
   payouts: AnySubscan,
   poolClaims: AnySubscan
 ) => {
-  let payoutsByDay = prefillToMaxDays(
-    calculatePayoutsByDay(payouts, days, units),
+  const payoutsByDay = prefillToMaxDays(
+    calculatePayoutsByDay(payouts, days, average, units),
     days
   );
-  let poolClaimsByDay = prefillToMaxDays(
-    calculatePayoutsByDay(poolClaims, days, units),
+  const poolClaimsByDay = prefillToMaxDays(
+    calculatePayoutsByDay(poolClaims, days, average, units),
     days
   );
-
-  // reverse rewards: most recent last
-  payoutsByDay = payoutsByDay.reverse();
-  poolClaimsByDay = poolClaimsByDay.reverse();
 
   // get most recent payout
   const payoutExists =
@@ -266,8 +330,9 @@ export const formatRewardsForGraphs = (
   }
 
   return {
-    payoutsByDay,
-    poolClaimsByDay,
+    // reverse rewards: most recent last
+    payoutsByDay: payoutsByDay.reverse(),
+    poolClaimsByDay: poolClaimsByDay.reverse(),
     lastReward,
   };
 };
@@ -318,7 +383,6 @@ export const combineRewardsByDay = (
   // loop pool claims and consume / combine payouts
   poolClaimsByDay.forEach((p: AnySubscan) => {
     let { amount } = p;
-    const { block_timestamp } = p;
 
     // check payouts exist on this day
     const payoutsThisDay = payoutsByDay.filter((q: AnySubscan) => {
@@ -337,7 +401,7 @@ export const combineRewardsByDay = (
     });
     rewards.push({
       amount,
-      block_timestamp,
+      block_timestamp: p.block_timestamp,
     });
   });
 
@@ -365,13 +429,20 @@ export const combineRewardsByDay = (
 
 // calculate whether 2 unix timestamps are on the same day
 export const unixSameDay = (p: number, q: number) => {
-  const dateQ = moment.unix(q);
-  const _dayQ = dateQ.dayOfYear();
-  const _yearQ = dateQ.year();
+  const dateQ = getUnixTime(q);
+  const _dayQ = getDayOfYear(dateQ);
+  const _yearQ = getYear(dateQ);
 
-  const dateP = moment.unix(p);
-  const _dayP = dateP.dayOfYear();
-  const _yearP = dateP.year();
+  const dateP = getUnixTime(p);
+  const _dayP = getDayOfYear(dateP);
+  const _yearP = getYear(dateP);
 
   return _dayQ === _dayP && _yearQ === _yearP;
+};
+
+// ensures leading zeroes of numbers
+export const pad = (num: number, size: number) => {
+  let numStr = num.toString();
+  while (numStr.length < size) numStr = `0${numStr}`;
+  return numStr;
 };

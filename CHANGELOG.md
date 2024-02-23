@@ -116,7 +116,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored testnet inclusion condition in build-and-deploy job
 - Updated branches for Stage and Prod
 - Updated information about Inflation
-- Fixed HTML page formatting, ChangeNominations, and CERE_URL
+- Fixed HTML page formatting, ChangeNominations, and CereUrl
 - Updated README.md, prod.yaml, Favicons, units, and URI Prefix
 - Adjusted constants and networks for Cere
 - Updated default Network and active networks fields

@@ -1,19 +1,8 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState, useEffect, useRef } from 'react';
 import BN from 'bn.js';
-// eslint-disable-next-line import/no-webpack-loader-syntax, import/no-unresolved
-import Worker from 'worker-loader!../../workers/stakers';
-import {
-  rmCommas,
-  localStorageOrDefault,
-  setStateWithRef,
-  planckBnToUnit,
-} from 'Utils';
 import { ExternalAccount, ImportedAccount } from 'contexts/Connect/types';
-import { AnyApi, MaybeAccount } from 'types';
-import type { VoidFn } from '@polkadot/api/types';
 import {
   EraStakers,
   NominationStatuses,
@@ -21,10 +10,20 @@ import {
   StakingMetrics,
   StakingTargets,
 } from 'contexts/Staking/types';
+import React, { useEffect, useRef, useState } from 'react';
+import { AnyApi, MaybeAccount } from 'types';
+import {
+  localStorageOrDefault,
+  planckBnToUnit,
+  rmCommas,
+  setStateWithRef,
+} from 'Utils';
+// eslint-disable-next-line import/no-unresolved
+import Worker from 'worker-loader!../../workers/stakers';
 import { useApi } from '../Api';
-import { useNetworkMetrics } from '../Network';
 import { useBalances } from '../Balances';
 import { useConnect } from '../Connect';
+import { useNetworkMetrics } from '../Network';
 import * as defaults from './defaults';
 
 export const StakingContext = React.createContext<StakingContextInterface>(
@@ -55,8 +54,6 @@ export const StakingProvider = ({
   } = useBalances();
   const { units } = network;
   const { maxNominatorRewardedPerValidator } = consts;
-  // Store unsub object fro staking metrics.
-  const unsub = useRef<VoidFn | null>(null);
 
   // store staking metrics in state
   const [stakingMetrics, setStakingMetrics] = useState<StakingMetrics>(
@@ -204,39 +201,49 @@ export const StakingProvider = ({
     if (api !== null && isReady && metrics.activeEra.index !== 0) {
       const previousEra = metrics.activeEra.index - 1;
 
-      const u = await api.queryMulti<AnyApi>(
+      // subscribe to staking metrics
+      const unsub = await api.queryMulti<AnyApi>(
         [
           api.query.staking.counterForNominators,
           api.query.staking.counterForValidators,
           api.query.staking.maxNominatorsCount,
           api.query.staking.maxValidatorsCount,
           api.query.staking.validatorCount,
-          [api.query.staking.erasValidatorReward, previousEra.toString()],
-          [api.query.staking.erasTotalStake, previousEra.toString()],
+          [api.query.staking.erasValidatorReward, previousEra],
+          [api.query.staking.erasTotalStake, previousEra],
           api.query.staking.minNominatorBond,
           [api.query.staking.payee, activeAccount],
-          [
-            api.query.staking.erasTotalStake,
-            metrics.activeEra.index.toString(),
-          ],
         ],
-        (q) => {
+        ([
+          _totalNominators,
+          _totalValidators,
+          _maxNominatorsCount,
+          _maxValidatorsCount,
+          _validatorCount,
+          _lastReward,
+          _lastTotalStake,
+          _minNominatorBond,
+          _payee,
+        ]) => {
           setStakingMetrics({
             ...stakingMetrics,
-            totalNominators: new BN(q[0].toString()),
-            totalValidators: new BN(q[1].toString()),
-            maxNominatorsCount: new BN(q[2].toString()),
-            maxValidatorsCount: new BN(q[3].toString()),
-            validatorCount: new BN(q[4].toString()),
-            lastReward: new BN(q[5].toString()),
-            lastTotalStake: new BN(q[6].toString()),
-            minNominatorBond: new BN(q[7].toString()),
-            payee: q[7].toString(),
+            payee: _payee.toHuman(),
+            lastTotalStake: _lastTotalStake.toBn(),
+            validatorCount: _validatorCount.toBn(),
+            totalNominators: _totalNominators.toBn(),
+            totalValidators: _totalValidators.toBn(),
+            minNominatorBond: _minNominatorBond.toBn(),
+            lastReward: _lastReward.unwrapOrDefault(new BN(0)),
+            maxValidatorsCount: new BN(_maxValidatorsCount.toString()),
+            maxNominatorsCount: new BN(_maxNominatorsCount.toString()),
           });
         }
       );
 
-      unsub.current = u;
+      setStakingMetrics({
+        ...stakingMetrics,
+        unsub,
+      });
     }
   };
 
@@ -329,6 +336,38 @@ export const StakingProvider = ({
   };
 
   /*
+   * Gets the nomination statuses of passed in nominations
+   */
+  const getNominationsStatusFromTargets = (
+    who: MaybeAccount,
+    _targets: [any]
+  ) => {
+    const statuses: { [key: string]: string } = {};
+
+    if (!_targets.length) {
+      return statuses;
+    }
+
+    for (const target of _targets) {
+      const s = eraStakersRef.current.stakers.find(
+        (_n: any) => _n.address === target
+      );
+
+      if (s === undefined) {
+        statuses[target] = 'waiting';
+        continue;
+      }
+      const exists = (s.others ?? []).find((_o: any) => _o.who === who);
+      if (exists === undefined) {
+        statuses[target] = 'inactive';
+        continue;
+      }
+      statuses[target] = 'active';
+    }
+    return statuses;
+  };
+
+  /*
    * Helper function to determine whether the controller account
    * has been imported.
    */
@@ -406,6 +445,7 @@ export const StakingProvider = ({
     <StakingContext.Provider
       value={{
         getNominationsStatus,
+        getNominationsStatusFromTargets,
         setTargets,
         hasController,
         getControllerNotImported,

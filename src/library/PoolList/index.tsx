@@ -1,33 +1,53 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faGripVertical } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ListItemsPerBatch, ListItemsPerPage } from 'consts';
 import { useApi } from 'contexts/Api';
-import { StakingContext } from 'contexts/Staking';
+import { useFilters } from 'contexts/Filters';
+import { FilterType } from 'contexts/Filters/types';
 import { useNetworkMetrics } from 'contexts/Network';
-import { LIST_ITEMS_PER_PAGE, LIST_ITEMS_PER_BATCH } from 'consts';
-import { Pool } from 'library/Pool';
-import { List, Header, Wrapper as ListWrapper, Pagination } from 'library/List';
 import { useBondedPools } from 'contexts/Pools/BondedPools';
+import { StakingContext } from 'contexts/Staking';
 import { useTheme } from 'contexts/Themes';
+import { useUi } from 'contexts/UI';
+import { motion } from 'framer-motion';
+import { usePoolFilters } from 'library/Hooks/usePoolFilters';
+import { Header, List, Wrapper as ListWrapper } from 'library/List';
+import { MotionContainer } from 'library/List/MotionContainer';
+import { Pagination } from 'library/List/Pagination';
+import { SearchInput } from 'library/List/SearchInput';
+import { Pool } from 'library/Pool';
+import React, { useEffect, useRef, useState } from 'react';
 import { networkColors } from 'theme/default';
 import { PoolListProvider, usePoolList } from './context';
+import { Filters } from './Filters';
 import { PoolListProps } from './types';
 
-export const PoolListInner = (props: PoolListProps) => {
-  const { allowMoreCols, pagination, batchKey }: any = props;
-  const disableThrottle = props.disableThrottle ?? false;
-  const refetchOnListUpdate =
-    props.refetchOnListUpdate !== undefined ? props.refetchOnListUpdate : false;
-
+export const PoolListInner = ({
+  allowMoreCols,
+  pagination,
+  batchKey = '',
+  disableThrottle,
+  allowSearch,
+  pools,
+  title,
+  defaultFilters,
+}: PoolListProps) => {
   const { mode } = useTheme();
   const { isReady, network } = useApi();
   const { metrics } = useNetworkMetrics();
-  const { fetchPoolsMetaBatch }: any = useBondedPools();
+  const { fetchPoolsMetaBatch, poolSearchFilter, meta } = useBondedPools();
   const { listFormat, setListFormat } = usePoolList();
+  const { isSyncing } = useUi();
+
+  const { getFilters, setMultiFilters, getSearchTerm, setSearchTerm } =
+    useFilters();
+  const { applyFilter } = usePoolFilters();
+  const includes = getFilters(FilterType.Include, 'pools');
+  const excludes = getFilters(FilterType.Exclude, 'pools');
+  const searchTerm = getSearchTerm('pools');
 
   // current page
   const [page, setPage] = useState<number>(1);
@@ -36,10 +56,10 @@ export const PoolListInner = (props: PoolListProps) => {
   const [renderIteration, _setRenderIteration] = useState<number>(1);
 
   // default list of pools
-  const [poolsDefault, setPoolsDefault] = useState(props.pools);
+  const [poolsDefault, setPoolsDefault] = useState(pools);
 
   // manipulated list (ordering, filtering) of pools
-  const [pools, setPools] = useState(props.pools);
+  const [_pools, _setPools] = useState(pools);
 
   // is this the initial fetch
   const [fetched, setFetched] = useState<boolean>(false);
@@ -52,21 +72,19 @@ export const PoolListInner = (props: PoolListProps) => {
   };
 
   // pagination
-  const totalPages = Math.ceil(pools.length / LIST_ITEMS_PER_PAGE);
-  const nextPage = page + 1 > totalPages ? totalPages : page + 1;
-  const prevPage = page - 1 < 1 ? 1 : page - 1;
-  const pageEnd = page * LIST_ITEMS_PER_PAGE - 1;
-  const pageStart = pageEnd - (LIST_ITEMS_PER_PAGE - 1);
+  const totalPages = Math.ceil(_pools.length / ListItemsPerPage);
+  const pageEnd = page * ListItemsPerPage - 1;
+  const pageStart = pageEnd - (ListItemsPerPage - 1);
 
   // render batch
-  const batchEnd = renderIteration * LIST_ITEMS_PER_BATCH - 1;
+  const batchEnd = renderIteration * ListItemsPerBatch - 1;
 
   // refetch list when pool list changes
   useEffect(() => {
-    if (props.pools !== poolsDefault) {
+    if (pools !== poolsDefault) {
       setFetched(false);
     }
-  }, [props.pools]);
+  }, [pools]);
 
   // configure pool list when network is ready to fetch
   useEffect(() => {
@@ -77,10 +95,10 @@ export const PoolListInner = (props: PoolListProps) => {
 
   // handle pool list bootstrapping
   const setupPoolList = () => {
-    setPoolsDefault(props.pools);
-    setPools(props.pools);
+    setPoolsDefault(pools);
+    _setPools(pools);
     setFetched(true);
-    fetchPoolsMetaBatch(batchKey, props.pools, refetchOnListUpdate);
+    fetchPoolsMetaBatch(batchKey, pools, true);
   };
 
   // render throttle
@@ -92,25 +110,70 @@ export const PoolListInner = (props: PoolListProps) => {
     }
   }, [renderIterationRef.current]);
 
+  // list ui changes / validator changes trigger re-render of list
+  useEffect(() => {
+    // only filter when pool nominations have been synced.
+    if (!isSyncing && meta[batchKey]?.nominations) {
+      handlePoolsFilterUpdate();
+    }
+  }, [isSyncing, includes?.length, excludes?.length, meta]);
+
+  // set default filters
+  useEffect(() => {
+    if (defaultFilters?.includes?.length) {
+      setMultiFilters(FilterType.Include, 'pools', defaultFilters?.includes);
+    }
+    if (defaultFilters?.excludes?.length) {
+      setMultiFilters(FilterType.Exclude, 'pools', defaultFilters?.excludes);
+    }
+  }, []);
+
+  // handle filter / order update
+  const handlePoolsFilterUpdate = (
+    filteredPools: any = Object.assign(poolsDefault)
+  ) => {
+    filteredPools = applyFilter(includes, excludes, filteredPools, batchKey);
+    if (searchTerm) {
+      filteredPools = poolSearchFilter(filteredPools, batchKey, searchTerm);
+    }
+    _setPools(filteredPools);
+    setPage(1);
+    setRenderIteration(1);
+  };
+
   // get pools to render
   let listPools = [];
 
   // get throttled subset or entire list
   if (!disableThrottle) {
-    listPools = pools.slice(pageStart).slice(0, LIST_ITEMS_PER_PAGE);
+    listPools = _pools.slice(pageStart).slice(0, ListItemsPerPage);
   } else {
-    listPools = pools;
+    listPools = _pools;
   }
 
-  if (!pools.length) {
-    return <></>;
-  }
+  const handleSearchChange = (e: React.FormEvent<HTMLInputElement>) => {
+    const newValue = e.currentTarget.value;
+    let filteredPools = Object.assign(poolsDefault);
+    filteredPools = applyFilter(includes, excludes, filteredPools, batchKey);
+    filteredPools = poolSearchFilter(filteredPools, batchKey, newValue);
+
+    // ensure no duplicates
+    filteredPools = filteredPools.filter(
+      (value: any, index: any, self: any) =>
+        index === self.findIndex((t: any) => t.id === value.id)
+    );
+
+    setPage(1);
+    setRenderIteration(1);
+    _setPools(filteredPools);
+    setSearchTerm('pools', newValue);
+  };
 
   return (
     <ListWrapper>
       <Header>
         <div>
-          <h4>{props.title}</h4>
+          <h4>{title}</h4>
         </div>
         <div>
           <button type="button" onClick={() => setListFormat('row')}>
@@ -136,74 +199,55 @@ export const PoolListInner = (props: PoolListProps) => {
         </div>
       </Header>
       <List flexBasisLarge={allowMoreCols ? '33.33%' : '50%'}>
-        {pagination && (
-          <Pagination prev={page !== 1} next={page !== totalPages}>
-            <div>
-              <h4>
-                Page
-                {page} of {totalPages}
-              </h4>
-            </div>
-            <div>
-              <button
-                type="button"
-                className="prev"
-                onClick={() => {
-                  setPage(prevPage);
-                }}
-              >
-                Prev
-              </button>
-              <button
-                type="button"
-                className="next"
-                onClick={() => {
-                  setPage(nextPage);
-                }}
-              >
-                Next
-              </button>
-            </div>
-          </Pagination>
+        {allowSearch && poolsDefault.length > 0 && (
+          <SearchInput
+            handleChange={handleSearchChange}
+            placeholder="Search Pool ID, Name or Address"
+          />
         )}
-        <motion.div
-          className="transition"
-          initial="hidden"
-          animate="show"
-          variants={{
-            hidden: { opacity: 0 },
-            show: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.01,
-              },
-            },
-          }}
-        >
-          {listPools.map((pool: any, index: number) => {
-            // fetch batch data by referring to default list index.
-            const batchIndex = poolsDefault.indexOf(pool);
+        <Filters />
+        {pagination && listPools.length > 0 && (
+          <Pagination page={page} total={totalPages} setter={setPage} />
+        )}
+        <MotionContainer>
+          {listPools.length ? (
+            <>
+              {listPools.map((pool: any, index: number) => {
+                // fetch batch data by referring to default list index.
+                const batchIndex = poolsDefault.indexOf(pool);
 
-            return (
-              <motion.div
-                className={`item ${listFormat === 'row' ? 'row' : 'col'}`}
-                key={`nomination_${index}`}
-                variants={{
-                  hidden: {
-                    y: 15,
-                    opacity: 0,
-                  },
-                  show: {
-                    y: 0,
-                    opacity: 1,
-                  },
-                }}
-              >
-                <Pool pool={pool} batchKey={batchKey} batchIndex={batchIndex} />
-              </motion.div>
-            );
-          })}
-        </motion.div>
+                return (
+                  <motion.div
+                    className={`item ${listFormat === 'row' ? 'row' : 'col'}`}
+                    key={`nomination_${index}`}
+                    variants={{
+                      hidden: {
+                        y: 15,
+                        opacity: 0,
+                      },
+                      show: {
+                        y: 0,
+                        opacity: 1,
+                      },
+                    }}
+                  >
+                    <Pool
+                      pool={pool}
+                      batchKey={batchKey}
+                      batchIndex={batchIndex}
+                    />
+                  </motion.div>
+                );
+              })}
+            </>
+          ) : (
+            <h4 style={{ padding: '1rem 1rem 0 1rem' }}>
+              {isSyncing
+                ? 'Syncing Pool list...'
+                : 'No pools match this criteria.'}
+            </h4>
+          )}
+        </MotionContainer>
       </List>
     </ListWrapper>
   );
@@ -220,7 +264,7 @@ export const PoolList = (props: any) => {
 export class PoolListShouldUpdate extends React.Component<any, any> {
   static contextType = StakingContext;
 
-  shouldComponentUpdate(nextProps: PoolListProps, nextState: any) {
+  shouldComponentUpdate(nextProps: PoolListProps) {
     return this.props.pools !== nextProps.pools;
   }
 

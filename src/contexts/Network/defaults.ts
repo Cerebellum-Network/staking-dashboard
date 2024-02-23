@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BN from 'bn.js';
-import { NetworkMetricsContextInterface, NetworkMetrics } from './types';
+import { NetworkMetrics, NetworkMetricsContextInterface } from './types';
 
 export const metrics: NetworkMetrics = {
   activeEra: {
@@ -10,6 +10,8 @@ export const metrics: NetworkMetrics = {
     start: 0,
   },
   totalIssuance: new BN(0),
+  // auctionCounter: new BN(0),
+  // earliestStoredSession: new BN(0),
 };
 
 export const defaultNetworkContext: NetworkMetricsContextInterface = {

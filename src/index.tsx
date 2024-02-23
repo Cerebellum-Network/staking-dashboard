@@ -1,13 +1,12 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { createRoot } from 'react-dom/client';
-import 'index.css';
+import '@rossbulat/polkadot-dashboard-ui/index.css';
 import App from 'App';
+import 'index.css';
+import { createRoot } from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
 
-// workaround for supporting react 18 beta types:
-// https://blog.logrocket.com/how-to-use-typescript-with-react-18-alpha/
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Failed to find the root element');
 const root = createRoot(rootElement);

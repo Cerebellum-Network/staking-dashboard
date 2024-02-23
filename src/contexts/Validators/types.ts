@@ -9,15 +9,17 @@ export interface ValidatorsContextInterface {
   fetchValidatorPrefs: (
     v: ValidatorAddresses
   ) => Promise<Array<Validator> | null>;
-  addFavourite: (a: string) => void;
-  removeFavourite: (a: string) => void;
+  addFavorite: (a: string) => void;
+  removeFavorite: (a: string) => void;
   validators: Array<Validator>;
+  avgCommission: number;
   meta: AnyMetaBatch;
   session: SessionValidators;
-  favourites: string[];
+  sessionParachain: string[];
+  favorites: string[];
   nominated: Array<Validator> | null;
   poolNominated: Array<Validator> | null;
-  favouritesList: Array<Validator> | null;
+  favoritesList: Array<Validator> | null;
   validatorCommunity: Array<any>;
 }
 
@@ -26,6 +28,11 @@ export type ValidatorAddresses = Array<{
 }>;
 
 export interface SessionValidators {
+  list: string[];
+  unsub: { (): void } | null;
+}
+
+export interface SessionParachainValidators {
   list: string[];
   unsub: { (): void } | null;
 }

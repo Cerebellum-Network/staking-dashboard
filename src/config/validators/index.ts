@@ -5,26 +5,27 @@
  * Use upper camel-case for your SVG import, lower camel case for the svg.
  * import { ReactComponent as ValidatorEntityName } from './thumbnails/validatorEntityName.svg';
  */
-import { ReactComponent as Cere } from './thumbnails/cere.svg';
-import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
+import { ReactComponent as Thumbnail4T2CAPITAL } from './thumbnails/4t2.svg';
 import { ReactComponent as AnyValid } from './thumbnails/anyvalid.svg';
+import { ReactComponent as Brightlystake } from './thumbnails/Brightlystake-logo.svg';
+import { ReactComponent as Cere } from './thumbnails/cere.svg';
+import { ReactComponent as EdgeServices } from './thumbnails/edgeservices.svg';
+import { ReactComponent as garm99 } from './thumbnails/garm99.svg';
+import { ReactComponent as Jinogami } from './thumbnails/Jinogami.svg';
+import { ReactComponent as medium } from './thumbnails/medium.svg';
 import { ReactComponent as SerGo } from './thumbnails/SerGo.svg';
 import { ReactComponent as StakeAngle } from './thumbnails/stakeangle.svg';
-import { ReactComponent as medium } from './thumbnails/medium.svg';
-import { ReactComponent as Jinogami } from './thumbnails/Jinogami.svg';
-import { ReactComponent as EdgeServices } from './thumbnails/edgeservices.svg';
-import { ReactComponent as wombat } from './thumbnails/wombat.svg';
-import { ReactComponent as Brightlystake } from './thumbnails/Brightlystake-logo.svg';
-import { ReactComponent as garm99 } from './thumbnails/garm99.svg';
-import { ReactComponent as Thumbnail4T2CAPITAL } from './thumbnails/4t2.svg';
-import { ReactComponent as TRK } from './thumbnails/TRK.svg';
 import { ReactComponent as Testnetrun } from './thumbnails/Testnetrun.svg';
 import { ReactComponent as Tokem } from './thumbnails/tomek.svg';
+import { ReactComponent as TRK } from './thumbnails/TRK.svg';
+import { ReactComponent as wombat } from './thumbnails/wombat.svg';
+import { ReactComponent as XameyzIdentity } from './thumbnails/xameyz.svg';
 
 export const VALIDATOR_COMMUNITY = [
   {
     name: 'CERE',
     Thumbnail: Cere,
+    thumbnail: 'Cere',
     bio: `Official Validators from Cere Network, the world's first Decentralized Data Cloud platform.`,
     email: 'team@cere.network',
     website: 'https://cere.network',
@@ -45,6 +46,7 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: 'Xameyz',
     Thumbnail: XameyzIdentity,
+    thumbnail: 'Xameyz',
     bio: `Just a humble validator on a humble decentralized network.`,
     email: 'xameyz.crypto@yahoo.com',
     website: '',
@@ -56,6 +58,7 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: 'AnyValid',
     Thumbnail: AnyValid,
+    thumbnail: 'AnyValid',
     bio: `Professional Proof-of-Stake Networks Validation Services`,
     email: 'mail@anyvalid.com',
     website: 'https://anyvalid.com',
@@ -67,6 +70,7 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: 'SerGo',
     Thumbnail: SerGo,
+    thumbnail: 'SerGo',
     bio: `We validate with expertise, you earn with confidence.`,
     email: 'contact@sergo.dev',
     website: 'https://sergo.dev',
@@ -78,6 +82,7 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: 'StakeAngle',
     Thumbnail: StakeAngle,
+    thumbnail: 'StakeAngle',
     bio: `Non-custodial staking provider`,
     email: 'info@stakeangle.com',
     website: 'https://stakeangle.com',
@@ -89,6 +94,7 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: 'medium',
     Thumbnail: medium,
+    thumbnail: 'medium',
     bio: `Individual staking services`,
     email: 'hsonelove228@gmail.com',
     website: 'https://github.com/mediumwe11',
@@ -100,6 +106,7 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: 'Jinogami',
     Thumbnail: Jinogami,
+    thumbnail: 'Jinogami',
     bio: `A Community Cere Validator`,
     email: 'steganosgraphos@gmail.com',
     website: '',
@@ -111,6 +118,7 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: 'EdgeServices',
     Thumbnail: EdgeServices,
+    thumbnail: 'EdgeServices',
     bio: `Blockchain Nodes & Services`,
     email: 'contact@edgeservices.io',
     website: 'https://edgeservices.io',
@@ -122,6 +130,7 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: 'wombat',
     Thumbnail: wombat,
+    thumbnail: 'wombat',
     bio: `Professional blockchain validator`,
     email: 'sdidenko566@yandex.ru',
     website: 'https://github.com/wombatqq',
@@ -133,6 +142,7 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: 'Brightlystake',
     Thumbnail: Brightlystake,
+    thumbnail: 'Brightlystake',
     bio: `Cere node from Brightlystake. Contact us for any queries https://linktr.ee/brightlystake`,
     email: 'contact@brightlystake.com',
     website: 'https://brightlystake.com/',
@@ -144,6 +154,7 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: 'garm99',
     Thumbnail: garm99,
+    thumbnail: 'garm99',
     bio: `Staking Provider of Proof-of-Stake Networks`,
     email: 'info@nodeskeeper.com',
     website: 'nodeskeeper.com',
@@ -155,7 +166,8 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: '4T2.CAPITAL',
     Thumbnail: Thumbnail4T2CAPITAL,
-    bio: `validating with love & care | secure and seamless staking experience | based in 🇳🇴`,
+    thumbnail: '4T2.CAPITAL',
+    bio: `valid    thumbnail: 'XameyzIdentity',ating with love & care | secure and seamless staking experience | based in 🇳🇴`,
     email: '4t2@4t2.capital',
     website: 'https://4t2.capital',
     twitter: '',
@@ -166,6 +178,7 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: 'TRK',
     Thumbnail: TRK,
+    thumbnail: 'TRK',
     bio: `Validating...`,
     email: '',
     website: '',
@@ -177,6 +190,7 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: 'Testnetrun',
     Thumbnail: Testnetrun,
+    thumbnail: 'Testnetrun',
     bio: `Position yourself for the blockchain-powered future of the next decade by staking today, ensuring you're part of the fastest and most secure validator network in the space.`,
     email: 'info@testnet.run',
     website: 'https://stake.testnet.run',
@@ -188,6 +202,7 @@ export const VALIDATOR_COMMUNITY = [
   {
     name: 'TomekNode',
     Thumbnail: Tokem,
+    thumbnail: 'Tokem',
     bio: `Experienced and dedicated, I pride myself on being a reliable community validator node maintainer, ensuring optimal performance and trust for our nominators`,
     email: 'cere.e69cg@passfwd.com',
     website: '',

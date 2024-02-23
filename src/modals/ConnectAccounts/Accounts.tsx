@@ -1,26 +1,36 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useState, useEffect, forwardRef } from 'react';
-import { faCog, faChartLine, faUsers } from '@fortawesome/free-solid-svg-icons';
-import { useConnect } from 'contexts/Connect';
-import Button from 'library/Button';
-import { useBalances } from 'contexts/Balances';
-import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useModal } from 'contexts/Modal';
-import { useApi } from 'contexts/Api';
-import { PoolMembership } from 'contexts/Pools/types';
-import { ImportedAccount } from 'contexts/Connect/types';
 import {
-  AccountWrapper,
+  faCog,
+  faProjectDiagram,
+  faUsers,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ButtonSecondary } from '@rossbulat/polkadot-dashboard-ui';
+import { useApi } from 'contexts/Api';
+import { useBalances } from 'contexts/Balances';
+import { useConnect } from 'contexts/Connect';
+import { ImportedAccount } from 'contexts/Connect/types';
+import { useModal } from 'contexts/Modal';
+import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
+import { PoolMembership } from 'contexts/Pools/types';
+import { forwardRef, useEffect, useState } from 'react';
+import { AnyJson } from 'types';
+import { AccountButton, AccountElement } from './Account';
+import {
+  ActivelyStakingAccount,
+  ControllerAccount,
+  StashAcount,
+} from './types';
+import {
   AccountGroupWrapper,
-  PaddingWrapper,
+  AccountWrapper,
   ContentWrapper,
+  PaddingWrapper,
 } from './Wrappers';
-import { AccountElement, AccountButton } from './Account';
 
-export const Accounts = forwardRef((props: any, ref: any) => {
+export const Accounts = forwardRef((props: AnyJson, ref: AnyJson) => {
   const { setSection } = props;
 
   const { isReady } = useApi();
@@ -37,16 +47,16 @@ export const Accounts = forwardRef((props: any, ref: any) => {
   const { accounts } = useConnect();
   const { memberships } = usePoolMemberships();
 
-  const _controllers: any = [];
-  const _stashes: any = [];
+  const _controllers: Array<ControllerAccount> = [];
+  const _stashes: Array<StashAcount> = [];
 
   // store local copy of accounts
   const [localAccounts, setLocalAccounts] = useState(accounts);
 
   // store staking statuses
-  const [activeStaking, setActiveStaking] = useState<Array<ImportedAccount>>(
-    []
-  );
+  const [activeStaking, setActiveStaking] = useState<
+    Array<ActivelyStakingAccount>
+  >([]);
   const [activePooling, setActivePooling] = useState<Array<PoolMembership>>([]);
   const [inactive, setInactive] = useState<string[]>([]);
 
@@ -56,7 +66,7 @@ export const Accounts = forwardRef((props: any, ref: any) => {
 
   useEffect(() => {
     getStakingStatuses();
-  }, [localAccounts, balanceAccounts, ledgers]);
+  }, [localAccounts, balanceAccounts, ledgers, accounts, memberships]);
 
   const getStakingStatuses = () => {
     // accumulate imported stash accounts
@@ -88,24 +98,29 @@ export const Accounts = forwardRef((props: any, ref: any) => {
     }
 
     // construct account groupings
-    const _activeStaking: Array<any> = [];
+    const _activeStaking: Array<ActivelyStakingAccount> = [];
     const _activePooling: Array<PoolMembership> = [];
     const _inactive: string[] = [];
 
     for (const account of localAccounts) {
-      const stash = _stashes.find((s: any) => s.address === account.address);
-      const controller = _controllers.find(
-        (c: any) => c.address === account.address
-      );
-      const poolMember = memberships.find(
-        (m: PoolMembership) => m.address === account.address
-      );
+      const stash =
+        _stashes.find((s: StashAcount) => s.address === account.address) ??
+        null;
+      const controller =
+        _controllers.find(
+          (c: ControllerAccount) => c.address === account.address
+        ) ?? null;
+      const poolMember =
+        memberships.find(
+          (m: PoolMembership) => m.address === account.address
+        ) ?? null;
 
       // if stash, get controller
       if (stash) {
         const applied =
-          _activeStaking.find((a: any) => a.stash === account.address) !==
-          undefined;
+          _activeStaking.find(
+            (a: ActivelyStakingAccount) => a.stash === account.address
+          ) !== undefined;
 
         if (!applied) {
           const _record = {
@@ -168,11 +183,10 @@ export const Accounts = forwardRef((props: any, ref: any) => {
             <h1>Accounts</h1>
           </div>
           <div>
-            <Button
-              title="Extensions"
-              inline
-              icon={faCog}
-              transform="shrink-2"
+            <ButtonSecondary
+              text="Extensions"
+              iconLeft={faCog}
+              iconTransform="shrink-2"
               onClick={() => setSection(0)}
             />
           </div>
@@ -196,11 +210,11 @@ export const Accounts = forwardRef((props: any, ref: any) => {
         )}
         {activeStaking.length > 0 && (
           <>
-            <h2>
-              <FontAwesomeIcon icon={faChartLine} transform="shrink-4" />{' '}
-              Actively Staking
-            </h2>
-            {activeStaking.map((item: any, i: number) => {
+            <h3 className="heading">
+              <FontAwesomeIcon icon={faProjectDiagram} transform="shrink-4" />{' '}
+              Nominating
+            </h3>
+            {activeStaking.map((item: ActivelyStakingAccount, i: number) => {
               const { stash, controller } = item;
               const stashAccount = getAccount(stash);
               const controllerAccount = getAccount(controller);
@@ -211,7 +225,7 @@ export const Accounts = forwardRef((props: any, ref: any) => {
                   onClick={() => {
                     if (stashAccount) {
                       connectToAccount(stashAccount);
-                      setStatus(0);
+                      setStatus(2);
                     }
                   }}
                 >
@@ -239,9 +253,9 @@ export const Accounts = forwardRef((props: any, ref: any) => {
 
         {activePooling.length > 0 && (
           <>
-            <h2>
+            <h3 className="heading">
               <FontAwesomeIcon icon={faUsers} transform="shrink-4" /> In Pool
-            </h2>
+            </h3>
             {activePooling.map((item: PoolMembership, i: number) => {
               const { address } = item;
               const account = getAccount(address);
@@ -259,7 +273,7 @@ export const Accounts = forwardRef((props: any, ref: any) => {
 
         {inactive.length > 0 && (
           <>
-            <h2>Not Staking</h2>
+            <h3 className="heading">Not Staking</h3>
             {inactive.map((item: string, i: number) => {
               const account = getAccount(item);
               const address = account?.address ?? '';

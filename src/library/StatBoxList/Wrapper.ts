@@ -1,18 +1,18 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import styled from 'styled-components';
 
 import {
-  textSecondary,
-  textInvert,
   backgroundSecondary,
-  tooltipBackground,
-  cardShadow,
-  shadowColor,
   borderPrimary,
   cardBorder,
+  cardShadow,
+  shadowColor,
+  textInvert,
+  textSecondary,
+  tooltipBackground,
 } from 'theme';
 
 export const Wrapper = styled.div`
@@ -63,7 +63,7 @@ export const StatBoxWrapper = styled(motion.div)`
     border-radius: 0.95rem;
     margin-right: 1.25rem;
     padding: 0.9rem 0;
-    max-height: 3.4rem;
+    max-height: 5.25rem;
     flex-flow: row wrap;
 
     @media (max-width: 749px) {
@@ -82,7 +82,7 @@ export const StatBoxWrapper = styled(motion.div)`
       flex-flow: row wrap;
       align-items: center;
 
-      .assistant-icon {
+      .help-icon {
         margin-left: 0.6rem;
       }
     }

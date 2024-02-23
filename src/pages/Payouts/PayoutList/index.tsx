@@ -1,23 +1,33 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState, useEffect, useRef } from 'react';
-import moment from 'moment';
-import { motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faGripVertical } from '@fortawesome/free-solid-svg-icons';
-import { List, Header, Wrapper as ListWrapper, Pagination } from 'library/List';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ListItemsPerBatch, ListItemsPerPage } from 'consts';
 import { useApi } from 'contexts/Api';
-import { StakingContext } from 'contexts/Staking';
 import { useNetworkMetrics } from 'contexts/Network';
-import { LIST_ITEMS_PER_PAGE, LIST_ITEMS_PER_BATCH } from 'consts';
-import { planckToUnit } from 'Utils';
-import { networkColors } from 'theme/default';
+import { useBondedPools } from 'contexts/Pools/BondedPools';
+import { BondedPool } from 'contexts/Pools/types';
+import { StakingContext } from 'contexts/Staking';
 import { useTheme } from 'contexts/Themes';
+import { useValidators } from 'contexts/Validators';
+import { Validator } from 'contexts/Validators/types';
+import { formatDistance, fromUnixTime } from 'date-fns';
+import { motion } from 'framer-motion';
+import { Header, List, Wrapper as ListWrapper } from 'library/List';
+import { MotionContainer } from 'library/List/MotionContainer';
+import { Pagination } from 'library/List/Pagination';
+import { Identity } from 'library/ListItem/Labels/Identity';
+import { PoolIdentity } from 'library/ListItem/Labels/PoolIdentity';
+import { locales } from 'locale';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { networkColors } from 'theme/default';
 import { AnySubscan } from 'types';
-import { usePayoutList, PayoutListProvider } from './context';
-import { ItemWrapper } from '../Wrappers';
+import { clipAddress, planckToUnit } from 'Utils';
 import { PayoutListProps } from '../types';
+import { ItemWrapper } from '../Wrappers';
+import { PayoutListProvider, usePayoutList } from './context';
 
 export const PayoutListInner = (props: PayoutListProps) => {
   const { allowMoreCols, pagination } = props;
@@ -27,6 +37,9 @@ export const PayoutListInner = (props: PayoutListProps) => {
   const { units } = network;
   const { metrics } = useNetworkMetrics();
   const { listFormat, setListFormat } = usePayoutList();
+  const { validators, meta } = useValidators();
+  const { bondedPools } = useBondedPools();
+  const { i18n, t } = useTranslation('pages');
 
   const disableThrottle = props.disableThrottle ?? false;
 
@@ -50,14 +63,12 @@ export const PayoutListInner = (props: PayoutListProps) => {
   };
 
   // pagination
-  const totalPages = Math.ceil(payouts.length / LIST_ITEMS_PER_PAGE);
-  const nextPage = page + 1 > totalPages ? totalPages : page + 1;
-  const prevPage = page - 1 < 1 ? 1 : page - 1;
-  const pageEnd = page * LIST_ITEMS_PER_PAGE - 1;
-  const pageStart = pageEnd - (LIST_ITEMS_PER_PAGE - 1);
+  const totalPages = Math.ceil(payouts.length / ListItemsPerPage);
+  const pageEnd = page * ListItemsPerPage - 1;
+  const pageStart = pageEnd - (ListItemsPerPage - 1);
 
   // render batch
-  const batchEnd = renderIteration * LIST_ITEMS_PER_BATCH - 1;
+  const batchEnd = renderIteration * ListItemsPerBatch - 1;
 
   // refetch list when list changes
   useEffect(() => {
@@ -86,7 +97,7 @@ export const PayoutListInner = (props: PayoutListProps) => {
 
   // get throttled subset or entire list
   if (!disableThrottle) {
-    listPayouts = payouts.slice(pageStart).slice(0, LIST_ITEMS_PER_PAGE);
+    listPayouts = payouts.slice(pageStart).slice(0, ListItemsPerPage);
   } else {
     listPayouts = payouts;
   }
@@ -94,6 +105,9 @@ export const PayoutListInner = (props: PayoutListProps) => {
   if (!payouts.length) {
     return <></>;
   }
+
+  // get validator metadata
+  const batchKey = 'validators_browse';
 
   return (
     <ListWrapper>
@@ -126,58 +140,39 @@ export const PayoutListInner = (props: PayoutListProps) => {
       </Header>
       <List flexBasisLarge={allowMoreCols ? '33.33%' : '50%'}>
         {pagination && (
-          <Pagination prev={page !== 1} next={page !== totalPages}>
-            <div>
-              <h4>
-                Page {page} of {totalPages}
-              </h4>
-            </div>
-            <div>
-              <button
-                type="button"
-                className="prev"
-                onClick={() => {
-                  setPage(prevPage);
-                }}
-              >
-                Prev
-              </button>
-              <button
-                type="button"
-                className="next"
-                onClick={() => {
-                  setPage(nextPage);
-                }}
-              >
-                Next
-              </button>
-            </div>
-          </Pagination>
+          <Pagination page={page} total={totalPages} setter={setPage} />
         )}
+        <MotionContainer>
+          {listPayouts.map((p: AnySubscan, index: number) => {
+            const label =
+              p.event_id === 'PaidOut'
+                ? t('payouts.pool_claim')
+                : p.event_id === 'Rewarded'
+                ? t('payouts.payout')
+                : p.event_id;
 
-        <motion.div
-          className="transition"
-          initial="hidden"
-          animate="show"
-          variants={{
-            hidden: { opacity: 0 },
-            show: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.01,
-              },
-            },
-          }}
-        >
-          {listPayouts.map((payout: AnySubscan, index: number) => {
-            const { amount, block_timestamp, event_id } = payout;
-            const label = event_id === 'PaidOut' ? 'Pool Claim' : event_id;
             const labelClass =
-              event_id === 'PaidOut'
+              p.event_id === 'PaidOut'
                 ? 'claim'
-                : event_id === 'Reward'
+                : p.event_id === 'Rewarded'
                 ? 'reward'
                 : undefined;
+
+            // get validator if it exists
+            const validator = validators.find(
+              (v: Validator) => v.address === p.validator_stash
+            );
+
+            // get pool if it exists
+            const pool = bondedPools.find(
+              (_p: BondedPool) => String(_p.id) === String(p.pool_id)
+            );
+
+            const batchIndex = validator
+              ? validators.indexOf(validator)
+              : pool
+              ? bondedPools.indexOf(pool)
+              : 0;
 
             return (
               <motion.div
@@ -195,25 +190,76 @@ export const PayoutListInner = (props: PayoutListProps) => {
                 }}
               >
                 <ItemWrapper>
-                  <div>
-                    <div>
-                      <span className={labelClass}>
-                        <h4>{label}</h4>
-                      </span>
-                      <h4 className={labelClass}>
-                        {event_id === 'Slash' ? '-' : '+'}
-                        {planckToUnit(amount, units)} {network.unit}
-                      </h4>
+                  <div className="inner">
+                    <div className="row">
+                      <div>
+                        <div>
+                          <h4 className={`${labelClass}`}>
+                            {p.event_id === 'Slashed' ? '-' : '+'}
+                            {planckToUnit(p.amount, units)} {network.unit}
+                          </h4>
+                        </div>
+                        <div>
+                          <h5 className={`${labelClass}`}>{label}</h5>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h4>{moment.unix(block_timestamp).fromNow()}</h4>
+                    <div className="row">
+                      <div>
+                        <div>
+                          {label === t('payouts.payout') && (
+                            <>
+                              {batchIndex > 0 ? (
+                                <Identity
+                                  meta={meta}
+                                  address={p.validator_stash}
+                                  batchIndex={batchIndex}
+                                  batchKey={batchKey}
+                                />
+                              ) : (
+                                <div>{clipAddress(p.validator_stash)}</div>
+                              )}
+                            </>
+                          )}
+                          {label === t('payouts.pool_claim') && (
+                            <>
+                              {pool ? (
+                                <PoolIdentity
+                                  batchKey={batchKey}
+                                  batchIndex={batchIndex}
+                                  pool={pool}
+                                />
+                              ) : (
+                                <h4>
+                                  {t('payouts.from_pool')} {p.pool_id}
+                                </h4>
+                              )}
+                            </>
+                          )}
+                          {label === t('payouts.slashed') && (
+                            <h4>{t('payouts.deducted_from_bond')}</h4>
+                          )}
+                        </div>
+                        <div>
+                          <h5>
+                            {formatDistance(
+                              fromUnixTime(p.block_timestamp),
+                              new Date(),
+                              {
+                                addSuffix: true,
+                                locale: locales[i18n.resolvedLanguage],
+                              }
+                            )}
+                          </h5>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </ItemWrapper>
               </motion.div>
             );
           })}
-        </motion.div>
+        </MotionContainer>
       </List>
     </ListWrapper>
   );

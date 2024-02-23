@@ -5,62 +5,40 @@ import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useApi } from 'contexts/Api';
 import { useBalances } from 'contexts/Balances';
-import { OpenAssistantIcon } from 'library/OpenAssistantIcon';
+import { OpenHelpIcon } from 'library/OpenHelpIcon';
+import { useTranslation } from 'react-i18next';
 import { planckBnToUnit, toFixedIfNecessary } from 'Utils';
-import { SectionWrapper, ReserveWrapper, Separator } from './Wrappers';
 import { ReserveProps } from './types';
+import { ReserveWrapper, SectionWrapper, Separator } from './Wrappers';
 
 export const Reserve = (props: ReserveProps) => {
   const { height } = props;
   const { network } = useApi();
-  const { minReserve, existentialAmount, reserveAmount } = useBalances();
+  const { existentialAmount } = useBalances();
+  const { t } = useTranslation('pages');
 
   return (
     <SectionWrapper style={{ height }}>
       <ReserveWrapper>
         <Separator />
         <h4>
-          Reserved
-          <OpenAssistantIcon page="overview" title="Your Balance" />
+          {t('overview.reserved')}
+          <OpenHelpIcon helpKey="Reserve Balance" />
         </h4>
 
         <div className="inner">
           <section>
-            <div className="items">
-              <div className="main">
-                <h2>
-                  <FontAwesomeIcon icon={faLock} transform="shrink-4" />
-                  &nbsp;
-                  {`${toFixedIfNecessary(
-                    planckBnToUnit(minReserve, network.units),
-                    5
-                  )} ${network.unit}`}
-                </h2>
-              </div>
-            </div>
-          </section>
-          <section>
-            <div className="items">
-              <div style={{ maxWidth: '10rem' }}>
-                <h3 className="sec">
-                  {`${toFixedIfNecessary(
-                    planckBnToUnit(existentialAmount, network.units),
-                    5
-                  )} ${network.unit}`}
-                </h3>
-                <h5>Existential Deposit</h5>
-              </div>
-              <div className="sep">
-                <h3>+</h3>
-              </div>
-              <div>
-                <h3>{`${toFixedIfNecessary(
-                  planckBnToUnit(reserveAmount, network.units),
-                  5
-                )} ${network.unit}`}</h3>
-                <h5>Reserved for Tx Fees</h5>
-              </div>
-            </div>
+            <h3 className="reserve">
+              <FontAwesomeIcon
+                icon={faLock}
+                transform="shrink-4"
+                className="icon"
+              />
+              {`${toFixedIfNecessary(
+                planckBnToUnit(existentialAmount, network.units),
+                5
+              )} ${network.unit}`}
+            </h3>
           </section>
         </div>
       </ReserveWrapper>

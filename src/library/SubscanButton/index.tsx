@@ -1,13 +1,13 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faProjectDiagram } from '@fortawesome/free-solid-svg-icons';
-import { useUi } from 'contexts/UI';
-import { useTheme } from 'contexts/Themes';
-import { defaultThemes, networkColors } from 'theme/default';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useApi } from 'contexts/Api';
+import { useTheme } from 'contexts/Themes';
+import { useUi } from 'contexts/UI';
+import styled from 'styled-components';
+import { defaultThemes, networkColors } from 'theme/default';
 import { WrapperProps } from './types';
 
 const Wrapper = styled.div<WrapperProps>`
@@ -15,11 +15,11 @@ const Wrapper = styled.div<WrapperProps>`
   right: 10px;
   top: 10px;
   font-size: 0.9rem;
-  font-variation-settings: 'wght' 570;
   border-radius: 0.3rem;
   padding: 0.25rem 0.4rem;
   color: ${(props) => props.color};
   opacity: ${(props) => props.opacity};
+  z-index: 2;
 `;
 
 export const SubscanButton = () => {
@@ -30,7 +30,7 @@ export const SubscanButton = () => {
   return (
     <Wrapper
       color={
-        services.includes('cereStats')
+        services.includes('subscan')
           ? networkColors[`${network.name}-${mode}`]
           : defaultThemes.text.secondary[mode]
       }

@@ -1,13 +1,13 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import moment from 'moment';
-import React, { useState, useEffect, useRef } from 'react';
+import { getUnixTime } from 'date-fns';
+import React, { useEffect, useRef, useState } from 'react';
 import { AnyApi } from 'types';
 import { setStateWithRef } from 'Utils';
 import { useApi } from '../Api';
 import * as defaults from './defaults';
-import { SessionEraContextInterface, SessionEra } from './types';
+import { SessionEra, SessionEraContextInterface } from './types';
 
 export const SessionEraContext =
   React.createContext<SessionEraContextInterface>(
@@ -28,12 +28,12 @@ export const SessionEraProvider = ({
 
   useEffect(() => {
     if (status === 'connecting') {
-      setStateWithRef(defaults.sessionEra, setSessioEra, sessionEraRef);
+      setStateWithRef(defaults.sessionEra, setSessionEra, sessionEraRef);
     }
   }, [status]);
 
   // store network metrics in state
-  const [sessionEra, setSessioEra] = useState<SessionEra>(defaults.sessionEra);
+  const [sessionEra, setSessionEra] = useState<SessionEra>(defaults.sessionEra);
   const sessionEraRef = useRef(sessionEra);
 
   const [unsub, setUnsub] = useState<AnyApi>(null);
@@ -61,7 +61,7 @@ export const SessionEraProvider = ({
             sessionProgress: session.sessionProgress.toNumber(),
             sessionsPerEra: session.sessionsPerEra.toNumber(),
           },
-          setSessioEra,
+          setSessionEra,
           sessionEraRef
         );
       });
@@ -73,8 +73,10 @@ export const SessionEraProvider = ({
     const eraBlocksLeft =
       sessionEraRef.current.eraLength - sessionEraRef.current.eraProgress;
     const eraTimeLeftSeconds = eraBlocksLeft * (expectedBlockTime * 0.001);
-    const eventTime = moment().unix() + eraTimeLeftSeconds;
-    const diffTime = eventTime - moment().unix();
+
+    const unixTime = getUnixTime(new Date());
+    const eventTime = unixTime + eraTimeLeftSeconds;
+    const diffTime = eventTime - unixTime;
     return diffTime;
   };
 

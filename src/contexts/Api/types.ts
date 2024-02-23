@@ -21,6 +21,7 @@ export interface APIConstants {
   maxNominations: number;
   sessionsPerEra: number;
   maxNominatorRewardedPerValidator: number;
+  historyDepth: BN;
   maxElectingVoters: number;
   expectedBlockTime: number;
   existentialDeposit: BN;
@@ -30,10 +31,14 @@ export interface APIConstants {
 export interface APIContextInterface {
   connect: (_network: NetworkName) => Promise<void>;
   fetchDotPrice: () => void;
-  switchNetwork: (_network: NetworkName) => Promise<void>;
+  switchNetwork: (
+    _network: NetworkName,
+    _isLightClient: boolean
+  ) => Promise<void>;
   api: ApiPromise | null;
   consts: APIConstants;
   isReady: boolean;
+  isLightClient: boolean;
   status: ConnectionStatus;
   network: Network;
 }

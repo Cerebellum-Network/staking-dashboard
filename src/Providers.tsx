@@ -1,57 +1,70 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { AccountProvider } from 'contexts/Account';
+import { APIProvider, useApi } from 'contexts/Api';
+import { BalancesProvider } from 'contexts/Balances';
+import { ConnectProvider } from 'contexts/Connect';
+import { ExtensionsProvider } from 'contexts/Extensions';
+import { ExtrinsicsProvider } from 'contexts/Extrinsics';
+import { FiltersProvider } from 'contexts/Filters';
+import { HelpProvider } from 'contexts/Help';
+import { MenuProvider } from 'contexts/Menu';
+import { ModalProvider } from 'contexts/Modal';
+import { NetworkMetricsProvider } from 'contexts/Network';
+import { NotificationsProvider } from 'contexts/Notifications';
+import { OverlayProvider } from 'contexts/Overlay';
+import { ActivePoolsProvider } from 'contexts/Pools/ActivePools';
+import { BondedPoolsProvider } from 'contexts/Pools/BondedPools';
+import { PoolMembersProvider } from 'contexts/Pools/PoolMembers';
+import { PoolMembershipsProvider } from 'contexts/Pools/PoolMemberships';
+import { PoolsConfigProvider } from 'contexts/Pools/PoolsConfig';
+import { SessionEraProvider } from 'contexts/SessionEra';
+import { StakingProvider } from 'contexts/Staking';
+import { useTheme } from 'contexts/Themes';
+import { TooltipProvider } from 'contexts/Tooltip';
+import { TransferOptionsProvider } from 'contexts/TransferOptions';
+import { TxFeesProvider } from 'contexts/TxFees';
+import { UIProvider } from 'contexts/UI';
+import { ValidatorsProvider } from 'contexts/Validators';
+import { withProviders } from 'library/Hooks';
+import Router from 'Router';
 import { ThemeProvider } from 'styled-components';
 import { EntryWrapper as Wrapper } from 'Wrappers';
-import Router from 'Router';
-import { withProviders } from 'library/Hooks';
-import { TooltipProvider } from 'contexts/Tooltip';
-import { AccountProvider } from './contexts/Account';
-import { APIProvider, useApi } from './contexts/Api';
-import { AssistantProvider } from './contexts/Assistant';
-import { BalancesProvider } from './contexts/Balances';
-import { ConnectProvider } from './contexts/Connect';
-import { ExtrinsicsProvider } from './contexts/Extrinsics';
-import { MenuProvider } from './contexts/Menu';
-import { PaletteProvider } from './contexts/Palette';
-import { ModalProvider } from './contexts/Modal';
-import { NetworkMetricsProvider } from './contexts/Network';
-import { NotificationsProvider } from './contexts/Notifications';
-import { PoolsConfigProvider } from './contexts/Pools/PoolsConfig';
-import { BondedPoolsProvider } from './contexts/Pools/BondedPools';
-import { PoolMembershipsProvider } from './contexts/Pools/PoolMemberships';
-import { ActivePoolProvider } from './contexts/Pools/ActivePool';
-import { SideBarProvider } from './contexts/SideBar';
-import { StakingProvider } from './contexts/Staking';
 import { CereStatsProvider } from './contexts/CereStats';
-import { ValidatorsProvider } from './contexts/Validators';
-import { UIProvider } from './contexts/UI';
-import { useTheme } from './contexts/Themes';
-import { SessionEraProvider } from './contexts/SessionEra';
 
-export const WrappedRouter = () => (
-  <Wrapper>
-    <Router />
-  </Wrapper>
-);
-
-export const ThemedRouter = () => {
-  const { mode, card } = useTheme();
+// `polkadot-dashboard-ui` theme classes are inserted here.
+export const WrappedRouter = () => {
+  const { mode } = useTheme();
   const { network } = useApi();
 
   return (
-    <ThemeProvider theme={{ mode, card, network: `${network.name}-${mode}` }}>
+    <Wrapper className={`theme-${network.name.toLowerCase()} theme-${mode}`}>
+      <Router />
+    </Wrapper>
+  );
+};
+
+// App-specific theme classes are inserted here.
+export const ThemedRouter = () => {
+  const { mode } = useTheme();
+  const { network } = useApi();
+
+  return (
+    <ThemeProvider
+      theme={{ mode, card: 'shadow', network: `${network.name}-${mode}` }}
+    >
       <WrappedRouter />
     </ThemeProvider>
   );
 };
 
 export const Providers = withProviders(
+  FiltersProvider,
   APIProvider,
-  ModalProvider,
+  ExtensionsProvider,
   ConnectProvider,
-  AssistantProvider,
-  SideBarProvider,
+  HelpProvider,
   NetworkMetricsProvider,
   AccountProvider,
   BalancesProvider,
@@ -59,16 +72,20 @@ export const Providers = withProviders(
   PoolsConfigProvider,
   BondedPoolsProvider,
   PoolMembershipsProvider,
-  ActivePoolProvider,
+  PoolMembersProvider,
+  ActivePoolsProvider,
+  TransferOptionsProvider,
   ValidatorsProvider,
   UIProvider,
   CereStatsProvider,
   MenuProvider,
   TooltipProvider,
-  PaletteProvider,
   NotificationsProvider,
+  TxFeesProvider,
   ExtrinsicsProvider,
-  SessionEraProvider
+  ModalProvider,
+  SessionEraProvider,
+  OverlayProvider
 )(ThemedRouter);
 
 export default Providers;

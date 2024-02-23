@@ -1,31 +1,30 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Line } from 'react-chartjs-2';
 import {
-  Chart as ChartJS,
   CategoryScale,
+  Chart as ChartJS,
+  Legend,
   LinearScale,
-  PointElement,
   LineElement,
+  PointElement,
   Title,
   Tooltip,
-  Legend,
 } from 'chart.js';
 import { useApi } from 'contexts/Api';
+import { useCereStats } from 'contexts/CereStats';
+import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
+import { useStaking } from 'contexts/Staking';
+import { useTheme } from 'contexts/Themes';
+import { useUi } from 'contexts/UI';
+import { Line } from 'react-chartjs-2';
 import {
   defaultThemes,
   networkColors,
   networkColorsSecondary,
-  networkColorsTransparent,
 } from 'theme/default';
-import { useTheme } from 'contexts/Themes';
-import { humanNumber } from 'Utils';
-import { useUi } from 'contexts/UI';
-import { useStaking } from 'contexts/Staking';
-import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
 import { AnySubscan } from 'types';
-import { useCereStats } from 'contexts/CereStats';
+import { humanNumber } from 'Utils';
 import { PayoutLineProps } from './types';
 import { combineRewardsByDay, formatRewardsForGraphs } from './Utils';
 
@@ -39,24 +38,32 @@ ChartJS.register(
   Legend
 );
 
-export const PayoutLine = (props: PayoutLineProps) => {
-  const { days, height, background } = props;
-
+export const PayoutLine = ({
+  days,
+  average,
+  height,
+  background,
+}: PayoutLineProps) => {
   const { mode } = useTheme();
-  const { network } = useApi();
+  const { name, unit, units } = useApi().network;
   const { isSyncing } = useUi();
   const { inSetup } = useStaking();
   const { membership: poolMembership } = usePoolMemberships();
   const { payouts, poolClaims } = useCereStats();
 
-  const { units } = network;
   const notStaking = !isSyncing && inSetup() && !poolMembership;
   const poolingOnly = !isSyncing && inSetup() && poolMembership !== null;
 
+  // remove slashes from payouts (graph does not support negative values).
+  const payoutsNoSlash = payouts.filter(
+    (p: AnySubscan) => p.event_id !== 'Slashed'
+  );
+
   const { payoutsByDay, poolClaimsByDay } = formatRewardsForGraphs(
     days,
+    average,
     units,
-    payouts,
+    payoutsNoSlash,
     poolClaims
   );
 
@@ -65,10 +72,10 @@ export const PayoutLine = (props: PayoutLineProps) => {
 
   // determine color for payouts
   const color = notStaking
-    ? networkColorsTransparent[`${network.name}-${mode}`]
+    ? networkColors[`${name}-${mode}`]
     : !poolingOnly
-    ? defaultThemes.graphs.accent[mode]
-    : networkColorsSecondary[`${network.name}-${mode}`];
+    ? networkColors[`${name}-${mode}`]
+    : networkColorsSecondary[`${name}-${mode}`];
 
   // configure graph options
   const options = {
@@ -78,7 +85,6 @@ export const PayoutLine = (props: PayoutLineProps) => {
       x: {
         grid: {
           display: false,
-          drawBorder: false,
         },
         ticks: {
           display: false,
@@ -91,10 +97,11 @@ export const PayoutLine = (props: PayoutLineProps) => {
           display: false,
           beginAtZero: false,
         },
+        border: {
+          display: false,
+        },
         grid: {
-          drawBorder: false,
           color: defaultThemes.graphs.grid[mode],
-          borderColor: defaultThemes.transparent[mode],
         },
       },
     },
@@ -102,24 +109,17 @@ export const PayoutLine = (props: PayoutLineProps) => {
       legend: {
         display: false,
       },
-      title: {
-        display: false,
-        text: `${network.unit} Payouts`,
-      },
       tooltip: {
         displayColors: false,
         backgroundColor: defaultThemes.graphs.tooltip[mode],
+        titleColor: defaultThemes.text.invert[mode],
         bodyColor: defaultThemes.text.invert[mode],
         bodyFont: {
           weight: '600',
         },
         callbacks: {
-          title: () => {
-            return [];
-          },
-          label: (context: any) => {
-            return ` ${humanNumber(context.parsed.y)} ${network.unit}`;
-          },
+          title: () => [],
+          label: (context: any) => ` ${humanNumber(context.parsed.y)} ${unit}`,
         },
         intersect: false,
         interaction: {
@@ -130,34 +130,35 @@ export const PayoutLine = (props: PayoutLineProps) => {
   };
 
   const data = {
-    labels: payoutsByDay.map(() => {
-      return '';
-    }),
+    labels: payoutsByDay.map(() => ''),
     datasets: [
       {
         label: 'Payout',
-        data: combinedPayouts.map((item: AnySubscan) => {
-          return item?.amount ?? 0;
-        }),
+        data: combinedPayouts.map((item: AnySubscan) => item?.amount ?? 0),
         borderColor: color,
         backgroundColor: color,
         pointStyle: undefined,
         pointRadius: 0,
-        borderWidth: 2,
+        borderWidth: 2.3,
       },
     ],
   };
 
   return (
-    <div
-      className="graph_line"
-      style={{
-        height: height === undefined ? 'auto' : height,
-        background: background === undefined ? 'none' : background,
-      }}
-    >
-      <Line options={options} data={data} />
-    </div>
+    <>
+      <h5 className="secondary">
+        {average > 1 ? `${average} Day Average` : null}
+      </h5>
+      <div
+        className="graph_line"
+        style={{
+          height: height || 'auto',
+          background: background || 'none',
+        }}
+      >
+        <Line options={options} data={data} />
+      </div>
+    </>
   );
 };
 

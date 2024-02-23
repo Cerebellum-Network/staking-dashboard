@@ -1,14 +1,13 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { FloatingMenuWidth } from 'consts';
 import styled from 'styled-components';
-import { FLOATING_MENU_WIDTH } from 'consts';
-import { modalBackground, borderPrimary, textSecondary } from 'theme';
+import { borderPrimary, modalBackground, textSecondary } from 'theme';
 
 export const Wrapper = styled.div`
   background: ${modalBackground};
-  box-sizing: border-box;
-  width: ${FLOATING_MENU_WIDTH}px;
+  width: ${FloatingMenuWidth}px;
   padding: 0.25rem 0.75rem;
   display: flex;
   flex-flow: column wrap;
@@ -22,7 +21,6 @@ export const Wrapper = styled.div`
 
 export const ItemWrapper = styled.button`
   border-bottom: 1px solid ${borderPrimary};
-  box-sizing: border-box;
   display: flex;
   width: 100%;
   padding: 0.75rem 0.5rem;

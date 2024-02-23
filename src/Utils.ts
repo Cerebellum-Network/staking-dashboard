@@ -1,11 +1,11 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { decodeAddress, encodeAddress } from '@polkadot/keyring';
+import { hexToU8a, isHex, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
 import BN from 'bn.js';
 import { MutableRefObject } from 'react';
-import { PagesConfig } from 'types/index';
-import { decodeAddress, encodeAddress } from '@polkadot/keyring';
-import { hexToU8a, isHex } from '@polkadot/util';
+import { AnyMetaBatch } from 'types/index';
 
 export const clipAddress = (val: string) => {
   if (typeof val !== 'string') {
@@ -136,13 +136,6 @@ export const pageFromUri = (pathname: string) => {
   return page;
 };
 
-export const pageTitleFromUri = (pathname: string, pages: PagesConfig) => {
-  for (const page of pages) {
-    if (page.uri === pathname) return page.title;
-  }
-  return '';
-};
-
 export const isNumeric = (str: string | number) => {
   str = typeof str === 'string' ? str.trim() : String(str);
   return str !== '' && !Number.isNaN(Number(str));
@@ -201,4 +194,40 @@ export const escapeRegExp = (string: string) => {
 // replace all to work with legacy browsers
 export const replaceAll = (str: string, find: string, replace: string) => {
   return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+};
+
+export const determinePoolDisplay = (
+  adddress: string,
+  batchItem: AnyMetaBatch
+) => {
+  // default display value
+  const defaultDisplay = clipAddress(adddress);
+
+  // fallback to address on empty metadata string
+  let display = batchItem ?? defaultDisplay;
+
+  // check if super identity has been byte encoded
+  const displayAsBytes = u8aToString(u8aUnwrapBytes(display));
+  if (displayAsBytes !== '') {
+    display = displayAsBytes;
+  }
+  // if still empty string, default to clipped address
+  if (display === '') {
+    display = defaultDisplay;
+  }
+
+  return display;
+};
+
+// extracts a URL value from a URL string
+export const extractUrlValue = (key: string, url: string) => {
+  if (typeof url === 'undefined') url = window.location.href;
+  const match = url.match(`[?&]${key}=([^&]+)`);
+  return match ? match[1] : null;
+};
+
+// converts a string of text to lowercase and replaces spaces with underscores
+export const stringToKey = (str: string) => {
+  if (!str) return '';
+  return str.toLowerCase().replace(/ /g, '_');
 };

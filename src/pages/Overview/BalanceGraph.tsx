@@ -1,70 +1,75 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React from 'react';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Doughnut } from 'react-chartjs-2';
-import { useActivePool } from 'contexts/Pools/ActivePool';
+import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
 import { useApi } from 'contexts/Api';
-import { useUi } from 'contexts/UI';
 import { useBalances } from 'contexts/Balances';
 import { useConnect } from 'contexts/Connect';
-import {
-  usdFormatter,
-  planckBnToUnit,
-  humanNumber,
-  toFixedIfNecessary,
-} from 'Utils';
-import { useSize, formatSize } from 'library/Graphs/Utils';
+import { useTheme } from 'contexts/Themes';
+import { useTransferOptions } from 'contexts/TransferOptions';
+import { useUi } from 'contexts/UI';
+import { formatSize, useSize } from 'library/Graphs/Utils';
+import { usePrices } from 'library/Hooks/usePrices';
+import { OpenHelpIcon } from 'library/OpenHelpIcon';
+import React from 'react';
+import { Doughnut } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
 import {
   defaultThemes,
   networkColors,
   networkColorsSecondary,
 } from 'theme/default';
-import { useTheme } from 'contexts/Themes';
-import { usePrices } from 'library/Hooks/usePrices';
-import { OpenAssistantIcon } from 'library/OpenAssistantIcon';
-import { BondOptions } from 'contexts/Balances/types';
+import {
+  humanNumber,
+  planckBnToUnit,
+  toFixedIfNecessary,
+  usdFormatter,
+} from 'Utils';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export const BalanceGraph = () => {
   const { mode } = useTheme();
   const { network } = useApi();
-  const { units, features } = network;
+  const { units } = network;
   const { activeAccount } = useConnect();
-  const { getAccountBalance, getBondOptions } = useBalances();
+  const { getAccountBalance } = useBalances();
+  const { getTransferOptions } = useTransferOptions();
   const balance = getAccountBalance(activeAccount);
   const { services } = useUi();
   const prices = usePrices();
+  const { t } = useTranslation('pages');
+
+  const allTransferOptions = getTransferOptions(activeAccount);
+  const { freeBalance } = allTransferOptions;
+
   const {
-    freeToBond,
     freeToUnbond: staked,
     totalUnlocking,
     totalUnlocked,
-  }: BondOptions = getBondOptions(activeAccount) || {};
-  const { getPoolBondOptions } = useActivePool();
+  } = allTransferOptions.nominate;
 
-  const poolBondOpions = getPoolBondOptions(activeAccount);
-  const unlocking = poolBondOpions.totalUnlocking
-    .add(poolBondOpions.totalUnlocked)
-    .add(totalUnlocked)
-    .add(totalUnlocking);
+  const poolBondOpions = allTransferOptions.pool;
+  const unlockingPools = poolBondOpions.totalUnlocking.add(
+    poolBondOpions.totalUnlocked
+  );
 
+  const unlocking = unlockingPools.add(totalUnlocked).add(totalUnlocking);
+
+  // get user's total balance
   const { free } = balance;
-
-  // get user's total free balance
-  const freeBase = planckBnToUnit(free, units);
+  const freeBase = planckBnToUnit(
+    free.add(poolBondOpions.active).add(unlockingPools),
+    units
+  );
 
   // convert balance to fiat value
-  const freeBalance = toFixedIfNecessary(
-    Number(freeBase * prices.lastPrice),
-    2
-  );
+  const freeFiat = toFixedIfNecessary(Number(freeBase * prices.lastPrice), 2);
 
   // graph data
   let graphStaked = planckBnToUnit(staked, units);
-  let graphFreeToStake = planckBnToUnit(freeToBond, units);
+  let graphFreeToStake = planckBnToUnit(freeBalance, units);
+
   let graphInPool = planckBnToUnit(poolBondOpions.active, units);
   let graphUnlocking = planckBnToUnit(unlocking, units);
 
@@ -106,13 +111,14 @@ export const BalanceGraph = () => {
       tooltip: {
         displayColors: false,
         backgroundColor: defaultThemes.graphs.tooltip[mode],
+        titleColor: defaultThemes.text.invert[mode],
         bodyColor: defaultThemes.text.invert[mode],
         bodyFont: {
           weight: '600',
         },
         callbacks: {
           label: (context: any) => {
-            return `${context.label}: ${
+            return `${
               context.parsed === -1 ? 0 : humanNumber(context.parsed)
             } ${network.unit}`;
           },
@@ -122,10 +128,15 @@ export const BalanceGraph = () => {
     cutout: '78%',
   };
 
-  // determine stats from network features
-  let _labels = ['Available', 'Unlocking', 'Staking', 'In Pool'];
-  let _data = [graphFreeToStake, graphUnlocking, graphStaked, graphInPool];
-  let _colors = zeroBalance
+  // determine stats
+  const _labels = [
+    t('overview.available'),
+    t('overview.unlocking'),
+    t('overview.nominating'),
+    t('overview.in_pool'),
+  ];
+  const _data = [graphFreeToStake, graphUnlocking, graphStaked, graphInPool];
+  const _colors = zeroBalance
     ? [
         defaultThemes.graphs.colors[1][mode],
         defaultThemes.graphs.inactive2[mode],
@@ -135,13 +146,9 @@ export const BalanceGraph = () => {
     : [
         defaultThemes.graphs.colors[1][mode],
         defaultThemes.graphs.colors[0][mode],
-        defaultThemes.graphs.accent[mode],
+        networkColors[`${network.name}-${mode}`],
         networkColorsSecondary[`${network.name}-${mode}`],
       ];
-
-  _data = features.pools ? _data : _data.slice(0, 3);
-  _colors = features.pools ? _colors : _colors.slice(0, 3);
-  _labels = features.pools ? _labels : _labels.slice(0, 3);
 
   // default to a greyscale 50/50 donut on zero balance
   let dataSet;
@@ -172,17 +179,17 @@ export const BalanceGraph = () => {
 
   return (
     <>
-      <div className="head" style={{ paddingTop: '0' }}>
+      <div className="head">
         <h4>
-          Balance
-          <OpenAssistantIcon page="overview" title="Your Balance" />
+          {t('overview.balance')}
+          <OpenHelpIcon helpKey="Your Balance" />
         </h4>
         <h2>
           <span className="amount">{humanNumber(freeBase)}</span>&nbsp;
           {network.unit}
           <span className="fiat">
             {services.includes('binance_spot') && (
-              <>&nbsp;{usdFormatter.format(Number(freeBalance))}</>
+              <>&nbsp;{usdFormatter.format(Number(freeFiat))}</>
             )}
           </span>
         </h2>

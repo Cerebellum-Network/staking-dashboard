@@ -1,14 +1,18 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useState, useRef } from 'react';
 import { useApi } from 'contexts/Api';
+import { useUi } from 'contexts/UI';
 import { useOutsideAlerter } from 'library/Hooks';
-import { Wrapper, Summary, NetworkInfo, Separator } from './Wrappers';
+import { usePrices } from 'library/Hooks/usePrices';
+import { useEffect, useRef, useState } from 'react';
 import { Status } from './Status';
+import { NetworkInfo, Separator, Summary, Wrapper } from './Wrappers';
 
 export const NetworkBar = () => {
-  const { network } = useApi();
+  const { services } = useUi();
+  const { network, isLightClient } = useApi();
+  const prices = usePrices();
 
   // currently not in use
   const [open, setOpen] = useState(false);
@@ -30,6 +34,8 @@ export const NetworkBar = () => {
   const DISCLAIMER_URL = process.env.REACT_APP_DISCLAIMER_URL;
   const ORGANISATION = process.env.REACT_APP_ORGANISATION;
 
+  const [networkName, setNetworkName] = useState<string>(network.name);
+
   useOutsideAlerter(
     ref,
     () => {
@@ -37,6 +43,12 @@ export const NetworkBar = () => {
     },
     ['igignore-network-info-toggle']
   );
+
+  useEffect(() => {
+    setNetworkName(
+      isLightClient ? network.name.concat(' Light') : network.name
+    );
+  }, [network.name, isLightClient]);
 
   return (
     <Wrapper
@@ -53,7 +65,7 @@ export const NetworkBar = () => {
       <Summary>
         <section>
           <network.brand.icon className="network_icon" />
-          <p>{ORGANISATION === undefined ? network.name : ORGANISATION}</p>
+          <p>{ORGANISATION === undefined ? networkName : ORGANISATION}</p>
           <Separator />
           {PRIVACY_URL !== undefined ? (
             <p>
@@ -76,7 +88,29 @@ export const NetworkBar = () => {
           )}
         </section>
         <section>
-          <div className="hide-small" />
+          <div className="hide-small">
+            {services.includes('binance_spot') && (
+              <>
+                <div className="stat">
+                  <span
+                    className={`change${
+                      prices.change < 0
+                        ? ' neg'
+                        : prices.change > 0
+                        ? ' pos'
+                        : ''
+                    }`}
+                  >
+                    {prices.change < 0 ? '' : prices.change > 0 ? '+' : ''}
+                    {prices.change}%
+                  </span>
+                </div>
+                <div className="stat">
+                  1 {network.api.unit} / {prices.lastPrice} USD
+                </div>
+              </>
+            )}
+          </div>
         </section>
       </Summary>
 

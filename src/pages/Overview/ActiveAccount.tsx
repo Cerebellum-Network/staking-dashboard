@@ -1,52 +1,46 @@
 // Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCopy } from '@fortawesome/free-regular-svg-icons';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { motion } from 'framer-motion';
+import { faCopy } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useConnect } from 'contexts/Connect';
-import { Identicon } from 'library/Identicon';
-import { clipAddress } from 'Utils';
 import { useNotifications } from 'contexts/Notifications';
 import { NotificationText } from 'contexts/Notifications/types';
-import { Separator, SectionWrapper } from './Wrappers';
+import { Identicon } from 'library/Identicon';
+import { useTranslation } from 'react-i18next';
+import { clipAddress, convertRemToPixels } from 'Utils';
+import { ActiveAccounWrapper } from './Wrappers';
 
 export const ActiveAccount = () => {
   const { addNotification } = useNotifications();
   const { activeAccount, getAccount } = useConnect();
   const accountData = getAccount(activeAccount);
+  const { t } = useTranslation('pages');
 
   // click to copy notification
   let notification: NotificationText | null = null;
   if (accountData !== null) {
     notification = {
-      title: 'Address Copied to Clipboard',
+      title: t('overview.address_copied'),
       subtitle: accountData.address,
     };
   }
 
   return (
-    <SectionWrapper>
+    <ActiveAccounWrapper>
       <div className="account">
-        {accountData !== null && (
-          <>
-            <div className="icon">
-              <Identicon value={accountData.address} size="1.6rem" />
-            </div>
-            <div className="title">
-              <h4>
+        <div className="title">
+          <h3>
+            {accountData && (
+              <>
+                <div className="icon">
+                  <Identicon
+                    value={accountData.address}
+                    size={convertRemToPixels('1.7rem')}
+                  />
+                </div>
                 {clipAddress(accountData.address)}
-                <div className="sep" />{' '}
-                <span className="addr">{accountData.name}</span>
-              </h4>
-            </div>
-            <div>
-              <motion.div
-                className="copy"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
-              >
                 <button
                   type="button"
                   onClick={() => {
@@ -57,23 +51,27 @@ export const ActiveAccount = () => {
                   }}
                 >
                   <FontAwesomeIcon
+                    className="copy"
                     icon={faCopy as IconProp}
-                    transform="grow-1"
+                    transform="shrink-1"
                   />
                 </button>
-              </motion.div>
-            </div>
-          </>
-        )}
-        {accountData === null && (
-          <>
-            <h4 style={{ marginLeft: 0 }}>Account Not Connected</h4>
-            <div />
-          </>
-        )}
+                {accountData.name !== clipAddress(accountData.address) && (
+                  <>
+                    <div className="sep" />
+                    <div className="rest">
+                      <span className="name">{accountData.name}</span>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+
+            {!accountData && t('overview.no_account_connected')}
+          </h3>
+        </div>
       </div>
-      <Separator />
-    </SectionWrapper>
+    </ActiveAccounWrapper>
   );
 };
 

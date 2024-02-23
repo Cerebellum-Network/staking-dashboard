@@ -8,6 +8,11 @@ export const sessionValidators = {
   unsub: null,
 };
 
+export const sessionParachainValidators = {
+  list: [],
+  unsub: null,
+};
+
 export const defaultValidatorsContext: ValidatorsContextInterface = {
   // eslint-disable-next-line
   fetchValidatorMetaBatch: (k, v, r) => {},
@@ -16,15 +21,17 @@ export const defaultValidatorsContext: ValidatorsContextInterface = {
   // eslint-disable-next-line
   fetchValidatorPrefs: async (v) => null,
   // eslint-disable-next-line
-  addFavourite: (a) => {},
+  addFavorite: (a) => {},
   // eslint-disable-next-line
-  removeFavourite: (a) => {},
+  removeFavorite: (a) => {},
   validators: [],
+  avgCommission: 0,
   meta: {},
   session: sessionValidators,
-  favourites: [],
+  sessionParachain: [],
+  favorites: [],
   nominated: null,
   poolNominated: null,
-  favouritesList: null,
+  favoritesList: null,
   validatorCommunity: [],
 };
