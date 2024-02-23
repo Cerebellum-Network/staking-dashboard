@@ -4,8 +4,8 @@
 import { decodeAddress, encodeAddress } from '@polkadot/keyring';
 import { hexToU8a, isHex, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
 import BN from 'bn.js';
-import { MutableRefObject } from 'react';
-import { AnyMetaBatch } from 'types/index';
+import type { MutableRefObject } from 'react';
+import type { AnyMetaBatch } from 'types/index';
 
 export const clipAddress = (val: string) => {
   if (typeof val !== 'string') {
@@ -25,9 +25,8 @@ export const convertRemToPixels = (rem: string) => {
   );
 };
 
-export const toFixedIfNecessary = (value: number, dp: number) => {
-  return +parseFloat(String(value)).toFixed(dp);
-};
+export const toFixedIfNecessary = (value: number, dp: number) =>
+  +parseFloat(String(value)).toFixed(dp);
 
 export const planckToUnit = (val: number, units: number): number => {
   const value = val / 10 ** units;
@@ -104,19 +103,14 @@ export const humanNumber = (val: number): string => {
   return str.join('.');
 };
 
-export const rmCommas = (val: string): string => {
-  return val.replace(/,/g, '');
-};
+export const rmCommas = (val: string): string => val.replace(/,/g, '');
 
-export const sleep = (milliseconds: number) => {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-};
+export const sleep = (milliseconds: number) =>
+  new Promise((resolve) => setTimeout(resolve, milliseconds));
 
-export const removePercentage = (v: string) => {
-  return Number(v.slice(0, -1));
-};
+export const removePercentage = (v: string) => Number(v.slice(0, -1));
 
-export const shuffle = <T>(array: Array<T>) => {
+export const shuffle = <T>(array: T[]) => {
   let currentIndex = array.length;
   let randomIndex;
   while (currentIndex !== 0) {
@@ -148,9 +142,8 @@ export const defaultIfNaN = <T>(val: T, _default: T) => {
   return val;
 };
 
-export const capitalizeFirstLetter = (string: string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-};
+export const capitalizeFirstLetter = (string: string) =>
+  string.charAt(0).toUpperCase() + string.slice(1);
 
 export const setStateWithRef = <T>(
   value: T,
@@ -187,14 +180,12 @@ export const isValidAddress = (address: string) => {
   }
 };
 
-export const escapeRegExp = (string: string) => {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& === the whole matched string
-};
+export const escapeRegExp = (string: string) =>
+  string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& === the whole matched string
 
 // replace all to work with legacy browsers
-export const replaceAll = (str: string, find: string, replace: string) => {
-  return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
-};
+export const replaceAll = (str: string, find: string, replace: string) =>
+  str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
 
 export const determinePoolDisplay = (
   adddress: string,
@@ -221,13 +212,17 @@ export const determinePoolDisplay = (
 
 // extracts a URL value from a URL string
 export const extractUrlValue = (key: string, url: string) => {
-  if (typeof url === 'undefined') url = window.location.href;
+  if (typeof url === 'undefined') {
+    url = window.location.href;
+  }
   const match = url.match(`[?&]${key}=([^&]+)`);
   return match ? match[1] : null;
 };
 
 // converts a string of text to lowercase and replaces spaces with underscores
 export const stringToKey = (str: string) => {
-  if (!str) return '';
+  if (!str) {
+    return '';
+  }
   return str.toLowerCase().replace(/ /g, '_');
 };

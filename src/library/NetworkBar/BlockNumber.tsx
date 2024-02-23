@@ -5,13 +5,11 @@ import { APIContext } from 'contexts/Api';
 import { motion } from 'framer-motion';
 import React from 'react';
 
-export const BlockNumberInner = (props: any) => {
-  return (
-    <motion.div animate={{ opacity: [0.5, 1] }} transition={{ duration: 0.5 }}>
-      {props.block}
-    </motion.div>
-  );
-};
+export const BlockNumberInner = (props: any) => (
+  <motion.div animate={{ opacity: [0.5, 1] }} transition={{ duration: 0.5 }}>
+    {props.block}
+  </motion.div>
+);
 
 export class BlockNumber extends React.Component<any, any> {
   static contextType = APIContext;

@@ -1,52 +1,50 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import type { WellKnownChain } from '@polkadot/rpc-provider/substrate-connect';
-import { PageProps } from 'pages/types';
-import React, { FunctionComponent, SVGProps } from 'react';
+import type { FC, FunctionComponent, SVGProps } from 'react';
+import type { Theme } from 'contexts/Themes/types';
+import type { ExtensionInjected } from '@polkadot-cloud/react/types';
+import type BigNumber from 'bignumber.js';
+import type { NotificationItem } from 'static/NotificationsController/types';
 
-export type Fn = () => void;
-
-export enum NetworkName {
-  Polkadot = 'polkadot',
-  Kusama = 'kusama',
-  Westend = 'westend',
+declare global {
+  interface Window {
+    injectedWeb3?: Record<string, ExtensionInjected>;
+  }
+  interface DocumentEventMap {
+    notification: CustomEvent<NotificationItem>;
+    'new-block-number': CustomEvent<{ blockNumber: string }>;
+  }
 }
 
-export enum Toggle {
-  Open = 'open',
-  Closed = 'closed',
-}
+export type NetworkName =
+  | 'Cere'
+  | 'Cere Testnet'
+  | 'Cere Qanet'
+  | 'Cere Devnet';
+// CereTestnet = 'Cere Testnet',
+// CereQanet = 'Cere Qanet',
+// CereDevnet = 'Cere Devnet',
+// Cere = 'Cere',
 
-export interface Networks {
-  [key: string]: Network;
-}
+export type Networks = Record<string, Network>;
 
+type NetworkColor =
+  | 'primary'
+  | 'secondary'
+  | 'stroke'
+  | 'transparent'
+  | 'pending';
 export interface Network {
-  name: string;
+  name: NetworkName;
   endpoints: {
-    rpc: string;
-    lightClient: WellKnownChain;
+    lightClient: AnyApi;
+    defaultRpcEndpoint: string;
+    rpcEndpoints: Record<string, string>;
   };
-  colors: {
-    primary: {
-      light: string;
-      dark: string;
-    };
-    secondary: {
-      light: string;
-      dark: string;
-    };
-    stroke: {
-      light: string;
-      dark: string;
-    };
-    transparent: {
-      light: string;
-      dark: string;
-    };
-  };
+  namespace: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  colors: Record<NetworkColor, { [key in Theme]: string }>;
   subscanEndpoint: string;
   cereStatsEndpoint: string;
   unit: string;
@@ -54,6 +52,9 @@ export interface Network {
   ss58: number;
   brand: {
     icon: FunctionComponent<
+      SVGProps<SVGSVGElement> & { title?: string | undefined }
+    >;
+    token: FunctionComponent<
       SVGProps<SVGSVGElement> & { title?: string | undefined }
     >;
     logo: {
@@ -73,7 +74,9 @@ export interface Network {
     unit: string;
     priceTicker: string;
   };
-  params: { [key: string]: number };
+  params: Record<string, number>;
+  defaultFeeReserve: number;
+  maxExposurePageSize: BigNumber;
 }
 
 export interface PageCategory {
@@ -81,16 +84,15 @@ export interface PageCategory {
   key: string;
 }
 
-export type PageCategories = Array<PageCategory>;
+export type PageCategoryItems = PageCategory[];
 
 export interface PageItem {
   category: number;
   key: string;
   uri: string;
   hash: string;
-  Entry: React.FC<PageProps>;
-  icon?: IconDefinition;
-  animate?: AnyJson;
+  Entry: FC<PageProps>;
+  lottie: AnyJson;
   action?: {
     type: string;
     status: string;
@@ -98,27 +100,45 @@ export interface PageItem {
   };
 }
 
-export type PagesConfig = Array<PageItem>;
+export type PagesConfigItems = PageItem[];
 
-export type MaybeAccount = string | null;
+export interface PageProps {
+  page: PageProp;
+}
+
+interface PageProp {
+  key: string;
+}
+
+export type MaybeAddress = string | null;
 
 export type MaybeString = string | null;
 
-// any types to compress compiler warnings
-// eslint-disable-next-line
-export type AnyApi = any;
-// eslint-disable-next-line
-export type AnyJson = any;
-// eslint-disable-next-line
-export type AnyFunction = any;
-// eslint-disable-next-line
-export type AnyMetaBatch = any;
-// eslint-disable-next-line
-export type AnySubscan = any;
+// list of available plugins.
+export type Plugin = 'cereStats';
 
 // track the status of a syncing / fetching process.
-export enum Sync {
-  Unsynced,
-  Syncing,
-  Synced,
-}
+export type Sync = 'unsynced' | 'syncing' | 'synced';
+
+// track whether bonding should be for nominator or nomination pool.
+export type BondFor = 'pool' | 'nominator';
+
+// which medium components are being displayed on.
+export type DisplayFor = 'default' | 'modal' | 'canvas';
+
+// generic function with no args or return type.
+export type Fn = () => void;
+
+// any types to compress compiler warnings
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyApi = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyJson = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyFunction = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyMetaBatch = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnySubscan = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyPolkawatch = any;

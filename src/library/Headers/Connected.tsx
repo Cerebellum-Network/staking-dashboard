@@ -1,88 +1,66 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { useBalances } from 'contexts/Balances';
-import { useConnect } from 'contexts/Connect';
+import { useTranslation } from 'react-i18next';
 import { useActivePools } from 'contexts/Pools/ActivePools';
 import { useStaking } from 'contexts/Staking';
 import { useUi } from 'contexts/UI';
-import { PoolAccount } from 'library/PoolAccount';
-import { clipAddress } from 'Utils';
-import { Account } from '../Account';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
+import { useBondedPools } from 'contexts/Pools/BondedPools';
+import DefaultAccount from '../Account/DefaultAccount';
+import PoolAccount from '../Account/PoolAccount';
 import { HeadingWrapper } from './Wrappers';
 
 export const Connected = () => {
-  const { activeAccount, accountHasSigner } = useConnect();
-  const { hasController, getControllerNotImported } = useStaking();
-  const { getBondedAccount } = useBalances();
-  const controller = getBondedAccount(activeAccount);
+  const { t } = useTranslation('library');
+  const { isNetworkSyncing } = useUi();
+  const { isNominating } = useStaking();
+  const { poolsMetaData } = useBondedPools();
   const { selectedActivePool } = useActivePools();
-  const { networkSyncing } = useUi();
-
-  let poolAddress = '';
-  if (selectedActivePool) {
-    const { addresses } = selectedActivePool;
-    poolAddress = addresses.stash;
-  }
-
-  const activeAccountLabel = networkSyncing
-    ? undefined
-    : hasController()
-    ? 'Stash'
-    : undefined;
+  const { accountHasSigner } = useImportedAccounts();
+  const { activeAccount, activeProxy } = useActiveAccounts();
 
   return (
-    <>
-      {activeAccount ? (
-        <>
-          {/* default account display / stash label if actively nominating */}
+    activeAccount && (
+      <>
+        {/* Default account display / stash label if actively nominating. */}
+        <HeadingWrapper>
+          <DefaultAccount
+            value={activeAccount}
+            label={
+              isNetworkSyncing
+                ? undefined
+                : isNominating()
+                  ? 'Nominator'
+                  : undefined
+            }
+            readOnly={!accountHasSigner(activeAccount)}
+          />
+        </HeadingWrapper>
+
+        {/* Pool account display / hide if not in pool or if syncing. */}
+        {selectedActivePool !== null && !isNetworkSyncing && (
           <HeadingWrapper>
-            <Account
-              canClick={false}
-              value={activeAccount}
-              readOnly={!accountHasSigner(activeAccount)}
-              label={activeAccountLabel}
-              format="name"
-              filled
+            <PoolAccount
+              label={t('pool')}
+              pool={selectedActivePool}
+              syncing={!Object.values(poolsMetaData).length}
             />
           </HeadingWrapper>
+        )}
 
-          {/* controller account display / hide if no controller present */}
-          {hasController() && !networkSyncing && (
-            <HeadingWrapper>
-              <Account
-                value={controller ?? ''}
-                readOnly={!accountHasSigner(controller)}
-                title={
-                  getControllerNotImported(controller)
-                    ? controller
-                      ? clipAddress(controller)
-                      : 'Not Imported'
-                    : undefined
-                }
-                format="name"
-                label="Controller"
-                canClick={false}
-                filled
-              />
-            </HeadingWrapper>
-          )}
-
-          {/* pool account display / hide if not in pool */}
-          {selectedActivePool !== null && !networkSyncing && (
-            <HeadingWrapper>
-              <PoolAccount
-                value={poolAddress}
-                pool={selectedActivePool}
-                label="Pool"
-                canClick={false}
-                onClick={() => {}}
-                filled
-              />
-            </HeadingWrapper>
-          )}
-        </>
-      ) : null}
-    </>
+        {/* Proxy account display / hide if no proxy. */}
+        {activeProxy && (
+          <HeadingWrapper>
+            <DefaultAccount
+              value={activeProxy}
+              label={t('proxy')}
+              readOnly={!accountHasSigner(activeProxy)}
+            />
+          </HeadingWrapper>
+        )}
+      </>
+    )
   );
 };

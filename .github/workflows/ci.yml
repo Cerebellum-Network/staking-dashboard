@@ -1,10 +1,10 @@
-name: Staking Dashboard CI
+name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
 
 jobs:
   check-license-lines:
@@ -15,25 +15,34 @@ jobs:
         uses: kt3k/license_checker@v1.0.6
   build:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
-
+        node-version: [18.x, 20.x]
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn install
       - run: yarn build
       - run: yarn lint
-      # - run: yarn test # No reason to check for tests now since they do not exist
+      - run: yarn test
+
+  validate-locales:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+      - run: yarn install
+      - run: yarn run locale:validate
 
   all:
     # This job ensures that all jobs above (now we have just build) are successful.
-    needs: [check-license-lines, build]
+    needs: [check-license-lines, build, validate-locales]
     runs-on: ubuntu-latest
     steps:
       - run: echo Success

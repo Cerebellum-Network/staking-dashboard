@@ -1,30 +1,27 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { useApi } from 'contexts/Api';
-import { useValidators } from 'contexts/Validators';
+import { PageRow } from '@polkadot-cloud/react';
 import { useEffect, useState } from 'react';
-import { PageRowWrapper } from 'Wrappers';
-import { useCommunitySections } from './context';
+import { useValidators } from 'contexts/Validators/ValidatorEntries';
+import { useNetwork } from 'contexts/Network';
 import { Item } from './Item';
 import { ItemsWrapper } from './Wrappers';
+import { useCommunitySections } from './context';
+import type { ValidatorEntry } from '@polkadot-cloud/assets/types';
 
 export const List = () => {
-  const { network } = useApi();
+  const { network } = useNetwork();
   const { validatorCommunity } = useValidators();
   const { scrollPos } = useCommunitySections();
 
-  const [entityItems, setEntityItems] = useState(
-    validatorCommunity.filter(
-      (v) => v.validators[network.name.toLowerCase()] !== undefined
-    )
+  const [entityItems, setEntityItems] = useState<ValidatorEntry[]>(
+    validatorCommunity.filter((v) => v.validators[network] !== undefined)
   );
 
   useEffect(() => {
     setEntityItems(
-      validatorCommunity.filter(
-        (v) => v.validators[network.name.toLowerCase()] !== undefined
-      )
+      validatorCommunity.filter((v) => v.validators[network] !== undefined)
     );
   }, [network]);
 
@@ -44,16 +41,12 @@ export const List = () => {
   };
 
   return (
-    <PageRowWrapper className="page-padding">
+    <PageRow yMargin>
       <ItemsWrapper variants={container} initial="hidden" animate="show">
-        {entityItems.map((item: any, index: number) => {
-          return (
-            <Item key={`community_item_${index}`} item={item} actionable />
-          );
-        })}
+        {entityItems.map((item, index: number) => (
+          <Item key={`community_item_${index}`} item={item} actionable />
+        ))}
       </ItemsWrapper>
-    </PageRowWrapper>
+    </PageRow>
   );
 };
-
-export default List;

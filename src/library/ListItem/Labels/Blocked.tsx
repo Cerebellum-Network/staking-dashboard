@@ -1,50 +1,34 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
 import { faUserSlash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useTranslation } from 'react-i18next';
 import { useTooltip } from 'contexts/Tooltip';
-import { TooltipPosition, TooltipTrigger } from 'library/ListItem/Wrappers';
-import { useRef } from 'react';
-import { BlockedProps } from '../types';
+import { TooltipTrigger } from 'library/ListItem/Wrappers';
+import type { BlockedProps } from '../types';
 
-export const Blocked = (props: BlockedProps) => {
-  const { prefs } = props;
+export const Blocked = ({ prefs }: BlockedProps) => {
+  const { t } = useTranslation('library');
   const blocked = prefs?.blocked ?? null;
-  const { setTooltipPosition, setTooltipMeta, open } = useTooltip();
+  const { setTooltipTextAndOpen } = useTooltip();
 
-  const posRef = useRef(null);
-
-  const tooltipText = 'Blocking Nominations';
-
-  const toggleTooltip = () => {
-    if (!open) {
-      setTooltipMeta(tooltipText);
-      setTooltipPosition(posRef);
-    }
-  };
+  const tooltipText = t('blockingNominations');
 
   return (
-    <>
-      {blocked && (
-        <>
-          <div className="label">
-            <TooltipTrigger
-              className="tooltip-trigger-element"
-              data-tooltip-text={tooltipText}
-              onMouseMove={() => toggleTooltip()}
-            />
-            <TooltipPosition ref={posRef} />
-            <FontAwesomeIcon
-              icon={faUserSlash}
-              color="#d2545d"
-              transform="shrink-1"
-            />
-          </div>
-        </>
-      )}
-    </>
+    blocked && (
+      <div className="label">
+        <TooltipTrigger
+          className="tooltip-trigger-element"
+          data-tooltip-text={tooltipText}
+          onMouseMove={() => setTooltipTextAndOpen(tooltipText)}
+        />
+        <FontAwesomeIcon
+          icon={faUserSlash}
+          color="#d2545d"
+          transform="shrink-1"
+        />
+      </div>
+    )
   );
 };
-
-export default Blocked;

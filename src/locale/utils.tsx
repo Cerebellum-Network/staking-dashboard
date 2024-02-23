@@ -1,21 +1,32 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { extractUrlValue, varToUrlHash } from '@polkadotcloud/utils';
 import { DefaultLocale } from 'consts';
-import { AnyJson } from 'types';
-import { lngNamespaces } from './index';
+import type { AnyApi, AnyJson } from 'types';
+import { availableLanguages, fallbackResources, lngNamespaces } from '.';
 
 // Gets the active language
 //
 // Get the stored language from localStorage, or fallback to
 // DefaultLocale otherwise.
-export const getActiveLanguage = () => {
-  const localLng = localStorage.getItem('lng');
-  if (!localLng) {
-    localStorage.setItem('lng', DefaultLocale);
-    return DefaultLocale;
+
+export const getInitialLanguage = () => {
+  // get language from url if present
+  const urlLng = extractUrlValue('l');
+  if (availableLanguages.find((n: any) => n[0] === urlLng) && urlLng) {
+    localStorage.setItem('lng', urlLng);
+    return urlLng;
   }
-  return localLng;
+
+  // fall back to localStorage if present.
+  const localLng = localStorage.getItem('lng');
+  if (availableLanguages.find((n: any) => n[0] === localLng) && localLng) {
+    return localLng;
+  }
+
+  localStorage.setItem('lng', DefaultLocale);
+  return DefaultLocale;
 };
 
 // Determine resources of selected language, and whether a dynamic
@@ -23,7 +34,7 @@ export const getActiveLanguage = () => {
 //
 // If selected language is DefaultLocale, then we fall back to
 // the default language resources that have already been imported.
-export const getResources = (lng: string, fallbackResources: AnyJson) => {
+export const getResources = (lng: string) => {
   let dynamicLoad = false;
 
   let resources: AnyJson = null;
@@ -53,7 +64,6 @@ export const getResources = (lng: string, fallbackResources: AnyJson) => {
         };
       }
     }
-
     if (!localValid) {
       // no resources exist locally, dynamic import needed.
       dynamicLoad = true;
@@ -66,6 +76,28 @@ export const getResources = (lng: string, fallbackResources: AnyJson) => {
     resources,
     dynamicLoad,
   };
+};
+
+// Change language
+//
+// On click handler for changing language in-app.
+export const changeLanguage = async (lng: string, i18next: AnyApi) => {
+  // check whether resources exist and need to by dynamically loaded.
+  const { resources, dynamicLoad } = getResources(lng);
+
+  localStorage.setItem('lng', lng);
+  // dynamically load default language resources if needed.
+  if (dynamicLoad) {
+    await doDynamicImport(lng, i18next);
+  } else {
+    localStorage.setItem(
+      'lng_resources',
+      JSON.stringify({ l: lng, r: resources })
+    );
+    i18next.changeLanguage(lng);
+  }
+  // update url `l` if needed.
+  varToUrlHash('l', lng, false);
 };
 
 // Load language resources dynamically.
@@ -94,9 +126,8 @@ export const loadLngAsync = async (l: string) => {
 //
 // Once imports have been loaded, they are added to i18next as resources.
 // Finally, the active langauge is changed to the imported language.
-export const doDynamicImport = async (lng: string, i18next: AnyJson) => {
+export const doDynamicImport = async (lng: string, i18next: AnyApi) => {
   const { l, r } = await loadLngAsync(lng);
-
   localStorage.setItem('lng_resources', JSON.stringify({ l: lng, r }));
 
   Object.entries(r).forEach(([ns, inner]: [string, AnyJson]) => {

@@ -1,15 +1,9 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useState } from 'react';
 import { defaultOverlayContext } from './defaults';
-import { OverlayContextInterface } from './types';
-
-export const OverlayContext = React.createContext<OverlayContextInterface>(
-  defaultOverlayContext
-);
-
-export const useOverlay = () => React.useContext(OverlayContext);
+import type { OverlayContextInterface } from './types';
 
 export const OverlayProvider = ({
   children,
@@ -72,3 +66,9 @@ export const OverlayProvider = ({
     </OverlayContext.Provider>
   );
 };
+
+export const OverlayContext = React.createContext<OverlayContextInterface>(
+  defaultOverlayContext
+);
+
+export const useOverlay = () => React.useContext(OverlayContext);

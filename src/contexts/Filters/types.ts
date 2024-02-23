@@ -1,26 +1,23 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { AnyFunction, AnyJson } from 'types';
+import type { AnyFunction, AnyJson } from 'types';
 
-export enum FilterType {
-  Exclude,
-  Include,
-}
+export type FilterType = 'exclude' | 'include';
 
 export interface FiltersContextInterface {
-  getFilters: (t: FilterType, g: string) => Array<string> | null;
-  toggleFilter: (t: FilterType, g: string, f: string) => void;
-  setMultiFilters: (t: FilterType, g: string, fs: Array<string>) => void;
+  getFilters: (type: FilterType, group: string) => string[] | null;
+  toggleFilter: (type: FilterType, g: string, f: string) => void;
+  setMultiFilters: (t: FilterType, g: string, fs: string[], r: boolean) => void;
   getOrder: (g: string) => string;
   setOrder: (g: string, o: string) => void;
   getSearchTerm: (g: string) => string | null;
-  setSearchTerm: (g: string, t: string) => void;
-  resetFilters: (t: FilterType, g: string) => void;
+  setSearchTerm: (g: string, searchTerm: string) => void;
+  resetFilters: (type: FilterType, g: string) => void;
   resetOrder: (g: string) => void;
   clearSearchTerm: (g: string) => void;
   applyFilters: (
-    t: FilterType,
+    type: FilterType,
     g: string,
     list: AnyJson,
     fn: AnyFunction
@@ -28,11 +25,20 @@ export interface FiltersContextInterface {
   applyOrder: (g: string, list: AnyJson, fn: AnyFunction) => void;
 }
 
-export type FilterItems = Array<FilterItem>;
-export type FilterItem = { key: string; filters: Array<string> };
+export type FilterItems = FilterItem[];
+export interface FilterItem {
+  key: string;
+  filters: string[];
+}
 
-export type FilterOrders = Array<FilterOrder>;
-export type FilterOrder = { key: string; order: string };
+export type FilterOrders = FilterOrder[];
+export interface FilterOrder {
+  key: string;
+  order: string;
+}
 
-export type FilterSearches = Array<FilterSearch>;
-export type FilterSearch = { key: string; searchTerm: string };
+export type FilterSearches = FilterSearch[];
+export interface FilterSearch {
+  key: string;
+  searchTerm: string;
+}

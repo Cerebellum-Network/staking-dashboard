@@ -1,31 +1,28 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import React, { useState } from 'react';
-import { AnyFunction, AnyJson } from 'types';
+import type { ReactNode } from 'react';
+import { createContext, useContext, useState } from 'react';
+import type { AnyFunction, AnyJson } from 'types';
 import { defaultFiltersInterface } from './defaults';
-import {
+import type {
   FilterItem,
   FilterItems,
   FilterOrder,
   FilterOrders,
-  FiltersContextInterface,
   FilterSearch,
   FilterSearches,
   FilterType,
+  FiltersContextInterface,
 } from './types';
 
-export const FiltersContext = React.createContext<FiltersContextInterface>(
+export const FiltersContext = createContext<FiltersContextInterface>(
   defaultFiltersInterface
 );
 
-export const useFilters = () => React.useContext(FiltersContext);
+export const useFilters = () => useContext(FiltersContext);
 
-export const FiltersProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const FiltersProvider = ({ children }: { children: ReactNode }) => {
   // groups along with their includes
   const [includes, setIncludes] = useState<FilterItems>([]);
 
@@ -39,13 +36,13 @@ export const FiltersProvider = ({
   const [searchTerms, setSearchTerms] = useState<FilterSearches>([]);
 
   // Get stored includes or excludes for a group.
-  const getFilters = (t: FilterType, g: string): Array<string> | null => {
-    const current = t === FilterType.Exclude ? excludes : includes;
-    return current.find((e: FilterItem) => e.key === g)?.filters || null;
+  const getFilters = (type: FilterType, group: string): string[] | null => {
+    const current = type === 'exclude' ? excludes : includes;
+    return current.find((e) => e.key === group)?.filters || null;
   };
 
   const setFilters = (t: FilterType, n: FilterItems) => {
-    if (t === FilterType.Exclude) {
+    if (t === 'exclude') {
       setExcludes(n);
     } else {
       setIncludes(n);
@@ -55,7 +52,7 @@ export const FiltersProvider = ({
   // Toggle a filter for a group.
   // Adds the group to `excludes` or `includes` if it does not already exist.
   const toggleFilter = (t: FilterType, g: string, f: string) => {
-    const current = t === FilterType.Exclude ? excludes : includes;
+    const current = t === 'exclude' ? excludes : includes;
     const exists = getFilters(t, g);
 
     if (!exists) {
@@ -64,8 +61,10 @@ export const FiltersProvider = ({
       return;
     }
     const newFilters = [...current]
-      .map((e: FilterItem) => {
-        if (e.key !== g) return e;
+      .map((e) => {
+        if (e.key !== g) {
+          return e;
+        }
         let { filters } = e;
 
         if (filters.includes(f)) {
@@ -78,13 +77,20 @@ export const FiltersProvider = ({
           filters,
         };
       })
-      .filter((e: FilterItem) => e.filters.length !== 0);
+      .filter((e) => e.filters.length !== 0);
     setFilters(t, newFilters);
   };
 
   // Sets an array of filters to a group.
-  const setMultiFilters = (t: FilterType, g: string, fs: Array<string>) => {
-    const current = t === FilterType.Exclude ? excludes : includes;
+  const setMultiFilters = (
+    t: FilterType,
+    g: string,
+    fs: string[],
+    reset: boolean
+  ) => {
+    // get the current filters from the group.
+    const current = reset ? [] : t === 'exclude' ? excludes : includes;
+    // check if filters currently exist in the group.
     const exists = getFilters(t, g);
 
     if (!exists) {
@@ -92,31 +98,39 @@ export const FiltersProvider = ({
       setFilters(t, newFilters);
       return;
     }
-    const newFilters = [...current].map((e: FilterItem) => {
-      if (e.key !== g) return e;
-      let { filters } = e;
-      filters = filters.filter((f: string) => !fs.includes(f)).concat(fs);
 
-      return {
-        key: e.key,
-        filters,
-      };
-    });
+    let newFilters: FilterItems;
+    if (current.length) {
+      newFilters = [...current].map((e) => {
+        // return groups we are not manipulating.
+        if (e.key !== g) {
+          return e;
+        }
+
+        let { filters } = e;
+        filters = filters.filter((f: string) => !fs.includes(f)).concat(fs);
+        return {
+          key: e.key,
+          filters,
+        };
+      });
+    } else {
+      newFilters = [{ key: g, filters: fs }];
+    }
     setFilters(t, newFilters);
   };
 
   // Get the current order of a list or null.
-  const getOrder = (g: string) => {
-    return orders.find((o: FilterOrder) => o.key === g)?.order || 'default';
-  };
+  const getOrder = (g: string) =>
+    orders.find((o) => o.key === g)?.order || 'default';
 
   // Sets an order key for a group.
   const setOrder = (g: string, o: string) => {
     let newOrders = [];
     if (o === 'default') {
-      newOrders = [...orders].filter((order: FilterOrder) => order.key !== g);
+      newOrders = [...orders].filter((order) => order.key !== g);
     } else if (orders.length) {
-      newOrders = [...orders].map((order: FilterOrder) =>
+      newOrders = [...orders].map((order) =>
         order.key !== g ? order : { ...order, order: o }
       );
     } else {
@@ -126,17 +140,14 @@ export const FiltersProvider = ({
   };
 
   // Get the current search term of a list or null.
-  const getSearchTerm = (g: string) => {
-    return (
-      searchTerms.find((o: FilterSearch) => o.key === g)?.searchTerm || null
-    );
-  };
+  const getSearchTerm = (g: string) =>
+    searchTerms.find((o) => o.key === g)?.searchTerm || null;
 
   // Sets an order key for a group.
   const setSearchTerm = (g: string, t: string) => {
     let newSearchTerms = [];
     if (orders.length) {
-      newSearchTerms = [...searchTerms].map((term: FilterSearch) =>
+      newSearchTerms = [...searchTerms].map((term) =>
         term.key !== g ? term : { ...term, searchTerm: t }
       );
     } else {
@@ -147,7 +158,7 @@ export const FiltersProvider = ({
 
   // resets excludes for a given group
   const resetFilters = (t: FilterType, g: string) => {
-    const current = t === FilterType.Exclude ? excludes : includes;
+    const current = t === 'exclude' ? excludes : includes;
     setFilters(
       t,
       [...current].filter((e: FilterItem) => e.key !== g)

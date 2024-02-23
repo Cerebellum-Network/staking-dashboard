@@ -1,26 +1,21 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import React, { useState } from 'react';
+import type { ReactNode } from 'react';
+import { createContext, useContext, useState } from 'react';
+import { defaultListFormat, defaultPoolList } from './defaults';
+import type { ListFormat, PoolListContextProps } from './types';
 
-export const PoolListContext: React.Context<any> = React.createContext({
-  // eslint-disable-next-line
-  setListFormat: (v: string) => {},
-  listFormat: 'col',
-});
+export const PoolListContext =
+  createContext<PoolListContextProps>(defaultPoolList);
 
-export const usePoolList = () => React.useContext(PoolListContext);
+export const usePoolList = () => useContext(PoolListContext);
 
-export const PoolListProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const [listFormat, _setListFormat] = useState('col');
+export const PoolListProvider = ({ children }: { children: ReactNode }) => {
+  const [listFormat, setListFormatState] =
+    useState<ListFormat>(defaultListFormat);
 
-  const setListFormat = (v: string) => {
-    _setListFormat(v);
-  };
+  const setListFormat = (v: ListFormat) => setListFormatState(v);
 
   return (
     <PoolListContext.Provider

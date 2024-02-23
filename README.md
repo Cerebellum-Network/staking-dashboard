@@ -63,109 +63,41 @@ export const VALIDATOR_COMMUNITY = [
 
 ```
 
-## General Requirements
+### General Requirements
 
-| Requirement | Notes                                                                                                                                                                                                                            |
-|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Accuracy    | Entity contact details must be working and valid.                                                                                                                                                                                |
-| Liveness    | All submitted validator addresses must be discoverable as a validator on Cere Network.                                                                                                                                           |
-| Ordering    | Please place your entity in alphabetical order within `VALIDATOR_COMMUNITY`. Validator entities (and their validators) are shuffled before being displayed in the dashboard, removing any bias associated with ordering methods. |
+| Requirement | Notes                                                                                                                                                                                             |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Accuracy    | Operator contact details must be working and valid.                                                                                                                                               |
+| Liveness    | All submitted validator addresses must be discoverable as a validator on the network in question - whether Polkadot or Kusama.                                                                    |
+| Ordering    | Please place your operator in alphabetical order within `ValidatorCommunity`. Operators are shuffled before being displayed in the dashboard, removing any bias associated with ordering methods. |
 
-Please submit an issue for any queries around adding your validator entity.
+Please submit an issue for any queries around adding your operator details.
 
-# Contribution Guide
+## URL Variables Support
 
-## Introduction
-This section aims to familiarise developers to the Cere Staking Dashboard [[GitHub](https://github.com/Cerebellum-Network/staking-dashboard), [Demo](https://paritytech.github.io/polkadot-staking-dashboard/#/overview)] for the purpose of contributing to the project.
+Polkadot staking dashboard supports URL variables that can be used to direct users to specific configurations of the app, such as landing on a specific language or on a specific network.
 
-Reach out to community@cere.io for clarification of any content within this document.
+Variables are added at the end of the hash portion of URL:
 
-## Major Packages Used
-
-- React 18
-- Polkadot JS API [[docs](https://polkadot.js.org/docs/api)]
-- React Chart JS 2 for graphing. [[docs](https://www.chartjs.org/docs/latest/), [React docs](https://react-chartjs-2.js.org/)]
-- Framer Motion. [[docs](https://www.framer.com/docs/animation/)]
-- [Font Awesome](https://fontawesome.com/v5/search) for the majority of icons. [Ionicons](https://ionic.io/ionicons) for side menu footer icons
-- Downshift for dropdowns [[docs](https://www.npmjs.com/package/downshift)]
-- Styled Components [[docs](https://styled-components.com/docs)] alongside Styled Theming [[docs](https://www.npmjs.com/package/styled-theming)] for theme configuration.
-
-## Environment Variables
-Optionally apply the following envrionment variables in an environment file such as `.env` or with `yarn build` to customise the build of staking dashboard:
 ```
-# disable all mentioning of fiat values and token prices
-REACT_APP_DISABLE_FIAT=1
-
-# display an organisation label in the network bar
-REACT_APP_ORGANISATION="© Parity Technologies"
-
-# provide a privacy policy url in the network bar
-REACT_APP_PRIVACY_URL=https://www.parity.io/privacy/
-
-# include the testnet configuration
-REACT_APP_INCLUDE_TESTNET=true
+staking.polkadot.network/#/overview?n=polkadot&l=en
 ```
-## Config Files
-There are some ad-hoc files defining app configuration where needed. These just provide a means of bootstrapping app data, and further abstraction could be explored in the future.
-- [`config/pages.ts`](https://github.com/paritytech/polkadot-staking-dashboard/blob/master/src/config/pages.ts): provides the pages and page categories of the app.
-- [`config/help.ts`](https://github.com/paritytech/polkadot-staking-dashboard/blob/master/src/config/help.ts): provides the help content.
-- [`Utils.ts`](https://github.com/paritytech/polkadot-staking-dashboard/blob/master/src/Utils.ts): Various general helper functions used throughout the app, such as formatting utilities.
 
-## Folders
+The currently supported URL variables are as follows:
 
-Folders are structured in the [`src/`](https://github.com/paritytech/polkadot-staking-dashboard/tree/master/src) directory to separate functional, presentational and context components:
-- [`contexts`](https://github.com/paritytech/polkadot-staking-dashboard/tree/master/src/contexts): context providers for the app. All Polkadot JS API interaction happens in these files.
-- [`img`](https://github.com/paritytech/polkadot-staking-dashboard/tree/master/src/img): app SVGs.
-- [`library`](https://github.com/paritytech/polkadot-staking-dashboard/tree/master/src/library): reusable components that could eventually be abstracted into a separate UI library.
-- [`modals`](https://github.com/paritytech/polkadot-staking-dashboard/tree/master/src/modals): the various modal pop-ups used in the app.
-- [`pages`](https://github.com/paritytech/polkadot-staking-dashboard/tree/master/src/pages): similar to modals, page components and components that comprise pages.
-- [`theme`](https://github.com/paritytech/polkadot-staking-dashboard/tree/master/src/theme): the theming configuration of the app.
-- [`workers`](https://github.com/paritytech/polkadot-staking-dashboard/tree/master/src/workers): web workers that crunch process-heavy scripts. Only one exists right now, that iterates `erasStakers` and calculates active nominators and minimum nomination bond.
+- `n`: Controls the network to default to upon visiting the dashboard. Supported values are `polkadot`, `kusama` and `westend`.
+- `l`: Controls the language to default to upon visiting the dashboard. Supported values are `en` and `cn`.
 
-## App Entry
+URL variables take precedence over saved values in local storage, and will overwrite current configurations. URL variables will update (if present) as a user switches configurations in-app, such as changing the network or language.
 
-Going from the top-most component, the component hierarchy is set up as follows:
-- [`index.tsx`](https://github.com/paritytech/polkadot-staking-dashboard/blob/master/src/index.tsx): DOM render, of little interest.
-- [`App.tsx`](https://github.com/paritytech/polkadot-staking-dashboard/blob/master/src/App.tsx): wraps `<App />` in the theme provider context and determines the active network from local storage.
-- [`Providers.tsx`](https://github.com/paritytech/polkadot-staking-dashboard/blob/master/src/Providers.tsx): imports and wraps `<Router />` with all the contexts using a withProviders hook. We also wrap styled component's theme provider context here to make the theme configuration work.
-- [`Router.tsx`](https://github.com/paritytech/polkadot-staking-dashboard/blob/master/src/Router.tsx): contains react router `<Route>`'s, in addition to the major app presentational components. Beyond `<Route>` components, this file is also the entry point for the following components:
-  - `<Modal />`: top-level of the modal.
-  - `<Help />`: top-level of the help module.
-  - `<Headers />`: fixed header of the app containing the stash / controller and accounts toggle buttons.
-  - `<NetworkBar />`: fixed network bar at the bottom of the app.
-  - `<Notifications />`: smaller context-based popups. Currently used on click-to-copy, or to display extrinsic status (pending, success).
+### Example URL:
 
-## Development Patterns
+The following URL will load Kusama and use the Chinese localisation resource:
 
-Documenting some of the development patterns used:
+```
+staking.polkadot.network/#/overview?n=kusama&l=cn
+```
 
-- We use the **"Wrapper" terminology for styled components** that wrap a functional component.
-- **Styles are defined on a per-component basis**, being defined in the same folder as the component markup itself. Where unavoidable (such as global styles, interface layout), styled components should reside in [`src/Wrappers.ts`](https://github.com/paritytech/polkadot-staking-dashboard/blob/master/src/Wrappers.tsx).
-- **Theme values** can be either directly imported into styled components, from [`theme/index.ts`](https://github.com/paritytech/polkadot-staking-dashboard/blob/master/src/theme/index.ts), or as raw values within component files using [`theme/default.ts`](https://github.com/paritytech/polkadot-staking-dashboard/blob/master/src/theme/default.ts).
-- **Constants or default values** (such as those waiting for Polkadot API) are defined in [`src/constants.ts`](https://github.com/paritytech/polkadot-staking-dashboard/blob/master/src/constants.ts).
-- Packages with **missing TypeScript definitions** can be declared in [`src/react-app-env.d.ts`](https://github.com/paritytech/polkadot-staking-dashboard/blob/master/src/react-app-env.d.ts).
-
-## TypeScript Support
-
-Beyond some very lightweight typing here and there, components are yet to be comprehensively typed. Types are welcome for data that makes sense to type (e.g. data that is unlikely to change as we continue development).
-
-We develop in strict mode, so types are always required for objects. Use any initially to adhere to this requirement.
-
-## Testing Support State
-
-**Tests have not yet been developed.**
-
-Testing could be initialised on a per-component basis, such as isolating library components and testing them within a storybook environment.
-
-Integration tests make sense for the app itself, ensuring the page layout, help module, and modals display the correct content at various app states. These states currently persist of:
-
-- Connecting to the network, fetching from API, fully synced.
-- Actively staking, not actively staking.
-- Account connected, no account connected.
-
-# Project Updates
+## Presentations
 
 - 30/06/2022: [[Video] Polkadot Decoded 2022: Polkadot Staking Dashboard Demo](https://youtu.be/H1WGu6mf1Ls)
-- 08/04/2022: [[Video] Polkadot Staking Dashboard April 2022 Update](https://www.youtube.com/watch?v=y6AJ6RhKMH0)
-- 09/03/2022: [Representing the Stash and Controller Account](https://medium.com/@paritytech/polkadot-staking-dashboard-representing-the-stack-and-controller-account-2ea76bb54b47)
-- 28/02/2022: [Defining the Polkadot Staking Experience: Phase 0](https://paritytech.medium.com/defining-the-polkadot-staking-experience-phase-0-211cb2bc113c)

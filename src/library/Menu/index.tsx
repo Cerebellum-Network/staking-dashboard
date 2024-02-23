@@ -1,10 +1,11 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
+import { useEffect, useRef } from 'react';
 import { useMenu } from 'contexts/Menu';
 import { useOutsideAlerter } from 'library/Hooks';
-import { useEffect, useRef } from 'react';
 import { ItemWrapper, Wrapper } from './Wrappers';
+import type { AnyJson } from 'types';
 
 export const Menu = () => {
   const menu = useMenu();
@@ -39,38 +40,34 @@ export const Menu = () => {
   );
 
   return (
-    <>
-      {menu.open === 1 && (
-        <Wrapper
-          ref={ref}
-          style={{
-            position: 'absolute',
-            left: `${position[0]}px`,
-            top: `${position[1]}px`,
-            zIndex: 99,
-            opacity: menu.show === 1 ? 1 : 0,
-          }}
-        >
-          {menu.items.map((item: any, i: number) => {
-            const { icon, title, cb } = item;
+    menu.open === 1 && (
+      <Wrapper
+        ref={ref}
+        style={{
+          position: 'absolute',
+          left: `${position[0]}px`,
+          top: `${position[1]}px`,
+          zIndex: 99,
+          opacity: menu.show === 1 ? 1 : 0,
+        }}
+      >
+        {menu.items.map((item: AnyJson, i: number) => {
+          const { icon, title, cb } = item;
 
-            return (
-              <ItemWrapper
-                key={`menu_item_${i}`}
-                onClick={() => {
-                  cb();
-                  menu.closeMenu();
-                }}
-              >
-                {icon}
-                <div className="title">{title}</div>
-              </ItemWrapper>
-            );
-          })}
-        </Wrapper>
-      )}
-    </>
+          return (
+            <ItemWrapper
+              key={`menu_item_${i}`}
+              onClick={() => {
+                cb();
+                menu.closeMenu();
+              }}
+            >
+              {icon}
+              <div className="title">{title}</div>
+            </ItemWrapper>
+          );
+        })}
+      </Wrapper>
+    )
   );
 };
-
-export default Menu;

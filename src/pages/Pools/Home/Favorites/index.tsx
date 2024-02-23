@@ -1,71 +1,63 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
+import { PageRow } from '@polkadot-cloud/react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useApi } from 'contexts/Api';
 import { useBondedPools } from 'contexts/Pools/BondedPools';
 import { usePoolsConfig } from 'contexts/Pools/PoolsConfig';
 import { useUi } from 'contexts/UI';
-import { CardWrapper } from 'library/Graphs/Wrappers';
-import PoolList from 'library/PoolList';
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { PageRowWrapper } from 'Wrappers';
+import { CardWrapper } from 'library/Card/Wrappers';
+import { PoolList } from 'library/PoolList/Default';
+import { ListStatusHeader } from 'library/List';
+import { PoolListProvider } from 'library/PoolList/context';
+import type { BondedPool } from 'contexts/Pools/BondedPools/types';
 
-export const Favorites = () => {
-  const { isReady } = useApi();
-  const { favorites, removeFavorite } = usePoolsConfig();
-  const { bondedPools } = useBondedPools();
-  const { poolsSyncing } = useUi();
+export const PoolFavorites = () => {
   const { t } = useTranslation('pages');
+  const { isReady } = useApi();
+  const { isPoolSyncing } = useUi();
+  const { bondedPools } = useBondedPools();
+  const { favorites, removeFavorite } = usePoolsConfig();
 
-  // store local favorite list and update when favorites list is mutated
-  const [favoritesList, setFavoritesList] = useState<Array<any>>([]);
+  // Store local favorite list and update when favorites list is mutated.
+  const [favoritesList, setFavoritesList] = useState<BondedPool[]>([]);
 
   useEffect(() => {
     // map favorites to bonded pools
-    let _favoritesList = favorites.map((f: any) => {
-      const pool = bondedPools.find((b: any) => b.addresses.stash === f);
-      if (!pool) {
-        removeFavorite(f);
-      }
-      return pool;
-    });
+    const newFavoritesList = favorites
+      .map((f) => {
+        const pool = bondedPools.find((b) => b.addresses.stash === f);
+        if (!pool) {
+          removeFavorite(f);
+        }
+        return pool;
+      })
+      .filter((f): f is BondedPool => f !== undefined);
 
     // filter not found bonded pools
-    _favoritesList = _favoritesList.filter((f: any) => f !== undefined);
-
-    setFavoritesList(_favoritesList);
+    setFavoritesList(newFavoritesList);
   }, [favorites]);
 
   return (
-    <>
-      <PageRowWrapper className="page-padding" noVerticalSpacer>
-        <CardWrapper>
-          {favoritesList === null || poolsSyncing ? (
-            <h3>{t('pools.fetching_favorite_pools')}</h3>
+    <PageRow>
+      <CardWrapper>
+        {favoritesList === null || isPoolSyncing ? (
+          <ListStatusHeader>
+            {t('pools.fetchingFavoritePools')}...
+          </ListStatusHeader>
+        ) : (
+          isReady &&
+          (favoritesList.length > 0 ? (
+            <PoolListProvider>
+              <PoolList pools={favoritesList} allowMoreCols pagination />
+            </PoolListProvider>
           ) : (
-            <>
-              {isReady && (
-                <>
-                  {favoritesList.length > 0 ? (
-                    <PoolList
-                      batchKey="favorite_pools"
-                      pools={favoritesList}
-                      title={t('pools.favorites_list')}
-                      allowMoreCols
-                      pagination
-                    />
-                  ) : (
-                    <h3>{t('pools.no_favorites')}</h3>
-                  )}
-                </>
-              )}
-            </>
-          )}
-        </CardWrapper>
-      </PageRowWrapper>
-    </>
+            <ListStatusHeader>{t('pools.noFavorites')}</ListStatusHeader>
+          ))
+        )}
+      </CardWrapper>
+    </PageRow>
   );
 };
-
-export default Favorites;

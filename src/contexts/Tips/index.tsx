@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useEffect, useState } from 'react';
-import { MaybeString } from 'types';
+import type { MaybeString } from 'types';
 import { defaultTipsContext } from './defaults';
-import { TipsContextInterface } from './types';
+import type { TipsContextInterface } from './types';
 
 export const TipsContext =
   React.createContext<TipsContextInterface>(defaultTipsContext);

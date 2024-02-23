@@ -1,16 +1,12 @@
-import {
-  ApolloClient,
-  gql,
-  InMemoryCache,
-  NormalizedCacheObject,
-} from '@apollo/client';
+import type { NormalizedCacheObject } from '@apollo/client';
+import { ApolloClient, gql, InMemoryCache } from '@apollo/client';
 import { WebSocketLink } from '@apollo/client/link/ws';
 import React, { createContext, useEffect, useState } from 'react';
-import { Network } from '../../types';
-import { useApi } from '../Api';
-import { useConnect } from '../Connect';
+import type { Network } from '../../types';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
 import { defaultCereStatsContext } from './defaults';
-import { CereStatsContextInterface } from './types';
+import type { CereStatsContextInterface } from './types';
 
 const useApolloClient = (endpoint: Network['cereStatsEndpoint']) => {
   const [client, setClient] =
@@ -86,8 +82,8 @@ const usePayouts = (
 
   const normalizePayouts = (
     payoutData: { blockNumber: number; data: string; timestamp: number }[]
-  ) => {
-    return payoutData
+  ) =>
+    payoutData
       .map(({ blockNumber, data, timestamp }) => {
         let amount = 0;
 
@@ -105,7 +101,6 @@ const usePayouts = (
         };
       })
       .sort((a, b) => b.block_timestamp - a.block_timestamp);
-  };
 
   const fetchPayouts = async () => {
     if (!activeAccount || !client) {
@@ -155,10 +150,10 @@ export const CereStatsProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { network } = useApi();
-  const { activeAccount } = useConnect();
+  const { networkData } = useNetwork();
+  const { activeAccount } = useActiveAccounts();
 
-  const client = useApolloClient(network.cereStatsEndpoint);
+  const client = useApolloClient(networkData.cereStatsEndpoint);
   const fetchEraPoints = useFetchEraPoints(client);
   const payouts = usePayouts(client, activeAccount);
 
@@ -172,6 +167,7 @@ export const CereStatsProvider = ({
         fetchEraPoints,
         payouts,
         poolClaims: [],
+        unclaimedPayouts: [],
       }}
     >
       {children}

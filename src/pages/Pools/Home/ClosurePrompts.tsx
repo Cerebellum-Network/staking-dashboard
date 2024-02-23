@@ -1,45 +1,39 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
 import { faLockOpen } from '@fortawesome/free-solid-svg-icons';
-import { ButtonPrimary } from '@rossbulat/polkadot-dashboard-ui';
-import { useApi } from 'contexts/Api';
-import { useConnect } from 'contexts/Connect';
-import { useModal } from 'contexts/Modal';
+import { ButtonPrimary, ButtonRow, PageRow } from '@polkadot-cloud/react';
+import { useTranslation } from 'react-i18next';
 import { useActivePools } from 'contexts/Pools/ActivePools';
-import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
-import { PoolState } from 'contexts/Pools/types';
 import { useTheme } from 'contexts/Themes';
 import { useTransferOptions } from 'contexts/TransferOptions';
 import { useUi } from 'contexts/UI';
-import { CardWrapper } from 'library/Graphs/Wrappers';
-import { useTranslation } from 'react-i18next';
-import { ButtonRowWrapper, PageRowWrapper } from 'Wrappers';
+import { CardWrapper } from 'library/Card/Wrappers';
+import { useOverlay } from '@polkadot-cloud/react/hooks';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
 
 export const ClosurePrompts = () => {
-  const { network } = useApi();
-  const { activeAccount } = useConnect();
+  const { t } = useTranslation('pages');
+  const { colors } = useNetwork().networkData;
+  const { activeAccount } = useActiveAccounts();
   const { mode } = useTheme();
-  const { openModalWith } = useModal();
-  const { membership } = usePoolMemberships();
-  const { poolsSyncing } = useUi();
+  const { openModal } = useOverlay().modal;
+  const { isPoolSyncing } = useUi();
   const { isBonding, selectedActivePool, isDepositor, poolNominations } =
     useActivePools();
   const { getTransferOptions } = useTransferOptions();
-  const { t } = useTranslation('pages');
 
   const { state, memberCounter } = selectedActivePool?.bondedPool || {};
-  const { active, totalUnlockChuncks } = getTransferOptions(activeAccount).pool;
+  const { active, totalUnlockChunks } = getTransferOptions(activeAccount).pool;
   const targets = poolNominations?.targets ?? [];
-
-  const networkColorsSecondary: any = network.colors.secondary;
-  const annuncementBorderColor = networkColorsSecondary[mode];
+  const annuncementBorderColor = colors.secondary[mode];
 
   // is the pool in a state for the depositor to close
   const depositorCanClose =
-    !poolsSyncing &&
+    !isPoolSyncing &&
     isDepositor() &&
-    state === PoolState.Destroy &&
+    state === 'Destroying' &&
     memberCounter === '1';
 
   // depositor needs to unbond funds
@@ -47,60 +41,65 @@ export const ClosurePrompts = () => {
 
   // depositor can withdraw & close pool
   const depositorCanWithdraw =
-    active.toNumber() === 0 && totalUnlockChuncks === 0 && !targets.length;
+    active.toNumber() === 0 && totalUnlockChunks === 0 && !targets.length;
 
   return (
-    <>
-      {depositorCanClose && (
-        <PageRowWrapper className="page-padding" noVerticalSpacer>
-          <CardWrapper
-            style={{ border: `1px solid ${annuncementBorderColor}` }}
-          >
-            <div className="content">
-              <h3>{t('pools.destroy_pool')}</h3>
-              <h4>
-                {t('pools.left_the_pool')}
-                {targets.length > 0
-                  ? t('pools.stop_nominating')
-                  : depositorCanWithdraw
-                  ? t('pools.close_pool')
+    depositorCanClose && (
+      <PageRow>
+        <CardWrapper style={{ border: `1px solid ${annuncementBorderColor}` }}>
+          <div className="content">
+            <h3>{t('pools.destroyPool')}</h3>
+            <h4>
+              {t('pools.leftThePool')}.{' '}
+              {targets.length > 0
+                ? t('pools.stopNominating')
+                : depositorCanWithdraw
+                  ? t('pools.closePool')
                   : depositorCanUnbond
-                  ? t('pools.unbond_your_funds')
-                  : t('pools.withdraw_unlock')}
-              </h4>
-              <ButtonRowWrapper verticalSpacing>
-                <ButtonPrimary
-                  marginRight
-                  text={t('pools.unbond')}
-                  disabled={
-                    poolsSyncing ||
-                    (!depositorCanWithdraw && !depositorCanUnbond)
-                  }
-                  onClick={() =>
-                    openModalWith(
-                      'UnbondPoolMember',
-                      { who: activeAccount, member: membership },
-                      'small'
-                    )
-                  }
-                />
-                <ButtonPrimary
-                  iconLeft={faLockOpen}
-                  text={String(totalUnlockChuncks ?? 0)}
-                  disabled={poolsSyncing || !isBonding()}
-                  onClick={() =>
-                    openModalWith(
-                      'UnlockChunks',
-                      { bondType: 'pool', poolClosure: true },
-                      'small'
-                    )
-                  }
-                />
-              </ButtonRowWrapper>
-            </div>
-          </CardWrapper>
-        </PageRowWrapper>
-      )}
-    </>
+                    ? t('pools.unbondYourFunds')
+                    : t('pools.withdrawUnlock')}
+            </h4>
+            <ButtonRow yMargin>
+              <ButtonPrimary
+                marginRight
+                text={t('pools.unbond')}
+                disabled={
+                  isPoolSyncing ||
+                  (!depositorCanWithdraw && !depositorCanUnbond)
+                }
+                onClick={() =>
+                  openModal({
+                    key: 'Unbond',
+                    options: { bondFor: 'pool' },
+                    size: 'sm',
+                  })
+                }
+              />
+              <ButtonPrimary
+                iconLeft={faLockOpen}
+                text={
+                  depositorCanWithdraw
+                    ? t('pools.unlocked')
+                    : String(totalUnlockChunks ?? 0)
+                }
+                disabled={isPoolSyncing || !isBonding()}
+                onClick={() =>
+                  openModal({
+                    key: 'UnlockChunks',
+                    options: {
+                      bondFor: 'pool',
+                      poolClosure: true,
+                      disableWindowResize: true,
+                      disableScroll: true,
+                    },
+                    size: 'sm',
+                  })
+                }
+              />
+            </ButtonRow>
+          </div>
+        </CardWrapper>
+      </PageRow>
+    )
   );
 };
