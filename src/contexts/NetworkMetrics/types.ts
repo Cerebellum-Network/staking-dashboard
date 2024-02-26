@@ -10,7 +10,7 @@ export interface NetworkMetricsContextInterface {
 
 export interface NetworkMetrics {
   totalIssuance: BigNumber;
-  auctionCounter: BigNumber;
+  // auctionCounter: BigNumber;
   earliestStoredSession: BigNumber;
   fastUnstakeErasToCheckPerBlock: number;
   minimumActiveStake: BigNumber;

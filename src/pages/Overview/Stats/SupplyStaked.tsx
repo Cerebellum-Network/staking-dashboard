@@ -18,6 +18,8 @@ export const SupplyStakedStat = () => {
   const { lastTotalStake } = staking;
   const { totalIssuance } = metrics;
 
+  console.warn(`Total Issuance: ${totalIssuance}`);
+  console.warn(`Total Stake: ${lastTotalStake}`);
   // total supply as percent.
   const totalIssuanceUnit = planckToUnit(totalIssuance, units);
   const lastTotalStakeUnit = planckToUnit(lastTotalStake, units);

@@ -18,6 +18,8 @@ export const List = () => {
     validatorCommunity.filter((v) => v.validators[network] !== undefined)
   );
 
+  console.warn(`All validators: ${validatorCommunity}`);
+
   useEffect(() => {
     setEntityItems(
       validatorCommunity.filter((v) => v.validators[network] !== undefined)
