@@ -1,52 +1,56 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import BN from 'bn.js';
-import { SectionFullWidthThreshold, SideMenuStickyThreshold } from 'consts';
-import { useApi } from 'contexts/Api';
-import { useCereStats } from 'contexts/CereStats';
-import { useUi } from 'contexts/UI';
-import { formatDistance, fromUnixTime, getUnixTime } from 'date-fns';
-import { formatRewardsForGraphs } from 'library/Graphs/Utils';
-import { GraphWrapper } from 'library/Graphs/Wrappers';
-import { PageTitle } from 'library/PageTitle';
-import { StatBoxList } from 'library/StatBoxList';
-import { SubscanButton } from 'library/SubscanButton';
-import { locales } from 'locale';
-import { useTranslation } from 'react-i18next';
-import { humanNumber, planckBnToUnit } from 'Utils';
 import {
-  PageRowWrapper,
-  RowPrimaryWrapper,
-  RowSecondaryWrapper,
-  TopBarWrapper,
-} from 'Wrappers';
-import { ActiveAccount } from './ActiveAccount';
-import BalanceGraph from './BalanceGraph';
+  Odometer,
+  PageHeading,
+  PageRow,
+  PageTitle,
+  RowSection,
+} from '@polkadot-cloud/react';
+import BigNumber from 'bignumber.js';
+import { formatDistance, fromUnixTime, getUnixTime } from 'date-fns';
+import { useTranslation } from 'react-i18next';
+import { DefaultLocale } from 'consts';
+import { useCereStats } from 'contexts/CereStats';
+import { CardHeaderWrapper, CardWrapper } from 'library/Card/Wrappers';
+import { formatRewardsForGraphs } from 'library/Graphs/Utils';
+import { StatBoxList } from 'library/StatBoxList';
+import { locales } from 'locale';
+import { ControllerNotStash } from 'pages/Nominate/Active/ControllerNotStash';
+import { minDecimalPlaces, planckToUnit } from '@polkadot-cloud/utils';
+import { PluginLabel } from 'library/PluginLabel';
+import { useNetwork } from 'contexts/Network';
+import { ActiveAccounts } from './ActiveAccounts';
+import { BalanceChart } from './BalanceChart';
+import { BalanceLinks } from './BalanceLinks';
 import { NetworkStats } from './NetworkSats';
-import Payouts from './Payouts';
-import Reserve from './Reserve';
-import ActiveEraStatBox from './Stats/ActiveEra';
-import { ActiveNominatorsStatBox } from './Stats/ActiveNominators';
-import TotalNominatorsStatBox from './Stats/TotalNominations';
-import { Tips } from './Tips';
+import { Payouts } from './Payouts';
+import { StakeStatus } from './StakeStatus';
+import { ActiveEraStat } from './Stats/ActiveEraTimeLeft';
+import { HistoricalRewardsRateStat } from './Stats/HistoricalRewardsRate';
+import { SupplyStakedStat } from './Stats/SupplyStaked';
 
 export const Overview = () => {
-  const { network } = useApi();
-  const { units } = network;
-  const { payouts, poolClaims } = useCereStats();
-  const { services } = useUi();
+  const { i18n, t } = useTranslation('pages');
+  const {
+    networkData: {
+      units,
+      brand: { token: Token },
+    },
+  } = useNetwork();
+  const { payouts, poolClaims, unclaimedPayouts } = useCereStats();
+
   const { lastReward } = formatRewardsForGraphs(
+    new Date(),
     14,
-    1,
     units,
     payouts,
-    poolClaims
+    poolClaims,
+    unclaimedPayouts
   );
-  const { i18n, t } = useTranslation('pages');
 
-  const PAYOUTS_HEIGHT = 410;
-  const BALANCE_HEIGHT = PAYOUTS_HEIGHT;
+  const PAYOUTS_HEIGHT = 380;
 
   let formatFrom = new Date();
   let formatTo = new Date();
@@ -58,74 +62,71 @@ export const Overview = () => {
     formatTo = new Date();
     formatOpts = {
       addSuffix: true,
-      locale: locales[i18n.resolvedLanguage],
+      locale: locales[i18n.resolvedLanguage ?? DefaultLocale],
     };
   }
 
   return (
     <>
       <PageTitle title={t('overview.overview')} />
-      <PageRowWrapper className="page-padding" noVerticalSpacer>
-        <TopBarWrapper>
-          <ActiveAccount />
-        </TopBarWrapper>
-      </PageRowWrapper>
+      <PageRow>
+        <PageHeading>
+          <ActiveAccounts />
+        </PageHeading>
+      </PageRow>
       <StatBoxList>
-        <TotalNominatorsStatBox />
-        <ActiveNominatorsStatBox />
-        <ActiveEraStatBox />
+        <HistoricalRewardsRateStat />
+        <SupplyStakedStat />
+        <ActiveEraStat />
       </StatBoxList>
-      {services.includes('tips') && (
-        <PageRowWrapper className="page-padding" noVerticalSpacer>
-          <Tips />
-        </PageRowWrapper>
-      )}
-      <PageRowWrapper className="page-padding" noVerticalSpacer>
-        <RowSecondaryWrapper
-          hOrder={0}
-          vOrder={0}
-          thresholdStickyMenu={SideMenuStickyThreshold}
-          thresholdFullWidth={SectionFullWidthThreshold}
-        >
-          <GraphWrapper style={{ minHeight: BALANCE_HEIGHT }} flex>
-            <BalanceGraph />
-            <Reserve />
-          </GraphWrapper>
-        </RowSecondaryWrapper>
-        <RowPrimaryWrapper
-          hOrder={1}
-          vOrder={1}
-          thresholdStickyMenu={SideMenuStickyThreshold}
-          thresholdFullWidth={SectionFullWidthThreshold}
-        >
-          <GraphWrapper style={{ minHeight: PAYOUTS_HEIGHT }} flex>
-            <SubscanButton />
-            <div className="head">
-              <h4>{t('overview.recent_payouts')}</h4>
+      <ControllerNotStash />
+      <PageRow>
+        <StakeStatus />
+      </PageRow>
+      <PageRow>
+        <RowSection secondary>
+          <CardWrapper height={PAYOUTS_HEIGHT}>
+            <BalanceChart />
+            <BalanceLinks />
+          </CardWrapper>
+        </RowSection>
+        <RowSection hLast vLast>
+          <CardWrapper style={{ minHeight: PAYOUTS_HEIGHT }}>
+            <PluginLabel plugin="subscan" />
+            <CardHeaderWrapper>
+              <h4>{t('overview.recentPayouts')}</h4>
               <h2>
-                {lastReward === null
-                  ? 0
-                  : humanNumber(
-                      planckBnToUnit(new BN(lastReward.amount), units)
-                    )}
-                &nbsp;{network.unit}
-                &nbsp;
-                <span className="fiat">
-                  {lastReward === null
-                    ? ''
-                    : formatDistance(formatFrom, formatTo, formatOpts)}
+                <Token className="networkIcon" />
+                <Odometer
+                  value={minDecimalPlaces(
+                    lastReward === null
+                      ? '0'
+                      : planckToUnit(
+                          new BigNumber(lastReward.amount),
+                          units
+                        ).toFormat(),
+                    2
+                  )}
+                />
+
+                <span className="note">
+                  {lastReward === null ? (
+                    ''
+                  ) : (
+                    <>
+                      &nbsp;{formatDistance(formatFrom, formatTo, formatOpts)}
+                    </>
+                  )}
                 </span>
               </h2>
-            </div>
+            </CardHeaderWrapper>
             <Payouts />
-          </GraphWrapper>
-        </RowPrimaryWrapper>
-      </PageRowWrapper>
-      <PageRowWrapper className="page-padding" noVerticalSpacer>
+          </CardWrapper>
+        </RowSection>
+      </PageRow>
+      <PageRow>
         <NetworkStats />
-      </PageRowWrapper>
+      </PageRow>
     </>
   );
 };
-
-export default Overview;

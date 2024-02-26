@@ -1,29 +1,32 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import BN from 'bn.js';
-import { useApi } from 'contexts/Api';
-import { useNetworkMetrics } from 'contexts/Network';
+import BigNumber from 'bignumber.js';
+import { useNetwork } from 'contexts/Network';
+import { useNetworkMetrics } from 'contexts/NetworkMetrics';
 import { useStaking } from 'contexts/Staking';
 
 export const useInflation = () => {
-  const { network } = useApi();
+  const {
+    networkData: { params },
+  } = useNetwork();
   const { metrics } = useNetworkMetrics();
   const { staking } = useStaking();
-  const { params } = network;
   const { lastTotalStake } = staking;
   const { totalIssuance } = metrics;
 
   const { falloff, maxInflation, minInflation, stakeTarget } = params;
 
-  const BN_MILLION = new BN('1000000');
+  const BIGNUMBER_MILLION = new BigNumber(1_000_000);
 
-  const calculateInflation = (totalStaked: BN) => {
+  const calculateInflation = (totalStaked: BigNumber) => {
     const stakedFraction =
       totalStaked.isZero() || totalIssuance.isZero()
         ? 0
-        : totalStaked.mul(BN_MILLION).div(totalIssuance).toNumber() /
-          BN_MILLION.toNumber();
+        : totalStaked
+            .multipliedBy(BIGNUMBER_MILLION)
+            .dividedBy(totalIssuance)
+            .toNumber() / BIGNUMBER_MILLION.toNumber();
 
     // The idealStake is equal to stakeTarget since
     // Cere Network doesn't provide auctionMax, numAuctions and auctionAdjust so far.
@@ -49,5 +52,3 @@ export const useInflation = () => {
 
   return calculateInflation(lastTotalStake);
 };
-
-export default useInflation;

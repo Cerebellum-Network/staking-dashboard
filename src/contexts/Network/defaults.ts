@@ -1,19 +1,10 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import BN from 'bn.js';
-import { NetworkMetrics, NetworkMetricsContextInterface } from './types';
+import { NetworkList } from 'config/networks';
 
-export const metrics: NetworkMetrics = {
-  activeEra: {
-    index: 0,
-    start: 0,
-  },
-  totalIssuance: new BN(0),
-  // auctionCounter: new BN(0),
-  // earliestStoredSession: new BN(0),
-};
-
-export const defaultNetworkContext: NetworkMetricsContextInterface = {
-  metrics,
+export const defaultNetworkContext = {
+  network: NetworkList.cereMainnet.name,
+  networkData: NetworkList.cereMainnet,
+  switchNetwork: () => {},
 };

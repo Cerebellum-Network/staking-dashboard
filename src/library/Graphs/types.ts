@@ -1,14 +1,15 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { AnySubscan } from 'types';
+import type BigNumber from 'bignumber.js';
+import type { AnyPolkawatch, AnySubscan } from 'types';
 
 export interface BondedProps {
-  active: number;
-  unlocking: number;
-  unlocked: number;
+  active: BigNumber;
+  free: BigNumber;
+  unlocking: BigNumber;
+  unlocked: BigNumber;
   inactive: boolean;
-  free: number;
 }
 
 export interface EraPointsProps {
@@ -28,25 +29,23 @@ export interface PayoutLineProps {
   background?: string;
 }
 
-export interface StatPieProps {
-  value: number;
-  value2: number;
-}
-
 export interface CardHeaderWrapperProps {
-  withAction?: boolean;
-  padded?: boolean;
+  $withAction?: boolean;
+  $withMargin?: boolean;
 }
 
 export interface CardWrapperProps {
-  noPadding?: boolean;
-  transparent?: boolean;
   height?: string | number;
-  flex?: boolean;
 }
 
-export interface GraphWrapperProps {
-  transparent?: boolean;
-  noMargin?: boolean;
-  flex?: boolean;
+export interface PayoutDayCursor {
+  amount: BigNumber;
+  event_id: string;
+}
+
+export interface GeoDonutProps {
+  title: string;
+  series: AnyPolkawatch;
+  width?: string | number;
+  height?: string | number;
 }

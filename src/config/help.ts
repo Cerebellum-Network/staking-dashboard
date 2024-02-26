@@ -1,37 +1,43 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-// ToDo: update
-import { HelpItems } from 'contexts/Help/types';
+import type { HelpItems } from 'contexts/Help/types';
 
-export const HELP_CONFIG: HelpItems = [
+export const HelpConfig: HelpItems = [
+  {
+    key: 'vault',
+    definitions: ['Polkadot Vault'],
+  },
   {
     key: 'overview',
     definitions: [
-      'Dashboard Tips',
       'Total Nominators',
       'Active Nominators',
       'Your Balance',
       'Reserve Balance',
-      'Network Stats',
-      'Inflation',
+      'Locked Balance',
       'Historical Rewards Rate',
+      'Adjusted Rewards Rate',
+      'Inflation',
       'Ideal Staked',
       'Supply Staked',
+      'Read Only Accounts',
+      'Proxy Accounts',
+      'Reserve Balance For Existential Deposit',
     ],
     external: [
       [
-        'connect_your_accounts',
+        'connectAccounts',
         'https://support.polkadot.network/support/solutions/articles/65000182121-how-to-use-the-staking-dashboard-connecting-your-account',
         'polkadot.network',
       ],
       [
-        'how_to_use',
+        'howToUse',
         'https://support.polkadot.network/support/solutions/articles/65000182104-how-to-use-the-staking-dashboard-overview',
         'polkadot.network',
       ],
       [
-        'stake_cere',
+        'stakeCere',
         'https://support.polkadot.network/support/solutions/articles/65000182104-how-to-use-the-staking-dashboard-overview',
         'polkadot.network',
       ],
@@ -41,28 +47,26 @@ export const HELP_CONFIG: HelpItems = [
     key: 'nominate',
     definitions: [
       'Nomination Status',
-      'Stash and Controller Accounts',
-      'Controller Account Eligibility',
       'Bonding',
-      'Active Bond Threshold',
-      'Reward Destination',
+      'Active Stake Threshold',
+      'Payout Destination',
       'Nominating',
       'Nominations',
       'Inactive Nominations',
     ],
     external: [
       [
-        'change_destination',
+        'changeDestination',
         'https://support.polkadot.network/support/solutions/articles/65000182220-how-to-use-the-staking-dashboard-changing-reward-destination',
         'polkadot.network',
       ],
       [
-        'bond_more',
+        'bondMore',
         'https://support.polkadot.network/support/solutions/articles/65000182207-how-to-use-the-staking-dashboard-bond-more-tokens-to-your-existing-stake',
         'polkadot.network',
       ],
       [
-        'unbonding_tokens',
+        'unbondingTokens',
         'https://support.polkadot.network/support/solutions/articles/65000182201-how-to-use-the-staking-dashboard-unbonding-your-tokens',
         'polkadot.network',
       ],
@@ -72,12 +76,12 @@ export const HELP_CONFIG: HelpItems = [
         'polkadot.network',
       ],
       [
-        'change_account',
+        'changeAccount',
         'https://support.polkadot.network/support/solutions/articles/65000182218-how-to-use-the-staking-dashboard-changing-your-controller-account',
         'polkadot.network',
       ],
       [
-        'change_nominations',
+        'changeNominations',
         'https://support.polkadot.network/support/solutions/articles/65000182518-how-to-use-the-staking-dashboard-changing-your-nominations',
         'polkadot.network',
       ],
@@ -88,21 +92,24 @@ export const HELP_CONFIG: HelpItems = [
     definitions: [
       'Nomination Pools',
       'Active Pools',
-      'Minimum Join Bond',
-      'Minimum Create Bond',
+      'Minimum To Join Pool',
+      'Minimum To Create Pool',
       'Pool Membership',
       'Bonded in Pool',
       'Pool Rewards',
       'Pool Roles',
+      'Pool Commission Rate',
+      'Pool Max Commission',
+      'Pool Commission Change Rate',
     ],
     external: [
       [
-        'create_pools',
+        'createPools',
         'https://support.polkadot.network/support/solutions/articles/65000182388-how-to-use-the-staking-dashboard-creating-nomination-pools',
         'polkadot.network',
       ],
       [
-        'claim_rewards',
+        'claimRewards',
         'https://support.polkadot.network/support/solutions/articles/65000182399-how-to-use-staking-dashboard-claiming-nomination-pool-rewards',
         'polkadot.network',
       ],
@@ -122,10 +129,11 @@ export const HELP_CONFIG: HelpItems = [
       'Commission',
       'Over Subscribed',
       'Blocked Nominations',
+      'Rewards By Country And Network',
     ],
     external: [
       [
-        'choose_validators',
+        'chooseValidators',
         'https://support.polkadot.network/support/solutions/articles/65000150130-how-do-i-know-which-validators-to-choose-',
         'polkadot.network',
       ],
@@ -139,6 +147,17 @@ export const HELP_CONFIG: HelpItems = [
   {
     key: 'community',
     definitions: [],
+    external: [],
+  },
+  {
+    key: 'ledger',
+    definitions: [
+      'Ledger Hardware Wallets',
+      'Ledger Rejected Transaction',
+      'Ledger Request Timeout',
+      'Open App On Ledger',
+      'Wrong Transaction',
+    ],
     external: [],
   },
 ];

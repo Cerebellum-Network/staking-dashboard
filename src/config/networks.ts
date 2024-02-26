@@ -1,12 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
-import { WellKnownChain } from '@polkadot/rpc-provider/substrate-connect';
 import { DefaultParams } from 'consts';
-import { ReactComponent as CereIconSvg } from 'img/cere_icon.svg';
-import { ReactComponent as CereLogoSvg } from 'img/cere_logo.svg';
-import { Networks } from 'types';
+import CereIconSvg from 'img/cere_icon.svg?react';
+import CereLogoSvg from 'img/cere_logo.svg?react';
+import type { NetworkName, Networks } from 'types';
+import BigNumber from 'bignumber.js';
+
+const CereMainnet: NetworkName = 'cereMainnet';
+const CereTestnet: NetworkName = 'cereTestnet';
+const CereDevnet: NetworkName = 'cereDevnet';
+const CereQanet: NetworkName = 'cereQanet';
 
 const cereMainnet = {
-  name: 'Cere',
+  name: CereMainnet,
+  namespace: '91b171bb158e2d3848fa23a9f1c25182',
   colors: {
     primary: {
       light: '#1D1B20',
@@ -22,12 +28,20 @@ const cereMainnet = {
     },
     transparent: {
       light: 'rgb(236,110,121,0.05)',
-      dark: 'rgb(236,110,121, 0.05)',
+      dark: 'rgb(236,110,121,0.05)',
+    },
+    pending: {
+      light: 'rgb(236,110,121,0.33)',
+      dark: 'rgb(236,110,121,0.33))',
     },
   },
   endpoints: {
-    rpc: 'wss://archive.mainnet.cere.network/ws',
-    lightClient: WellKnownChain.polkadot,
+    lightClient: 'Cere',
+    defaultRpcEndpoint: 'Cere',
+    rpcEndpoints: {
+      Cere: 'wss://archive.mainnet.cere.network/ws',
+      // Cere: 'ws://127.0.0.1:9944',
+    },
   },
   subscanEndpoint: '',
   cereStatsEndpoint: 'wss://hasura.stats.cere.network/v1/graphql',
@@ -37,6 +51,7 @@ const cereMainnet = {
   // It's a draft icons set
   brand: {
     icon: CereIconSvg,
+    token: CereIconSvg,
     logo: {
       svg: CereLogoSvg,
       width: '8.5rem',
@@ -53,47 +68,62 @@ const cereMainnet = {
   features: {
     pools: false,
   },
-  params: DefaultParams,
+  params: {
+    ...DefaultParams,
+    stakeTarget: 0.75,
+  },
+  defaultFeeReserve: 0.1,
+  maxExposurePageSize: new BigNumber(512),
 };
 
 const cereTestnet = {
   ...cereMainnet,
-  name: 'Cere Testnet',
+  name: CereTestnet,
   endpoints: {
-    rpc: 'wss://archive.testnet.cere.network/ws',
-    lightClient: WellKnownChain.polkadot,
+    lightClient: 'Cere',
+    defaultRpcEndpoint: 'Cere',
+    rpcEndpoints: {
+      Cere: 'wss://archive.testnet.cere.network/ws',
+    },
   },
   cereStatsEndpoint: 'wss://stats-hasura.network-dev.aws.cere.io/v1/graphql',
 };
 
 const cereDevnet = {
   ...cereMainnet,
-  name: 'Cere Devnet',
+  name: CereDevnet,
   endpoints: {
-    rpc: 'wss://archive.devnet.cere.network/ws',
-    lightClient: WellKnownChain.polkadot,
+    lightClient: 'Cere',
+    defaultRpcEndpoint: 'Cere',
+    rpcEndpoints: {
+      Cere: 'wss://archive.devnet.cere.network/ws',
+    },
   },
   cereStatsEndpoint: 'wss://stats-hasura.network-dev.aws.cere.io/v1/graphql',
 };
 
 const cereQAnet = {
   ...cereMainnet,
-  name: 'Cere Qanet',
+  name: CereQanet,
   endpoints: {
-    rpc: 'wss://archive.qanet.cere.network/ws',
-    lightClient: WellKnownChain.polkadot,
+    lightClient: 'Cere',
+    defaultRpcEndpoint: 'Cere',
+    rpcEndpoints: {
+      Cere: 'wss://archive.qanet.cere.network/ws',
+    },
   },
   cereStatsEndpoint: 'wss://stats-hasura.network-dev.aws.cere.io/v1/graphql',
 };
 
 // Determine if the testnet should be included based on the REACT_APP_INCLUDE_TESTNET environment variable
 // By default, includeTestnet is true or undefined unless REACT_APP_INCLUDE_TESTNET is explicitly set to 'false'
-const includeTestnet = process.env.REACT_APP_INCLUDE_TESTNET !== 'false';
+// const includeTestnet = process.env.REACT_APP_INCLUDE_TESTNET !== 'false';
+const includeTestnet = true;
 
 /*
  * Network Configuration
  */
-export const NETWORKS: Networks = {
+export const NetworkList: Networks = {
   cereMainnet,
   ...(includeTestnet ? { cereTestnet } : {}),
   cereDevnet,
