@@ -18,4 +18,4 @@ jobs:
       build_command: 'export REACT_APP_INCLUDE_TESTNET=true; yarn run build'
       path_to_static_files_to_upload: 'build'
       aws_account_id: ${{ vars.DEV_NETWORK_AWS_ACCOUNT_ID }}
-      s3_bucket_name: "staking-dev.network-dev.aws.cere.io"
+      s3_bucket_name: "staking.dev.cere.network"
