@@ -1,34 +1,18 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { MaybeAccount } from 'types';
-
-export enum SetupType {
-  Pool = 'pool',
-  Stake = 'stake',
-}
+import type { RefObject } from 'react';
 
 export interface UIContextInterface {
-  setSideMenu: (v: number) => void;
-  setUserSideMenuMinimised: (v: number) => void;
-  toggleService: (k: string) => void;
-  getSetupProgress: (t: SetupType, a: MaybeAccount) => any;
-  getStakeSetupProgressPercent: (a: MaybeAccount) => number;
-  getPoolSetupProgressPercent: (a: MaybeAccount) => number;
-  setActiveAccountSetup: (t: SetupType, p: any) => void;
-  setActiveAccountSetupSection: (t: SetupType, s: number) => void;
-  getServices: () => string[];
-  setOnNominatorSetup: (v: number) => void;
-  setOnPoolSetup: (v: number) => void;
-  setContainerRefs: (v: any) => void;
-  sideMenuOpen: number;
-  userSideMenuMinimised: number;
-  sideMenuMinimised: number;
-  services: string[];
-  onNominatorSetup: number;
-  onPoolSetup: number;
+  setSideMenu: (v: boolean) => void;
+  setUserSideMenuMinimised: (v: boolean) => void;
+  setContainerRefs: (v: Record<string, RefObject<HTMLDivElement>>) => void;
+  sideMenuOpen: boolean;
+  userSideMenuMinimised: boolean;
+  sideMenuMinimised: boolean;
+  containerRefs: Record<string, RefObject<HTMLDivElement>>;
   isSyncing: boolean;
-  networkSyncing: boolean;
-  poolsSyncing: boolean;
-  containerRefs: any;
+  isNetworkSyncing: boolean;
+  isPoolSyncing: boolean;
+  isBraveBrowser: boolean;
 }

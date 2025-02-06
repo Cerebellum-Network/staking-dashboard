@@ -1,21 +1,17 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { useValidators } from 'contexts/Validators';
-import { Validator } from 'contexts/Validators/types';
+import { shuffle } from '@polkadot-cloud/utils';
+import { useFavoriteValidators } from 'contexts/Validators/FavoriteValidators';
+import { useValidators } from 'contexts/Validators/ValidatorEntries';
+import type { Validator } from 'contexts/Validators/types';
 import { useValidatorFilters } from 'library/Hooks/useValidatorFilters';
-import { shuffle } from 'Utils';
+import type { AddNominationsType } from './types';
 
 export const useFetchMehods = () => {
-  const includeTestnet = process.env.REACT_APP_INCLUDE_TESTNET !== 'false';
-  const { validators } = useValidators();
+  const { favoritesList } = useFavoriteValidators();
   const { applyFilter, applyOrder } = useValidatorFilters();
-  let { favoritesList } = useValidators();
-  if (favoritesList === null) {
-    favoritesList = [];
-  }
-
-  const rawBatchKey = 'validators_browse';
+  const { validators, validatorEraPointsHistory } = useValidators();
 
   const fetch = (method: string) => {
     let nominations;
@@ -35,10 +31,10 @@ export const useFetchMehods = () => {
     return nominations;
   };
 
-  const add = (nominations: any, type: string) => {
+  const add = (nominations: Validator[], type: AddNominationsType) => {
     switch (type) {
-      case 'Parachain Validator':
-        nominations = addParachainValidator(nominations);
+      case 'High Performance Validator':
+        nominations = addHighPerformanceValidator(nominations);
         break;
       case 'Active Validator':
         nominations = addActiveValidator(nominations);
@@ -53,165 +49,164 @@ export const useFetchMehods = () => {
   };
 
   const fetchFavorites = () => {
-    let _favs: Array<Validator> = [];
+    let favs: Validator[] = [];
 
     if (!favoritesList) {
-      return _favs;
+      return favs;
     }
 
-    if (favoritesList.length) {
+    if (favoritesList?.length) {
       // take subset of up to 16 favorites
-      _favs = favoritesList.slice(0, 16);
+      favs = favoritesList.slice(0, 16);
     }
-    return _favs;
+    return favs;
   };
 
   const fetchLowCommission = () => {
-    let _nominations = Object.assign(validators);
+    let filtered = Object.assign(validators);
 
     // filter validators to find active candidates
-    _nominations = applyFilter(
+    filtered = applyFilter(
       ['active'],
-      [
-        'all_commission',
-        'blocked_nominations',
-        includeTestnet ? '' : 'missing_identity',
-      ],
-      _nominations,
-      rawBatchKey
+      ['all_commission', 'blocked_nominations', 'missing_identity'],
+      filtered
     );
 
     // order validators to find profitable candidates
-    _nominations = applyOrder('low_commission', _nominations);
+    filtered = applyOrder('low_commission', filtered);
+
+    // take the lowest commission half of the set
+    filtered = filtered.slice(0, filtered.length * 0.5);
+
+    // keep validators that are in upper 75% performance quartile.
+    filtered = filtered.filter((a: Validator) => {
+      const quartile = validatorEraPointsHistory[a.address]?.quartile || 100;
+      return quartile <= 75;
+    });
 
     // choose shuffled subset of validators
-    if (_nominations.length) {
-      _nominations = shuffle(
-        _nominations.slice(0, _nominations.length * 0.5)
-      ).slice(0, 16);
+    if (filtered.length) {
+      filtered = shuffle(filtered).slice(0, 16);
     }
-    return _nominations;
+    return filtered;
   };
 
   const fetchOptimal = () => {
-    let _nominationsActive = Object.assign(validators);
-    let _nominationsWaiting = Object.assign(validators);
+    let active = Object.assign(validators);
+    let waiting = Object.assign(validators);
 
     // filter validators to find waiting candidates
-    _nominationsWaiting = applyFilter(
+    waiting = applyFilter(
       null,
-      [
-        'all_commission',
-        'blocked_nominations',
-        includeTestnet ? '' : 'missing_identity',
-        'in_session',
-      ],
-      _nominationsWaiting,
-      rawBatchKey
-    );
-
-    // filter validators to find active candidates
-    _nominationsActive = applyFilter(
-      ['active'],
-      [
-        'all_commission',
-        'blocked_nominations',
-        includeTestnet ? '' : 'missing_identity',
-      ],
-      _nominationsActive,
-      rawBatchKey
-    );
-
-    // choose shuffled subset of waiting
-    if (_nominationsWaiting.length) {
-      _nominationsWaiting = shuffle(_nominationsWaiting).slice(0, 4);
-    }
-    // choose shuffled subset of active
-    if (_nominationsActive.length) {
-      _nominationsActive = shuffle(_nominationsActive).slice(0, 12);
-    }
-    return shuffle(_nominationsWaiting.concat(_nominationsActive));
-  };
-
-  const available = (nominations: any) => {
-    const _nominations = Object.assign(validators);
-
-    const _parachainValidators = applyFilter(
-      ['active'],
       [
         'all_commission',
         'blocked_nominations',
         'missing_identity',
-        'not_parachain_validator',
+        'in_session',
       ],
-      _nominations,
-      rawBatchKey
-    ).filter(
-      (n: any) => !nominations.find((o: any) => o.address === n.address)
+      waiting
     );
 
-    const _activeValidators = applyFilter(
+    // filter validators to find active candidates
+    active = applyFilter(
       ['active'],
-      [
-        'all_commission',
-        'blocked_nominations',
-        includeTestnet ? '' : 'missing_identity',
-      ],
-      _nominations,
-      rawBatchKey
-    ).filter(
-      (n: any) => !nominations.find((o: any) => o.address === n.address)
+      ['all_commission', 'blocked_nominations', 'missing_identity'],
+      active
     );
-    // .filter((n: any) => !sessionParachain?.includes(n.address) || false);
 
-    const _randomValidator = applyFilter(
-      null,
-      [
-        'all_commission',
-        'blocked_nominations',
-        includeTestnet ? '' : 'missing_identity',
-      ],
-      _nominations,
-      rawBatchKey
-    ).filter(
-      (n: any) => !nominations.find((o: any) => o.address === n.address)
-    );
+    // keep validators that are in upper 50% performance quartile.
+    active = active.filter((a: Validator) => {
+      const quartile = validatorEraPointsHistory[a.address]?.quartile || 100;
+      return quartile <= 50;
+    });
+
+    // choose shuffled subset of waiting
+    if (waiting.length) {
+      waiting = shuffle(waiting).slice(0, 2);
+    }
+    // choose shuffled subset of active
+    if (active.length) {
+      active = shuffle(active).slice(0, 14);
+    }
+
+    return shuffle(waiting.concat(active));
+  };
+
+  const available = (nominations: Validator[]) => {
+    const all = Object.assign(validators);
+
+    const parachainActive =
+      applyFilter(
+        ['active'],
+        [
+          'all_commission',
+          'blocked_nominations',
+          'missing_identity',
+          'not_parachain_validator',
+        ],
+        all
+      ).filter(
+        (n: Validator) => !nominations.find((o) => o.address === n.address)
+      ) || [];
+
+    const active =
+      applyFilter(
+        ['active'],
+        ['all_commission', 'blocked_nominations', 'missing_identity'],
+        all
+      ).filter(
+        (n: Validator) => !nominations.find((o) => o.address === n.address)
+      ) || [];
+
+    const highPerformance = active.filter((a: Validator) => {
+      const quartile = validatorEraPointsHistory[a.address]?.quartile || 100;
+      return quartile <= 50;
+    });
+
+    const random =
+      applyFilter(
+        null,
+        ['all_commission', 'blocked_nominations', 'missing_identity'],
+        all
+      ).filter(
+        (n: Validator) => !nominations.find((o) => o.address === n.address)
+      ) || [];
 
     return {
-      parachainValidators: _parachainValidators,
-      activeValidators: _activeValidators,
-      randomValidators: _randomValidator,
+      parachainValidators: parachainActive,
+      highPerformance,
+      activeValidators: active,
+      randomValidators: random,
     };
   };
 
-  const addActiveValidator = (nominations: any) => {
-    const _nominations = available(nominations).activeValidators;
+  const addActiveValidator = (nominations: Validator[]) => {
+    const all: Validator[] = available(nominations).activeValidators;
 
     // take one validator
-    const validator = shuffle(_nominations).slice(0, 1)[0] || null;
+    const validator = shuffle(all).slice(0, 1)[0] || null;
     if (validator) {
       nominations.push(validator);
     }
     return nominations;
   };
 
-  const addParachainValidator = (nominations: any) => {
-    const _nominations = available(nominations).parachainValidators;
+  const addHighPerformanceValidator = (nominations: Validator[]) => {
+    const all: Validator[] = available(nominations).highPerformance;
 
     // take one validator
-    const validator = shuffle(_nominations).slice(0, 1)[0] || null;
+    const validator = shuffle(all).slice(0, 1)[0] || null;
     if (validator) {
       nominations.push(validator);
     }
     return nominations;
   };
 
-  const addRandomValidator = (nominations: any) => {
-    const _nominations = available(nominations).randomValidators;
+  const addRandomValidator = (nominations: Validator[]) => {
+    const all: Validator[] = available(nominations).randomValidators;
 
     // take one validator
-    const validator = shuffle(_nominations).slice(0, 1)[0] || null;
-
+    const validator = shuffle(all).slice(0, 1)[0] || null;
     if (validator) {
       nominations.push(validator);
     }

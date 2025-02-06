@@ -1,64 +1,64 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import React, { useRef } from 'react';
-import { setStateWithRef } from 'Utils';
+import { setStateWithRef } from '@polkadot-cloud/utils';
+import type { ReactNode } from 'react';
+import { createContext, useContext, useRef, useState } from 'react';
 import { defaultThemeContext } from './defaults';
-import { ThemeContextInterface } from './types';
+import type { Theme, ThemeContextInterface } from './types';
 
 export const ThemeContext =
-  React.createContext<ThemeContextInterface>(defaultThemeContext);
+  createContext<ThemeContextInterface>(defaultThemeContext);
 
-export const useTheme = () => React.useContext(ThemeContext);
+export const useTheme = () => useContext(ThemeContext);
 
-export const ThemesProvider = ({ children }: { children: React.ReactNode }) => {
+export const ThemesProvider = ({ children }: { children: ReactNode }) => {
+  let initialTheme: Theme = 'light';
+
   // get the current theme
-  let localTheme = localStorage.getItem('theme') || '';
+  const localThemeRaw = localStorage.getItem('theme') || '';
 
-  // provide default theme if not set
-  if (!['light', 'dark'].includes(localTheme)) {
-    // check system theme
-    localTheme =
+  // Provide system theme if raw theme is not valid.
+  if (!['light', 'dark'].includes(localThemeRaw)) {
+    const systemTheme =
       window.matchMedia &&
       window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light';
-    localStorage.setItem('theme', localTheme);
+
+    initialTheme = systemTheme;
+    localStorage.setItem('theme', systemTheme);
+  } else {
+    // `localThemeRaw` is a valid theme.
+    initialTheme = localThemeRaw as Theme;
   }
 
-  // the theme state
-  const [state, setState] = React.useState<{ mode: string; card: string }>({
-    mode: localTheme,
-    card: 'shadow',
-  });
-  const stateRef = useRef(state);
+  // The current theme mode
+  const [theme, setTheme] = useState<Theme>(initialTheme);
+  const themeRef = useRef(theme);
 
-  // auto change theme on system change
+  // Automatically change theme on system change.
   window
     .matchMedia('(prefers-color-scheme: dark)')
     .addEventListener('change', (event) => {
-      const _theme = event.matches ? 'dark' : 'light';
-      localStorage.setItem('theme', _theme);
-      setStateWithRef(
-        { ...stateRef.current, mode: _theme },
-        setState,
-        stateRef
-      );
+      const newTheme = event.matches ? 'dark' : 'light';
+      localStorage.setItem('theme', newTheme);
+      setStateWithRef(newTheme, setTheme, themeRef);
     });
 
-  const toggleTheme = (_theme: string | null = null): void => {
-    if (_theme === null) {
-      _theme = state.mode === 'dark' ? 'light' : 'dark';
-    }
-    localStorage.setItem('theme', _theme);
-    setStateWithRef({ ...stateRef.current, mode: _theme }, setState, stateRef);
+  const toggleTheme = (maybeTheme: Theme | null = null): void => {
+    const newTheme =
+      maybeTheme || (themeRef.current === 'dark' ? 'light' : 'dark');
+
+    localStorage.setItem('theme', newTheme);
+    setStateWithRef(newTheme, setTheme, themeRef);
   };
 
   return (
     <ThemeContext.Provider
       value={{
         toggleTheme,
-        mode: stateRef.current.mode,
+        mode: themeRef.current,
       }}
     >
       {children}

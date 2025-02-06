@@ -1,67 +1,55 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
 import { faHeart } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useNotifications } from 'contexts/Notifications';
+import { useTranslation } from 'react-i18next';
 import { useTooltip } from 'contexts/Tooltip';
-import { useValidators } from 'contexts/Validators';
-import { TooltipPosition, TooltipTrigger } from 'library/ListItem/Wrappers';
-import { useRef } from 'react';
-import { FavoriteProps } from '../types';
+import { TooltipTrigger } from 'library/ListItem/Wrappers';
+import { useFavoriteValidators } from 'contexts/Validators/FavoriteValidators';
+import type { FavoriteProps } from '../types';
+import { NotificationsController } from 'static/NotificationsController';
 
-export const FavoriteValidator = (props: FavoriteProps) => {
-  const { addNotification } = useNotifications();
-  const { favorites, addFavorite, removeFavorite } = useValidators();
-  const { setTooltipPosition, setTooltipMeta, open } = useTooltip();
+export const FavoriteValidator = ({ address }: FavoriteProps) => {
+  const { t } = useTranslation('library');
+  const { setTooltipTextAndOpen } = useTooltip();
+  const { favorites, addFavorite, removeFavorite } = useFavoriteValidators();
 
-  const { address } = props;
   const isFavorite = favorites.includes(address);
 
   const notificationFavorite = !isFavorite
     ? {
-        title: 'Favorite Validator Added',
+        title: t('favoriteValidatorAdded'),
         subtitle: address,
       }
     : {
-        title: 'Favorite Validator Removed',
+        title: t('favoriteValidatorRemoved'),
         subtitle: address,
       };
 
-  const posRef = useRef<HTMLDivElement>(null);
-
-  const tooltipText = `${isFavorite ? `Remove` : `Add`} Favorite`;
-
-  const toggleTooltip = () => {
-    if (!open) {
-      setTooltipMeta(tooltipText);
-      setTooltipPosition(posRef);
-    }
-  };
+  const tooltipText = `${isFavorite ? `${t('remove')}` : `${t('add')}`} ${t(
+    'favorite'
+  )}`;
 
   return (
     <div className="label">
       <TooltipTrigger
         className="tooltip-trigger-element as-button"
         data-tooltip-text={tooltipText}
-        onMouseMove={() => toggleTooltip()}
+        onMouseMove={() => setTooltipTextAndOpen(tooltipText)}
         onClick={() => {
           if (isFavorite) {
             removeFavorite(address);
           } else {
             addFavorite(address);
           }
-          addNotification(notificationFavorite);
+          NotificationsController.emit(notificationFavorite);
         }}
       />
-      <TooltipPosition ref={posRef} />
       <button type="button" className={isFavorite ? 'active' : undefined}>
         <FontAwesomeIcon
-          icon={
-            !isFavorite ? (faHeartRegular as IconProp) : (faHeart as IconProp)
-          }
+          icon={!isFavorite ? faHeartRegular : faHeart}
           transform="shrink-2"
         />
       </button>

@@ -1,109 +1,152 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useActivePools } from 'contexts/Pools/ActivePools';
-import { PoolState } from 'contexts/Pools/types';
-import { Warning } from 'library/Form/Warning';
+import { ButtonOption } from '@polkadot-cloud/react';
+import type { ForwardedRef } from 'react';
 import { forwardRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useActivePools } from 'contexts/Pools/ActivePools';
+import { usePoolsConfig } from 'contexts/Pools/PoolsConfig';
+import { useTransferOptions } from 'contexts/TransferOptions';
+import { Warning } from 'library/Form/Warning';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
 import { ContentWrapper } from './Wrappers';
+import type { TasksProps } from './types';
 
-export const Tasks = forwardRef((props: any, ref: any) => {
-  const { setSection, setTask } = props;
+export const Tasks = forwardRef(
+  ({ setSection, setTask }: TasksProps, ref: ForwardedRef<HTMLDivElement>) => {
+    const { t } = useTranslation('modals');
+    const { stats } = usePoolsConfig();
+    const { activeAccount } = useActiveAccounts();
+    const { getTransferOptions } = useTransferOptions();
+    const { selectedActivePool, isOwner, isBouncer, isMember, isDepositor } =
+      useActivePools();
 
-  const { selectedActivePool, isOwner, isStateToggler } = useActivePools();
-  const poolLocked = selectedActivePool?.bondedPool?.state === PoolState.Block;
-  const poolDestroying =
-    selectedActivePool?.bondedPool?.state === PoolState.Destroy;
+    const { active } = getTransferOptions(activeAccount).pool;
+    const { globalMaxCommission } = stats;
 
-  return (
-    <ContentWrapper>
-      {poolDestroying && (
-        <Warning text="This pool is being destroyed. There are no management options available." />
-      )}
+    const poolLocked = selectedActivePool?.bondedPool?.state === 'Blocked';
+    const poolDestroying =
+      selectedActivePool?.bondedPool?.state === 'Destroying';
 
-      <div className="items" ref={ref}>
-        {isOwner() && (
-          <button
-            type="button"
-            className="action-button"
-            disabled={poolDestroying}
+    return (
+      <ContentWrapper>
+        <div className="items" ref={ref} style={{ paddingBottom: '1.5rem' }}>
+          <div style={{ paddingBottom: '0.75rem' }}>
+            {poolDestroying && <Warning text={t('beingDestroyed')} />}
+          </div>
+          {isOwner() && globalMaxCommission > 0 && (
+            <>
+              <ButtonOption
+                onClick={() => {
+                  setSection(1);
+                  setTask('claim_commission');
+                }}
+              >
+                <div>
+                  <h3>{t('claimCommission')}</h3>
+                  <p>{t('claimOutstandingCommission')}</p>
+                </div>
+              </ButtonOption>
+              <ButtonOption
+                onClick={() => {
+                  setSection(1);
+                  setTask('manage_commission');
+                }}
+              >
+                <div>
+                  <h3>{t('manageCommission')}</h3>
+                  <p>{t('updatePoolCommission')}</p>
+                </div>
+              </ButtonOption>
+            </>
+          )}
+          <ButtonOption
             onClick={() => {
               setSection(1);
-              setTask('set_pool_metadata');
+              setTask('set_claim_permission');
             }}
           >
             <div>
-              <h3>Rename Pool</h3>
-              <p>Update the public name of the pool.</p>
+              <h3>{t('updateClaimPermission')}</h3>
+              <p>{t('updateWhoClaimRewards')}</p>
             </div>
-            <div>
-              <FontAwesomeIcon transform="shrink-2" icon={faChevronRight} />
-            </div>
-          </button>
-        )}
-        {(isOwner() || isStateToggler()) && (
-          <>
-            {poolLocked ? (
-              <button
-                type="button"
-                className="action-button"
-                disabled={poolDestroying}
-                onClick={() => {
-                  setSection(1);
-                  setTask('unlock_pool');
-                }}
-              >
-                <div>
-                  <h3>Unlock Pool</h3>
-                  <p>Allow new members to join the pool.</p>
-                </div>
-                <div>
-                  <FontAwesomeIcon transform="shrink-2" icon={faChevronRight} />
-                </div>
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="action-button"
-                disabled={poolDestroying}
-                onClick={() => {
-                  setSection(1);
-                  setTask('lock_pool');
-                }}
-              >
-                <div>
-                  <h3>Lock Pool</h3>
-                  <p>Stop new members from joining the pool.</p>
-                </div>
-                <div>
-                  <FontAwesomeIcon transform="shrink-2" icon={faChevronRight} />
-                </div>
-              </button>
-            )}
-            <button
-              type="button"
-              className="action-button"
+          </ButtonOption>
+
+          {isOwner() && (
+            <ButtonOption
               disabled={poolDestroying}
               onClick={() => {
                 setSection(1);
-                setTask('destroy_pool');
+                setTask('set_pool_metadata');
               }}
             >
               <div>
-                <h3>Destroy Pool</h3>
-                <p>Change pool to destroying state.</p>
+                <h3>{t('renamePool')}</h3>
+                <p>{t('updateName')}</p>
               </div>
+            </ButtonOption>
+          )}
+          {(isOwner() || isBouncer()) && (
+            <>
+              {poolLocked ? (
+                <ButtonOption
+                  disabled={poolDestroying}
+                  onClick={() => {
+                    setSection(1);
+                    setTask('unlock_pool');
+                  }}
+                >
+                  <div>
+                    <h3>{t('unlockPool')}</h3>
+                    <p>{t('allowToJoin')}</p>
+                  </div>
+                </ButtonOption>
+              ) : (
+                <ButtonOption
+                  disabled={poolDestroying}
+                  onClick={() => {
+                    setSection(1);
+                    setTask('lock_pool');
+                  }}
+                >
+                  <div>
+                    <h3>{t('lockPool')}</h3>
+                    <p>{t('stopJoiningPool')}</p>
+                  </div>
+                </ButtonOption>
+              )}
+              <ButtonOption
+                disabled={poolDestroying}
+                onClick={() => {
+                  setSection(1);
+                  setTask('destroy_pool');
+                }}
+              >
+                <div>
+                  <h3>{t('destroyPool')}</h3>
+                  <p>{t('changeToDestroy')}</p>
+                </div>
+              </ButtonOption>
+            </>
+          )}
+          {isMember() && !isDepositor() && active?.isGreaterThan(0) && (
+            <ButtonOption
+              onClick={() => {
+                setSection(1);
+                setTask('leave_pool');
+              }}
+            >
               <div>
-                <FontAwesomeIcon transform="shrink-2" icon={faChevronRight} />
+                <h3>{t('leavePool')}</h3>
+                <p>{t('unbondFundsLeavePool')}</p>
               </div>
-            </button>
-          </>
-        )}
-      </div>
-    </ContentWrapper>
-  );
-});
+            </ButtonOption>
+          )}
+        </div>
+      </ContentWrapper>
+    );
+  }
+);
 
-export default Tasks;
+Tasks.displayName = 'Tasks';

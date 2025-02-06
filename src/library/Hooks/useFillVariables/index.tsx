@@ -1,67 +1,63 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
+import { capitalizeFirstLetter, planckToUnit } from '@polkadot-cloud/utils';
 import { useApi } from 'contexts/Api';
+import { useNetwork } from 'contexts/Network';
+import { useNetworkMetrics } from 'contexts/NetworkMetrics';
 import { usePoolsConfig } from 'contexts/Pools/PoolsConfig';
-import { useStaking } from 'contexts/Staking';
-import { AnyJson } from 'types';
-import { planckBnToUnit, replaceAll, toFixedIfNecessary } from 'Utils';
+import type { AnyJson } from 'types';
+import { useErasPerDay } from '../useErasPerDay';
 
 export const useFillVariables = () => {
-  const { network, consts } = useApi();
-  const { eraStakers } = useStaking();
+  const { consts } = useApi();
   const { stats } = usePoolsConfig();
-  const {
-    maxNominations,
-    maxNominatorRewardedPerValidator,
-    existentialDeposit,
-  } = consts;
-  const { minActiveBond } = eraStakers;
+  const { networkData } = useNetwork();
+  const { maxNominations, maxExposurePageSize, existentialDeposit } = consts;
+  const { maxSupportedDays } = useErasPerDay();
   const { minJoinBond, minCreateBond } = stats;
+  const { metrics } = useNetworkMetrics();
+  const { minimumActiveStake } = metrics;
 
-  const fillVariables = (d: AnyJson, keys: Array<string>) => {
-    const fields: AnyJson = Object.entries(d).filter(([k]: any) =>
-      keys.includes(k)
-    );
+  const fillVariables = (d: AnyJson, keys: string[]) => {
+    const fields: AnyJson = Object.entries(d).filter(([k]) => keys.includes(k));
     const transformed = Object.entries(fields).map(
       ([, [key, val]]: AnyJson) => {
         const varsToValues = [
-          ['{NETWORK_UNIT}', network.unit],
-          ['{NETWORK_NAME}', network.name],
+          ['{AVERAGE_REWARD_RATE_DAYS}', maxSupportedDays > 30 ? '30' : '15'],
+          ['{NETWORK_UNIT}', networkData.unit],
+          ['{NETWORK_NAME}', capitalizeFirstLetter(networkData.name)],
+          ['{MAX_EXPOSURE_PAGE_SIZE}', maxExposurePageSize.toString()],
+          ['{MAX_NOMINATIONS}', maxNominations.toString()],
           [
-            '{FallbackNominatorRewardedPerValidator}',
-            String(maxNominatorRewardedPerValidator),
+            '{MIN_ACTIVE_STAKE}',
+            planckToUnit(minimumActiveStake, networkData.units)
+              .decimalPlaces(3)
+              .toFormat(),
           ],
-          ['{FallbackMaxNominations}', String(maxNominations)],
-          ['{MIN_ACTIVE_BOND}', String(toFixedIfNecessary(minActiveBond, 3))],
           [
             '{MIN_POOL_JOIN_BOND}',
-            String(
-              toFixedIfNecessary(planckBnToUnit(minJoinBond, network.units), 3)
-            ),
+            planckToUnit(minJoinBond, networkData.units)
+              .decimalPlaces(3)
+              .toFormat(),
           ],
           [
             '{MIN_POOL_CREATE_BOND}',
-            String(
-              toFixedIfNecessary(
-                planckBnToUnit(minCreateBond, network.units),
-                3
-              )
-            ),
+            planckToUnit(minCreateBond, networkData.units)
+              .decimalPlaces(3)
+              .toFormat(),
           ],
           [
             '{EXISTENTIAL_DEPOSIT}',
-            String(planckBnToUnit(existentialDeposit, network.units)),
+            planckToUnit(existentialDeposit, networkData.units).toFormat(),
           ],
         ];
 
         for (const varToVal of varsToValues) {
           if (val.constructor === Array) {
-            val = val.map((_d: string) =>
-              replaceAll(_d, varToVal[0], varToVal[1])
-            );
+            val = val.map((_d) => _d.replaceAll(varToVal[0], varToVal[1]));
           } else {
-            val = replaceAll(val, varToVal[0], varToVal[1]);
+            val = val.replaceAll(varToVal[0], varToVal[1]);
           }
         }
         return [key, val];
@@ -78,5 +74,3 @@ export const useFillVariables = () => {
     fillVariables,
   };
 };
-
-export default useFillVariables;

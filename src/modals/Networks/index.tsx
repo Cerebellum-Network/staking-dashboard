@@ -1,18 +1,21 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
 import { faChevronRight, faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { NETWORKS } from 'config/networks';
+import { ButtonTertiary, ModalPadding } from '@polkadot-cloud/react';
+import { capitalizeFirstLetter } from '@polkadot-cloud/utils';
+import { useEffect } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import { NetworkList } from 'config/networks';
 import { useApi } from 'contexts/Api';
-import { useModal } from 'contexts/Modal';
-import { useTooltip } from 'contexts/Tooltip';
-import { TooltipPosition, TooltipTrigger } from 'library/ListItem/Wrappers';
 import { Title } from 'library/Modal/Title';
-import { useEffect, useRef, useState } from 'react';
-import { NetworkName } from 'types';
-import { ReactComponent as BraveIconSVG } from '../../img/brave-logo.svg';
-import { PaddingWrapper } from '../Wrappers';
+import type { NetworkName } from 'types';
+import { useOverlay } from '@polkadot-cloud/react/hooks';
+import { useNetwork } from 'contexts/Network';
+import { useUi } from 'contexts/UI';
+import { usePrompt } from 'contexts/Prompt';
+import BraveIconSVG from '../../img/brave-logo.svg?react';
 import {
   BraveWarning,
   ConnectionButton,
@@ -20,54 +23,41 @@ import {
   ContentWrapper,
   NetworkButton,
 } from './Wrapper';
+import { ProvidersPrompt } from './ProvidersPrompt';
 
 export const Networks = () => {
-  const [braveBrowser, setBraveBrowser] = useState<boolean>(false);
-  const { switchNetwork, network, isLightClient } = useApi();
-  const { setStatus } = useModal();
-  const networkKey: string = network.name.toLowerCase();
-  const { setTooltipPosition, setTooltipMeta, open } = useTooltip();
+  const { t } = useTranslation('modals');
+  const { isBraveBrowser } = useUi();
+  const { openPromptWith } = usePrompt();
+  const { network, switchNetwork } = useNetwork();
+  const { setModalStatus, setModalResize } = useOverlay().modal;
+  const { isLightClient, setIsLightClient, rpcEndpoint } = useApi();
+  const networkKey = network;
 
-  useEffect(() => {
-    // @ts-ignore
-    window.navigator?.brave?.isBrave().then(async (isBrave: boolean) => {
-      setBraveBrowser(isBrave);
-    });
-  });
-
-  const posRef = useRef(null);
-
-  const tooltipText = 'Undergoing Maintenance';
-
-  const toggleTooltip = () => {
-    if (!open) {
-      setTooltipMeta(tooltipText);
-      setTooltipPosition(posRef);
-    }
-  };
+  // Likely never going to happen; here just to be safe.
+  useEffect(() => setModalResize(), [isBraveBrowser]);
 
   return (
     <>
-      <Title title="Networks" icon={faGlobe} />
-      <PaddingWrapper>
+      <Title title={t('networks')} icon={faGlobe} />
+      <ModalPadding>
         <ContentWrapper>
-          <h4>Select Network</h4>
+          <h4>{t('selectNetwork')}</h4>
           <div className="items">
-            {Object.entries(NETWORKS).map(([key, item]: any, index: number) => {
+            {Object.entries(NetworkList).map(([key, item], index: number) => {
               const Svg = item.brand.inline.svg;
               const rpcDisabled = networkKey === key;
 
               return (
                 <NetworkButton
-                  connected={networkKey === key}
+                  $connected={networkKey === key}
                   disabled={rpcDisabled}
                   key={`network_switch_${index}`}
                   type="button"
-                  className="action-button"
                   onClick={() => {
                     if (networkKey !== key) {
-                      switchNetwork(key, isLightClient);
-                      setStatus(0);
+                      switchNetwork(key as NetworkName);
+                      setModalStatus('closing');
                     }
                   }}
                 >
@@ -77,8 +67,10 @@ export const Networks = () => {
                       height={item.brand.inline.size}
                     />
                   </div>
-                  <h3>{item.name}</h3>
-                  {networkKey === key && <h4 className="selected">Selected</h4>}
+                  <h3>{capitalizeFirstLetter(item.name)}</h3>
+                  {networkKey === key && (
+                    <h4 className="selected">{t('selected')}</h4>
+                  )}
                   <div>
                     <FontAwesomeIcon
                       transform="shrink-2"
@@ -89,63 +81,63 @@ export const Networks = () => {
               );
             })}
           </div>
-          <h4>Connection Type</h4>
+          <h4>{t('connectionType')}</h4>
           <ConnectionsWrapper>
-            <ConnectionButton
-              connected={!isLightClient}
-              disabled={!isLightClient}
-              type="button"
-              onClick={() => {
-                switchNetwork(networkKey as NetworkName, false);
-                setStatus(0);
-              }}
-            >
-              <h3>RPC</h3>
-              {!isLightClient && <h4 className="selected">Selected</h4>}
-            </ConnectionButton>
-            <ConnectionButton
-              connected={isLightClient}
-              className="off"
-              disabled
-              type="button"
-              onClick={() => {
-                switchNetwork(networkKey as NetworkName, true);
-                setStatus(0);
-              }}
-            >
-              <TooltipTrigger
-                className="tooltip-trigger-element"
-                data-tooltip-text={tooltipText}
-                onMouseMove={() => toggleTooltip()}
-              />
-              <TooltipPosition ref={posRef} style={{ left: '10px' }} />
-              <h3>Light Client</h3>
-              {isLightClient && <h4 className="selected">Selected</h4>}
-            </ConnectionButton>
+            <div>
+              <ConnectionButton
+                $connected={!isLightClient}
+                disabled={!isLightClient}
+                type="button"
+                onClick={() => {
+                  setIsLightClient(false);
+                  switchNetwork(networkKey as NetworkName);
+                  setModalStatus('closing');
+                }}
+              >
+                <h3>RPC</h3>
+                {!isLightClient && (
+                  <h4 className="selected">{t('selected')}</h4>
+                )}
+              </ConnectionButton>
+              <div className="provider">
+                <p>{t('provider')}:</p>
+                <ButtonTertiary
+                  text={rpcEndpoint}
+                  onClick={() => openPromptWith(<ProvidersPrompt />)}
+                  marginLeft
+                />
+              </div>
+            </div>
+            <div>
+              <ConnectionButton
+                $connected={isLightClient}
+                className="off"
+                type="button"
+                onClick={() => {
+                  setIsLightClient(true);
+                  switchNetwork(networkKey as NetworkName);
+                  setModalStatus('closing');
+                }}
+              >
+                <h3>{t('lightClient')}</h3>
+                {isLightClient && <h4 className="selected">{t('selected')}</h4>}
+              </ConnectionButton>
+            </div>
           </ConnectionsWrapper>
 
-          {braveBrowser ? (
+          {isBraveBrowser ? (
             <BraveWarning>
               <BraveIconSVG />
               <div className="brave-text">
-                <b>To Brave users!</b> Due to a recent update (
-                <i>Brave version 1.36</i>), there may appear issues while using
-                light clients (e.g. not connected).{' '}
-                <a
-                  href="https://paritytech.github.io/substrate-connect/#troubleshooting"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="learn-more"
-                >
-                  Learn more here.
-                </a>
+                <Trans
+                  defaults={t('braveText')}
+                  components={{ b: <b />, i: <i /> }}
+                />
               </div>
             </BraveWarning>
           ) : null}
         </ContentWrapper>
-      </PaddingWrapper>
+      </ModalPadding>
     </>
   );
 };
-
-export default Networks;

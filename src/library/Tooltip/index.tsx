@@ -1,19 +1,27 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { useTooltip } from 'contexts/Tooltip';
+import type { RefObject } from 'react';
 import { useEffect, useRef } from 'react';
+import { useTooltip } from 'contexts/Tooltip';
 import { Wrapper } from './Wrapper';
 
 export const Tooltip = () => {
-  const tooltip = useTooltip();
-  const { position } = tooltip;
+  const {
+    open,
+    text,
+    show,
+    position,
+    showTooltip,
+    closeTooltip,
+    setTooltipPosition,
+  } = useTooltip();
 
-  const ref = useRef(null);
+  // Ref for the tooltip element itself.
+  const tooltipRef: RefObject<HTMLDivElement> = useRef(null);
 
   useEffect(() => {
-    if (tooltip.open === 1) {
-      tooltip.checkTooltipPosition(ref);
+    if (open === 1) {
       window.addEventListener('mousemove', mouseMoveCallback);
     } else {
       window.removeEventListener('mousemove', mouseMoveCallback);
@@ -21,39 +29,47 @@ export const Tooltip = () => {
     return () => {
       window.removeEventListener('mousemove', mouseMoveCallback);
     };
-  }, [tooltip.open]);
+  }, [open]);
 
-  const mouseMoveCallback = (e: any) => {
-    const isTriggerElement = e.target?.classList.contains(
-      'tooltip-trigger-element'
-    );
-    const dataAttribute = e.target?.getAttribute('data-tooltip-text') ?? false;
-    if (!isTriggerElement) {
-      tooltip.closeTooltip();
-    } else if (dataAttribute !== tooltip.text) {
-      tooltip.closeTooltip();
+  const mouseMoveCallback = (e: MouseEvent) => {
+    const { target, pageX, pageY } = e;
+
+    if (tooltipRef?.current) {
+      setTooltipPosition(pageX, pageY - (tooltipRef.current.offsetHeight || 0));
+      if (!show) {
+        showTooltip();
+      }
+    }
+
+    if (target instanceof HTMLElement) {
+      const isTriggerElement = target?.classList.contains(
+        'tooltip-trigger-element'
+      );
+
+      const dataAttribute = target?.getAttribute('data-tooltip-text') ?? false;
+      if (!isTriggerElement) {
+        closeTooltip();
+      } else if (dataAttribute !== text) {
+        closeTooltip();
+      }
     }
   };
 
   return (
-    <>
-      {tooltip.open === 1 && (
-        <Wrapper
-          className="tooltip-trigger-element"
-          ref={ref}
-          style={{
-            position: 'absolute',
-            left: `${position[0]}px`,
-            top: `${position[1]}px`,
-            zIndex: 99,
-            opacity: tooltip.show === 1 ? 1 : 0,
-          }}
-        >
-          <h3 className="tooltip-trigger-element">{tooltip.text}</h3>
-        </Wrapper>
-      )}
-    </>
+    open === 1 && (
+      <Wrapper
+        className="tooltip-trigger-element"
+        ref={tooltipRef}
+        style={{
+          position: 'absolute',
+          left: `${position[0]}px`,
+          top: `${position[1]}px`,
+          zIndex: 99,
+          opacity: show === 1 ? 1 : 0,
+        }}
+      >
+        <h3 className="tooltip-trigger-element">{text}</h3>
+      </Wrapper>
+    )
   );
 };
-
-export default Tooltip;

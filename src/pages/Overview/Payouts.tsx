@@ -1,61 +1,61 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
+import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { usePlugins } from 'contexts/Plugins';
 import { useStaking } from 'contexts/Staking';
 import { useUi } from 'contexts/UI';
 import { PayoutBar } from 'library/Graphs/PayoutBar';
 import { PayoutLine } from 'library/Graphs/PayoutLine';
-import { formatSize, useSize } from 'library/Graphs/Utils';
+import { formatSize } from 'library/Graphs/Utils';
+import { GraphWrapper } from 'library/Graphs/Wrapper';
+import { useSize } from 'library/Hooks/useSize';
 import { StatusLabel } from 'library/StatusLabel';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
 
 export const Payouts = () => {
-  const { isSyncing, services } = useUi();
+  const { t } = useTranslation('pages');
+  const { isSyncing } = useUi();
+  const { plugins } = usePlugins();
   const { inSetup } = useStaking();
   const notStaking = !isSyncing && inSetup();
-  const { t } = useTranslation('pages');
 
-  const ref = React.useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
-  const size = useSize(ref.current);
-  const { width, height, minHeight } = formatSize(size, 306);
+  const size = useSize(ref?.current || undefined);
+  const { width, height, minHeight } = formatSize(size, 260);
 
   return (
     <div className="inner" ref={ref} style={{ minHeight }}>
-      {!services.includes('cereStats') ? (
+      {!plugins.includes('cereStats') ? (
         <StatusLabel
           status="active_service"
           statusFor="cereStats"
-          title="Cere Stats Disabled"
+          title={t('Cere Stats Disabled')}
           topOffset="37%"
         />
       ) : (
         <StatusLabel
           status="sync_or_setup"
-          title={t('overview.not_staking')}
+          title={t('overview.notStaking')}
           topOffset="37%"
         />
       )}
 
-      <div
-        className="graph"
+      <GraphWrapper
         style={{
           height: `${height}px`,
           width: `${width}px`,
           position: 'absolute',
           opacity: notStaking ? 0.75 : 1,
           transition: 'opacity 0.5s',
-          marginTop: '1.5rem',
         }}
       >
-        <PayoutBar days={19} height="160px" />
+        <PayoutBar days={19} height="150px" />
         <div style={{ marginTop: '3rem' }}>
-          <PayoutLine days={19} average={10} height="70px" />
+          <PayoutLine days={19} average={10} height="65px" />
         </div>
-      </div>
+      </GraphWrapper>
     </div>
   );
 };
-
-export default Payouts;

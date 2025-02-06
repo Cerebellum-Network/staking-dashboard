@@ -1,46 +1,45 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
 import { faExternalLinkAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ReactComponent as ForumSVG } from 'img/forum.svg';
+import { ModalPadding } from '@polkadot-cloud/react';
+import { useTranslation } from 'react-i18next';
+import ForumSVG from 'img/forum.svg?react';
 import { Title } from 'library/Modal/Title';
-import { NotesWrapper, PaddingWrapper } from '../Wrappers';
 
 export const GoToFeedback = () => {
+  const { t } = useTranslation('modals');
   return (
     <>
-      <Title title="Feedback" Svg={ForumSVG} />
-      <PaddingWrapper verticalOnly>
+      <Title title={t('feedback')} Svg={ForumSVG} />
+      <ModalPadding verticalOnly>
         <div
           style={{
-            padding: '0 1.75rem',
+            padding: '0 1.75rem 0.5rem 1.75rem',
             width: '100%',
           }}
         >
-          <NotesWrapper style={{ paddingTop: 0 }}>
-            <p>
-              We host a feedback page on{' '}
-              <a href="https://canny.io/" target="_blank" rel="noreferrer">
-                Canny.io
-              </a>
-              . Bug reports, feature requests and improvements are all welcome.
-            </p>
-          </NotesWrapper>
-          <h2 style={{ marginTop: 0 }}>
+          <h4 style={{ paddingBottom: '0.75rem' }}>
+            {t('feedbackPage')}{' '}
+            <a href="https://canny.io/" target="_blank" rel="noreferrer">
+              Canny.io
+            </a>
+            . {t('welcomeToReport')}
+          </h4>
+          <h2 style={{ marginTop: '0.75rem' }}>
             <a
               href="https://polkadot-staking-dashboard.canny.io/feedback"
               target="_blank"
               rel="noreferrer"
+              style={{ color: 'var(--accent-color-primary' }}
             >
-              Open Feedback on Canny.io &nbsp;
+              {t('openFeedback')} &nbsp;
               <FontAwesomeIcon icon={faExternalLinkAlt} transform="shrink-3" />
             </a>
           </h2>
         </div>
-      </PaddingWrapper>
+      </ModalPadding>
     </>
   );
 };
-
-export default GoToFeedback;

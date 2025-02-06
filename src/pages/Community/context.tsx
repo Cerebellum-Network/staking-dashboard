@@ -1,29 +1,29 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { useApi } from 'contexts/Api';
-import React, { useEffect, useState } from 'react';
-import * as defaults from './defaults';
+import type { ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { useNetwork } from 'contexts/Network';
+import { defaultContext, communityItem } from './defaults';
+import type { CommunitySectionsContextInterface, Item } from './types';
 
-export const CommunitySectionsContext: React.Context<any> = React.createContext(
-  defaults.defaultContext
-);
+export const CommunitySectionsContext =
+  createContext<CommunitySectionsContextInterface>(defaultContext);
 
-export const useCommunitySections = () =>
-  React.useContext(CommunitySectionsContext);
+export const useCommunitySections = () => useContext(CommunitySectionsContext);
 
 export const CommunitySectionsProvider = ({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) => {
-  const { network } = useApi();
+  const { network } = useNetwork();
 
   // store the active section of the community page
-  const [activeSection, _setActiveSection] = useState<number>(0);
+  const [activeSection, setActiveSectionState] = useState<number>(0);
 
   // store the active entity item of the community page
-  const [activeItem, setActiveItem] = useState(defaults.item);
+  const [activeItem, setActiveItem] = useState<Item>(communityItem);
 
   // store the Y scroll position when the last entity was visited
   // used to automatically scroll back down upon returning to the entity lsit.
@@ -31,12 +31,12 @@ export const CommunitySectionsProvider = ({
 
   // go back to first section and reset item when network switches
   useEffect(() => {
-    _setActiveSection(0);
-    setActiveItem(defaults.item);
+    setActiveSectionState(0);
+    setActiveItem(communityItem);
   }, [network]);
 
-  const setActiveSection = (t: any) => {
-    _setActiveSection(t);
+  const setActiveSection = (t: number) => {
+    setActiveSectionState(t);
   };
 
   return (

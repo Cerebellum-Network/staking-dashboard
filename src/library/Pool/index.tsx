@@ -1,22 +1,21 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faCopy } from '@fortawesome/free-regular-svg-icons';
 import { faBars, faProjectDiagram } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useConnect } from 'contexts/Connect';
+import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMenu } from 'contexts/Menu';
-import { useModal } from 'contexts/Modal';
-import { useNotifications } from 'contexts/Notifications';
-import { NotificationText } from 'contexts/Notifications/types';
+import type { NotificationText } from 'static/NotificationsController/types';
 import { useBondedPools } from 'contexts/Pools/BondedPools';
 import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
-import { PoolState } from 'contexts/Pools/types';
 import { useUi } from 'contexts/UI';
-import { useValidators } from 'contexts/Validators';
+import { useValidators } from 'contexts/Validators/ValidatorEntries';
+import { usePoolCommission } from 'library/Hooks/usePoolCommission';
 import { FavoritePool } from 'library/ListItem/Labels/FavoritePool';
 import { PoolBonded } from 'library/ListItem/Labels/PoolBonded';
+import { PoolCommission } from 'library/ListItem/Labels/PoolCommission';
 import { PoolIdentity } from 'library/ListItem/Labels/PoolIdentity';
 import {
   Labels,
@@ -25,37 +24,42 @@ import {
   Wrapper,
 } from 'library/ListItem/Wrappers';
 import { usePoolsTabs } from 'pages/Pools/Home/context';
-import { useRef } from 'react';
+import { useOverlay } from '@polkadot-cloud/react/hooks';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
 import { JoinPool } from '../ListItem/Labels/JoinPool';
 import { Members } from '../ListItem/Labels/Members';
 import { PoolId } from '../ListItem/Labels/PoolId';
-import { PoolProps } from './types';
+import type { PoolProps } from './types';
+import { Rewards } from './Rewards';
+import { NotificationsController } from 'static/NotificationsController';
+import type { MenuItem } from 'contexts/Menu/types';
 
-export const Pool = (props: PoolProps) => {
-  const { pool, batchKey, batchIndex } = props;
+export const Pool = ({ pool }: PoolProps) => {
+  const { t } = useTranslation('library');
   const { memberCounter, addresses, id, state } = pool;
-
-  const { openModalWith } = useModal();
-  const { activeAccount, isReadOnlyAccount } = useConnect();
-  const { meta } = useBondedPools();
-  const { membership } = usePoolMemberships();
-  const { addNotification } = useNotifications();
+  const { isPoolSyncing } = useUi();
   const { validators } = useValidators();
-  const { poolsSyncing } = useUi();
-
-  // assumes component is under `PoolsTabsProvider` (Pools page)
   const { setActiveTab } = usePoolsTabs();
-  const { setMenuPosition, setMenuItems, open }: any = useMenu();
+  const { openModal } = useOverlay().modal;
+  const { membership } = usePoolMemberships();
+  const { poolsNominations } = useBondedPools();
+  const { activeAccount } = useActiveAccounts();
+  const { isReadOnlyAccount } = useImportedAccounts();
+  const { getCurrentCommission } = usePoolCommission();
+  const { setMenuPosition, setMenuItems, open } = useMenu();
+
+  const currentCommission = getCurrentCommission(id);
 
   // get metadata from pools metabatch
-  const nominations = meta[batchKey]?.nominations ?? [];
+  const nominations = poolsNominations[pool.id];
 
   // get pool targets from nominations metadata
-  const targets = nominations[batchIndex]?.targets ?? [];
+  const targets = nominations?.targets || [];
 
   // extract validator entries from pool targets
-  const targetValidators = validators.filter((v: any) =>
-    targets.includes(v.address)
+  const targetValidators = validators.filter(({ address }) =>
+    targets.includes(address)
   );
 
   // configure floating menu position
@@ -66,39 +70,36 @@ export const Pool = (props: PoolProps) => {
     addresses.stash == null
       ? null
       : {
-          title: 'Address Copied to Clipboard',
+          title: t('addressCopiedToClipboard'),
           subtitle: addresses.stash,
         };
 
-  // consruct pool menu items
-  const menuItems: Array<any> = [];
+  // Consruct pool menu items.
+  const menuItems: MenuItem[] = [];
 
   // add view pool nominations button to menu
   menuItems.push({
-    icon: <FontAwesomeIcon icon={faProjectDiagram as IconProp} />,
-    wrap: null,
-    title: `View Pool Nominations`,
+    icon: <FontAwesomeIcon icon={faProjectDiagram} transform="shrink-3" />,
+    title: `${t('viewPoolNominations')}`,
     cb: () => {
-      openModalWith(
-        'PoolNominations',
-        {
+      openModal({
+        key: 'PoolNominations',
+        options: {
           nominator: addresses.stash,
           targets: targetValidators,
         },
-        'large'
-      );
+      });
     },
   });
 
   // add copy pool address button to menu
   menuItems.push({
-    icon: <FontAwesomeIcon icon={faCopy as IconProp} />,
-    wrap: null,
-    title: `Copy Pool Address`,
+    icon: <FontAwesomeIcon icon={faCopy} transform="shrink-3" />,
+    title: t('copyPoolAddress'),
     cb: () => {
       navigator.clipboard.writeText(addresses.stash);
       if (notificationCopyAddress) {
-        addNotification(notificationCopyAddress);
+        NotificationsController.emit(notificationCopyAddress);
       }
     },
   });
@@ -111,47 +112,52 @@ export const Pool = (props: PoolProps) => {
     }
   };
 
+  const displayJoin =
+    !isPoolSyncing &&
+    state === 'Open' &&
+    !membership &&
+    !isReadOnlyAccount(activeAccount) &&
+    activeAccount;
+
   return (
-    <Wrapper format="nomination">
+    <Wrapper className={displayJoin ? 'pool-join' : 'pool'}>
       <div className="inner">
         <MenuPosition ref={posRef} />
-        <div className="row">
-          <PoolIdentity
-            batchKey={batchKey}
-            batchIndex={batchIndex}
-            pool={pool}
-          />
+        <div className="row top">
+          <PoolIdentity pool={pool} />
           <div>
             <Labels>
               <FavoritePool address={addresses.stash} />
-              <PoolId id={id} />
-              <Members members={memberCounter} />
-              <button
-                type="button"
-                className="label"
-                onClick={() => toggleMenu()}
-              >
-                <FontAwesomeIcon icon={faBars} />
-              </button>
+              <div className="label">
+                <button type="button" onClick={() => toggleMenu()}>
+                  <FontAwesomeIcon icon={faBars} transform="shrink-2" />
+                </button>
+              </div>
             </Labels>
           </div>
         </div>
         <Separator />
-        <div className="row status">
-          <PoolBonded pool={pool} batchIndex={batchIndex} batchKey={batchKey} />
-          {!poolsSyncing &&
-            state === PoolState.Open &&
-            !membership &&
-            !isReadOnlyAccount(activeAccount) &&
-            activeAccount && (
-              <Labels>
+        <div className="row bottom lg">
+          <div>
+            <Rewards address={addresses.stash} displayFor="default" />
+          </div>
+          <div>
+            <Labels style={{ marginBottom: '0.9rem' }}>
+              {currentCommission > 0 && (
+                <PoolCommission commission={`${currentCommission}%`} />
+              )}
+              <PoolId id={id} />
+              <Members members={memberCounter} />
+            </Labels>
+            <PoolBonded pool={pool} />
+            {displayJoin && (
+              <Labels style={{ marginTop: '1rem' }}>
                 <JoinPool id={id} setActiveTab={setActiveTab} />
               </Labels>
             )}
+          </div>
         </div>
       </div>
     </Wrapper>
   );
 };
-
-export default Pool;

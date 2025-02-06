@@ -1,23 +1,22 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
 
-import BN from 'bn.js';
-import {
-  PoolAddresses,
-  PoolsConfigContextState,
-  PoolStats,
-} from 'contexts/Pools/types';
+import BigNumber from 'bignumber.js';
+import type { PoolsConfigContextState, PoolStats } from './types';
+import type { PoolAddresses } from '../BondedPools/types';
 
-export const stats: PoolStats = {
-  counterForPoolMembers: new BN(0),
-  counterForBondedPools: new BN(0),
-  counterForRewardPools: new BN(0),
-  lastPoolId: new BN(0),
-  maxPoolMembers: new BN(0),
-  maxPoolMembersPerPool: new BN(0),
-  maxPools: new BN(0),
-  minCreateBond: new BN(0),
-  minJoinBond: new BN(0),
+export const defaultStats: PoolStats = {
+  counterForPoolMembers: new BigNumber(0),
+  counterForBondedPools: new BigNumber(0),
+  counterForRewardPools: new BigNumber(0),
+  lastPoolId: new BigNumber(0),
+  maxPoolMembers: null,
+  maxPoolMembersPerPool: null,
+  maxPools: null,
+  minCreateBond: new BigNumber(0),
+  minJoinBond: new BigNumber(0),
+  globalMaxCommission: 0,
 };
 
 export const defaultPoolsConfigContext: PoolsConfigContextState = {
@@ -25,7 +24,7 @@ export const defaultPoolsConfigContext: PoolsConfigContextState = {
   removeFavorite: () => {},
   createAccounts: () => poolAddresses,
   favorites: [],
-  stats,
+  stats: defaultStats,
 };
 
 export const poolAddresses: PoolAddresses = {

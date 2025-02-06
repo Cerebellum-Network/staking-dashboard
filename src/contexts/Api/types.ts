@@ -1,15 +1,16 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { ApiPromise } from '@polkadot/api';
-import { U8aLike } from '@polkadot/util/types';
-import BN from 'bn.js';
-import { Network, NetworkName } from '../../types';
+import type { ApiPromise } from '@polkadot/api';
+import type { U8aLike } from '@polkadot/util/types';
+import type BigNumber from 'bignumber.js';
+import type { ReactNode } from 'react';
+import type { AnyJson, Network, NetworkName } from '../../types';
+import type { ApiStatus } from 'static/APController/types';
 
-export enum ConnectionStatus {
-  Connecting = 'connecting',
-  Connected = 'connected',
-  Disconnected = 'disconnected',
+export interface APIProviderProps {
+  children: ReactNode;
+  network: NetworkName;
 }
 
 export interface NetworkState {
@@ -17,28 +18,33 @@ export interface NetworkState {
   meta: Network;
 }
 export interface APIConstants {
-  bondDuration: number;
-  maxNominations: number;
-  sessionsPerEra: number;
-  maxNominatorRewardedPerValidator: number;
-  historyDepth: BN;
-  maxElectingVoters: number;
-  expectedBlockTime: number;
-  existentialDeposit: BN;
+  bondDuration: BigNumber;
+  maxNominations: BigNumber;
+  sessionsPerEra: BigNumber;
+  maxExposurePageSize: BigNumber;
+  historyDepth: BigNumber;
+  maxElectingVoters: BigNumber;
+  expectedBlockTime: BigNumber;
+  epochDuration: BigNumber;
+  existentialDeposit: BigNumber;
+  fastUnstakeDeposit: BigNumber;
   poolsPalletId: U8aLike;
 }
 
+export interface APIChainState {
+  chain: string | null;
+  version: AnyJson;
+  ss58Prefix: number;
+}
+
 export interface APIContextInterface {
-  connect: (_network: NetworkName) => Promise<void>;
-  fetchDotPrice: () => void;
-  switchNetwork: (
-    _network: NetworkName,
-    _isLightClient: boolean
-  ) => Promise<void>;
   api: ApiPromise | null;
   consts: APIConstants;
+  chainState: APIChainState;
   isReady: boolean;
+  apiStatus: ApiStatus;
   isLightClient: boolean;
-  status: ConnectionStatus;
-  network: Network;
+  setIsLightClient: (isLightClient: boolean) => void;
+  rpcEndpoint: string;
+  setRpcEndpoint: (key: string) => void;
 }

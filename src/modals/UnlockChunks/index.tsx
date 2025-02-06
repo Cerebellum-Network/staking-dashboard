@@ -1,52 +1,74 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { faLockOpen } from '@fortawesome/free-solid-svg-icons';
+import {
+  ModalFixedTitle,
+  ModalMotionTwoSection,
+  ModalSection,
+} from '@polkadot-cloud/react';
+import { setStateWithRef } from '@polkadot-cloud/utils';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useBalances } from 'contexts/Balances';
-import { useConnect } from 'contexts/Connect';
-import { useModal } from 'contexts/Modal';
 import { useActivePools } from 'contexts/Pools/ActivePools';
 import { Title } from 'library/Modal/Title';
-import { useEffect, useRef, useState } from 'react';
+import { useTxMeta } from 'contexts/TxMeta';
+import { useOverlay } from '@polkadot-cloud/react/hooks';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
+import { useLedgerHardware } from 'contexts/Hardware/Ledger/LedgerHardware';
 import { Forms } from './Forms';
 import { Overview } from './Overview';
-import { CardsWrapper, FixedContentWrapper, Wrapper } from './Wrappers';
+import type { UnlockChunk } from 'contexts/Balances/types';
 
 export const UnlockChunks = () => {
-  const { activeAccount } = useConnect();
-  const { config, setModalHeight } = useModal();
-  const { bondType } = config || {};
-  const { getLedgerForStash } = useBalances();
+  const { t } = useTranslation('modals');
+  const {
+    config: { options },
+    setModalHeight,
+    modalMaxHeight,
+  } = useOverlay().modal;
+  const { notEnoughFunds } = useTxMeta();
+  const { getStashLedger } = useBalances();
+  const { activeAccount } = useActiveAccounts();
   const { getPoolUnlocking } = useActivePools();
+  const { integrityChecked } = useLedgerHardware();
+  const { bondFor } = options || {};
 
-  // get the unlocking per bondType
-  const _getUnlocking = () => {
+  // get the unlocking per bondFor
+  const getUnlocking = () => {
     let unlocking = [];
     let ledger;
-    switch (bondType) {
-      case 'stake':
-        ledger = getLedgerForStash(activeAccount);
-        unlocking = ledger.unlocking;
-        break;
+    switch (bondFor) {
       case 'pool':
         unlocking = getPoolUnlocking();
         break;
       default:
-      // console.error(`unlocking modal bond-type ${bondType} is not defined.`);
+        ledger = getStashLedger(activeAccount);
+        unlocking = ledger.unlocking;
     }
     return unlocking;
   };
 
-  const unlocking = _getUnlocking();
+  const unlocking = getUnlocking();
 
   // active modal section
-  const [section, setSection] = useState(0);
+  const [section, setSectionState] = useState<number>(0);
+  const sectionRef = useRef(section);
+
+  const setSection = (s: number) => {
+    setStateWithRef(s, setSectionState, sectionRef);
+  };
 
   // modal task
   const [task, setTask] = useState<string | null>(null);
 
   // unlock value of interest
-  const [unlock, setUnlock] = useState(null);
+  const [unlock, setUnlock] = useState<UnlockChunk | null>(null);
+
+  // counter to trigger modal height calculation
+  const [calculateHeight, setCalculateHeight] = useState<number>(0);
+  const incrementCalculateHeight = () =>
+    setCalculateHeight(calculateHeight + 1);
 
   // refs for wrappers
   const headerRef = useRef<HTMLDivElement>(null);
@@ -56,7 +78,7 @@ export const UnlockChunks = () => {
   const getModalHeight = () => {
     let h = headerRef.current?.clientHeight ?? 0;
 
-    if (section === 0) {
+    if (sectionRef.current === 0) {
       h += overviewRef.current?.clientHeight ?? 0;
     } else {
       h += formsRef.current?.clientHeight ?? 0;
@@ -64,10 +86,21 @@ export const UnlockChunks = () => {
     return h;
   };
 
+  const resizeCallback = () => {
+    setModalHeight(getModalHeight());
+  };
+
   // resize modal on state change
   useEffect(() => {
     setModalHeight(getModalHeight());
-  }, [task, section]);
+  }, [
+    task,
+    calculateHeight,
+    notEnoughFunds,
+    sectionRef.current,
+    unlocking,
+    integrityChecked,
+  ]);
 
   // resize this modal on window resize
   useEffect(() => {
@@ -76,17 +109,17 @@ export const UnlockChunks = () => {
       window.removeEventListener('resize', resizeCallback);
     };
   }, []);
-  const resizeCallback = () => {
-    setModalHeight(getModalHeight());
-  };
 
   return (
-    <Wrapper>
-      <FixedContentWrapper ref={headerRef}>
-        <Title title="Unlocks" icon={faLockOpen} fixed />
-      </FixedContentWrapper>
-      <CardsWrapper
-        animate={section === 0 ? 'home' : 'next'}
+    <ModalSection type="carousel">
+      <ModalFixedTitle ref={headerRef}>
+        <Title title={t('unlocks')} fixed />
+      </ModalFixedTitle>
+      <ModalMotionTwoSection
+        style={{
+          maxHeight: modalMaxHeight - (headerRef.current?.clientHeight || 0),
+        }}
+        animate={sectionRef.current === 0 ? 'home' : 'next'}
         transition={{
           duration: 0.5,
           type: 'spring',
@@ -101,21 +134,26 @@ export const UnlockChunks = () => {
           },
         }}
       >
-        <Overview
-          unlocking={unlocking}
-          bondType={bondType}
-          setSection={setSection}
-          setUnlock={setUnlock}
-          setTask={setTask}
-          ref={overviewRef}
-        />
-        <Forms
-          setSection={setSection}
-          unlock={unlock}
-          task={task}
-          ref={formsRef}
-        />
-      </CardsWrapper>
-    </Wrapper>
+        <div className="section">
+          <Overview
+            unlocking={unlocking}
+            bondFor={bondFor}
+            setSection={setSection}
+            setUnlock={setUnlock}
+            setTask={setTask}
+            ref={overviewRef}
+          />
+        </div>
+        <div className="section">
+          <Forms
+            incrementCalculateHeight={incrementCalculateHeight}
+            setSection={setSection}
+            unlock={unlock}
+            task={task}
+            ref={formsRef}
+          />
+        </div>
+      </ModalMotionTwoSection>
+    </ModalSection>
   );
 };

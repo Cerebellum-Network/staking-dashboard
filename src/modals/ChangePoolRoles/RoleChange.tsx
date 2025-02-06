@@ -1,43 +1,40 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
 import { faAnglesRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Identicon from 'library/Identicon';
-import { clipAddress, convertRemToPixels } from 'Utils';
+import { ellipsisFn, remToUnit } from '@polkadot-cloud/utils';
+import { Polkicon } from '@polkadot-cloud/react';
 import { RoleChangeWrapper } from './Wrapper';
+import type { RoleChangeProps } from './types';
 
-export const RoleChange = ({ roleName, oldAddress, newAddress }: any) => {
-  return (
-    <RoleChangeWrapper>
-      <div className="label">{roleName}</div>
-      <div className="role-change">
-        <div className="input-wrap selected">
-          <Identicon
-            value={oldAddress ?? ''}
-            size={convertRemToPixels('2rem')}
-          />
-          <input
-            className="input"
-            disabled
-            value={oldAddress ? clipAddress(oldAddress) : ''}
-          />
-        </div>
-        <span>
-          <FontAwesomeIcon icon={faAnglesRight} />
-        </span>
-        <div className="input-wrap selected">
-          <Identicon
-            value={newAddress ?? ''}
-            size={convertRemToPixels('2rem')}
-          />
-          <input
-            className="input"
-            disabled
-            value={newAddress ? clipAddress(newAddress) : ''}
-          />
-        </div>
+export const RoleChange = ({
+  roleName,
+  oldAddress,
+  newAddress,
+}: RoleChangeProps) => (
+  <RoleChangeWrapper>
+    <div className="label">{roleName}</div>
+    <div className="role-change">
+      <div className="input-wrap selected">
+        <Polkicon address={oldAddress ?? ''} size={remToUnit('2rem')} />
+        <input
+          className="input"
+          disabled
+          value={oldAddress ? ellipsisFn(oldAddress) : ''}
+        />
       </div>
-    </RoleChangeWrapper>
-  );
-};
+      <span>
+        <FontAwesomeIcon icon={faAnglesRight} />
+      </span>
+      <div className="input-wrap selected">
+        <Polkicon address={newAddress ?? ''} size={remToUnit('2rem')} />
+        <input
+          className="input"
+          disabled
+          value={newAddress ? ellipsisFn(newAddress) : ''}
+        />
+      </div>
+    </div>
+  </RoleChangeWrapper>
+);

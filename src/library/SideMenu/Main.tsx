@@ -1,148 +1,170 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { PAGES_CONFIG, PAGE_CATEGORIES } from 'config/pages';
-import { CereUrl, UriPrefix } from 'consts';
-import { useApi } from 'contexts/Api';
-import { useBalances } from 'contexts/Balances';
-import { useConnect } from 'contexts/Connect';
-import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
-import { useStaking } from 'contexts/Staking';
-import { useUi } from 'contexts/UI';
-import { UIContextInterface } from 'contexts/UI/types';
-import React, { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { PageCategory, PageItem, PagesConfig } from 'types';
-import Heading from './Heading/Heading';
+import { PageCategories, PagesConfig } from 'config/pages';
+import { CereUrl } from 'consts';
+import { useBonded } from 'contexts/Bonded';
+import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
+import { useSetup } from 'contexts/Setup';
+import type { SetupContextInterface } from 'contexts/Setup/types';
+import { useStaking } from 'contexts/Staking';
+import { useUi } from 'contexts/UI';
+import type { UIContextInterface } from 'contexts/UI/types';
+import type { PageCategory, PageItem, PagesConfigItems } from 'types';
+import { useNetwork } from 'contexts/Network';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
+import { Heading } from './Heading/Heading';
 import { Primary } from './Primary';
 import { LogoWrapper } from './Wrapper';
+import type { AnyJson } from '@polkadot-cloud/react/types';
 
 export const Main = () => {
-  const { network } = useApi();
-  const { activeAccount, accounts } = useConnect();
+  const { t, i18n } = useTranslation('base');
+  const { networkData } = useNetwork();
   const { pathname } = useLocation();
-  const { getBondedAccount } = useBalances();
-  const { getControllerNotImported, inSetup: inNominatorSetup } = useStaking();
+  const { getBondedAccount } = useBonded();
+  const { accounts } = useImportedAccounts();
+  const { activeAccount } = useActiveAccounts();
+  const { inSetup: inNominatorSetup, addressDifferentToStash } = useStaking();
   const { membership } = usePoolMemberships();
   const controller = getBondedAccount(activeAccount);
   const {
-    isSyncing,
-    sideMenuMinimised,
-    getPoolSetupProgressPercent,
-    getStakeSetupProgressPercent,
-  }: UIContextInterface = useUi();
-  const controllerNotImported = getControllerNotImported(controller);
-  const { t } = useTranslation('base');
+    onNominatorSetup,
+    onPoolSetup,
+    getPoolSetupPercent,
+    getNominatorSetupPercent,
+  }: SetupContextInterface = useSetup();
+  const { isSyncing, sideMenuMinimised }: UIContextInterface = useUi();
+  const controllerDifferentToStash = addressDifferentToStash(controller);
 
-  const [pageConfig, setPageConfig] = useState({
-    categories: Object.assign(PAGE_CATEGORIES),
-    pages: Object.assign(PAGES_CONFIG),
+  const [pageConfig, setPageConfig] = useState<AnyJson>({
+    categories: Object.assign(PageCategories),
+    pages: Object.assign(PagesConfig),
   });
 
   useEffect(() => {
-    if (!accounts.length) return;
+    if (!accounts.length) {
+      return;
+    }
 
     // inject actions into menu items
-    const _pages = Object.assign(pageConfig.pages);
-    for (let i = 0; i < _pages.length; i++) {
-      const { uri } = _pages[i];
+    const pages = Object.assign(pageConfig.pages);
 
+    let i = 0;
+    for (const { uri } of pages) {
       // set undefined action as default
-      _pages[i].action = undefined;
-
-      if (uri === `${UriPrefix}/nominate`) {
-        // configure Stake action
-        const warning = !isSyncing && controllerNotImported;
-        const staking = !inNominatorSetup();
-        const setupPercent = getStakeSetupProgressPercent(activeAccount);
-
-        if (staking) {
-          _pages[i].action = {
-            type: 'text',
-            status: 'success',
-            text: t('active'),
-          };
-        } else if (warning) {
-          _pages[i].action = {
+      pages[i].action = undefined;
+      if (uri === `${import.meta.env.BASE_URL}`) {
+        const warning = !isSyncing && controllerDifferentToStash;
+        if (warning) {
+          pages[i].action = {
             type: 'bullet',
             status: 'warning',
           };
-        } else if (setupPercent > 0 && !staking) {
-          _pages[i].action = {
-            type: 'text',
-            status: 'warning',
-            text: `${setupPercent}%`,
-          };
         }
       }
 
-      if (uri === `${UriPrefix}/pools`) {
-        // configure Pools action
-        const inPool = membership;
-        const setupPercent = getPoolSetupProgressPercent(activeAccount);
+      if (uri === `${import.meta.env.BASE_URL}nominate`) {
+        // configure Stake action
+        const staking = !inNominatorSetup();
+        const warning = !isSyncing && controllerDifferentToStash;
+        const setupPercent = getNominatorSetupPercent(activeAccount);
 
-        if (inPool) {
-          _pages[i].action = {
+        if (staking) {
+          pages[i].action = {
             type: 'text',
             status: 'success',
             text: t('active'),
           };
-        } else if (setupPercent > 0 && !inPool) {
-          _pages[i].action = {
+        }
+        if (warning) {
+          pages[i].action = {
+            type: 'bullet',
+            status: 'warning',
+          };
+        }
+        if (!staking && (onNominatorSetup || setupPercent > 0)) {
+          pages[i].action = {
             type: 'text',
             status: 'warning',
             text: `${setupPercent}%`,
           };
         }
       }
+
+      if (uri === `${import.meta.env.BASE_URL}pools`) {
+        // configure Pools action
+        const inPool = membership;
+        const setupPercent = getPoolSetupPercent(activeAccount);
+
+        if (inPool) {
+          pages[i].action = {
+            type: 'text',
+            status: 'success',
+            text: t('active'),
+          };
+        }
+        if (!inPool && (setupPercent > 0 || onPoolSetup)) {
+          pages[i].action = {
+            type: 'text',
+            status: 'warning',
+            text: `${setupPercent}%`,
+          };
+        }
+      }
+      i++;
     }
+
     setPageConfig({
       categories: pageConfig.categories,
-      pages: _pages,
+      pages,
     });
   }, [
-    network,
+    networkData,
     activeAccount,
     accounts,
-    controllerNotImported,
+    controllerDifferentToStash,
     isSyncing,
     membership,
     inNominatorSetup(),
-    getStakeSetupProgressPercent(activeAccount),
-    getPoolSetupProgressPercent(activeAccount),
+    getNominatorSetupPercent(activeAccount),
+    getPoolSetupPercent(activeAccount),
+    i18n.resolvedLanguage,
+    onNominatorSetup,
+    onPoolSetup,
   ]);
 
   // remove pages that network does not support
-  const pagesToDisplay: PagesConfig = Object.values(pageConfig.pages);
+  const pagesToDisplay: PagesConfigItems = Object.values(pageConfig.pages);
 
   return (
     <>
       <LogoWrapper
-        onClick={() => {
-          window.open(CereUrl, '_blank');
-        }}
-        minimised={sideMenuMinimised}
+        $minimised={sideMenuMinimised}
+        onClick={() => window.open(CereUrl, '_blank')}
       >
         {sideMenuMinimised ? (
-          <network.brand.icon style={{ maxHeight: '100%', width: '2rem' }} />
+          <networkData.brand.icon
+            style={{ maxHeight: '100%', width: '2rem' }}
+          />
         ) : (
-          <>
-            <network.brand.logo.svg
-              style={{
-                maxHeight: '100%',
-                height: '100%',
-                width: network.brand.logo.width,
-              }}
-            />
-          </>
+          <networkData.brand.logo.svg
+            style={{
+              maxHeight: '100%',
+              height: '100%',
+              width: networkData.brand.logo.width,
+            }}
+          />
         )}
       </LogoWrapper>
 
       {pageConfig.categories.map(
         ({ id: categoryId, key: categoryKey }: PageCategory) => (
-          <React.Fragment key={`sidemenu_category_${categoryId}`}>
+          <Fragment key={`sidemenu_category_${categoryId}`}>
             {/* display heading if not `default` (used for top links) */}
             {categoryKey !== 'default' && (
               <Heading title={t(categoryKey)} minimised={sideMenuMinimised} />
@@ -150,31 +172,22 @@ export const Main = () => {
 
             {/* display category links */}
             {pagesToDisplay.map(
-              ({ category, hash, icon, key, animate, action }: PageItem) => (
-                <React.Fragment key={`sidemenu_page_${categoryId}_${key}`}>
+              ({ category, hash, key, lottie, action }: PageItem) => (
+                <Fragment key={`sidemenu_page_${categoryId}_${key}`}>
                   {category === categoryId && (
                     <Primary
                       name={t(key)}
                       to={hash}
                       active={hash === pathname}
-                      icon={
-                        icon ? (
-                          <FontAwesomeIcon
-                            icon={icon}
-                            transform="grow-1"
-                            className="fa-icon"
-                          />
-                        ) : undefined
-                      }
-                      animate={animate}
+                      lottie={lottie}
                       action={action}
                       minimised={sideMenuMinimised}
                     />
                   )}
-                </React.Fragment>
+                </Fragment>
               )
             )}
-          </React.Fragment>
+          </Fragment>
         )
       )}
     </>

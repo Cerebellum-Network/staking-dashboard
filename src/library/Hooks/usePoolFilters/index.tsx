@@ -1,33 +1,30 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
 
+import { useTranslation } from 'react-i18next';
 import { useBondedPools } from 'contexts/Pools/BondedPools';
-import { BondedPool } from 'contexts/Pools/types';
 import { useStaking } from 'contexts/Staking';
-import { AnyFunction, AnyJson } from 'types';
+import type { AnyFunction, AnyJson } from 'types';
+import type { AnyFilter } from 'library/Filter/types';
+import type { BondedPool } from 'contexts/Pools/BondedPools/types';
 
 export const usePoolFilters = () => {
-  const { meta } = useBondedPools();
+  const { t } = useTranslation('library');
+  const { poolsNominations } = useBondedPools();
   const { getNominationsStatusFromTargets } = useStaking();
   const { getPoolNominationStatusCode } = useBondedPools();
 
   /*
-   * filterActive
-   * Iterates through the supplied list and refers to the meta
-   * batch of the list to filter those list items that are
-   * actively nominating.
+   * Include active pools.
    * Returns the updated filtered list.
    */
-  const filterActive = (list: any, batchKey: string) => {
-    // get pool targets from nominations meta batch
-    const nominations = meta[batchKey]?.nominations ?? [];
-    if (!nominations) {
+  const includeActive = (list: AnyFilter) => {
+    if (!Object.keys(poolsNominations).length) {
       return list;
     }
 
-    let i = -1;
     const filteredList = list.filter((p: BondedPool) => {
-      i++;
-      const targets = nominations[i]?.targets ?? [];
+      const nominations = poolsNominations[p.id];
+      const targets = nominations?.targets || [];
       const status = getPoolNominationStatusCode(
         getNominationsStatusFromTargets(p.addresses.stash, targets)
       );
@@ -37,76 +34,117 @@ export const usePoolFilters = () => {
   };
 
   /*
-   * filterLocked
-   * Iterates through the supplied list and refers to the meta
-   * batch of the list to filter those list items that are
-   * locked.
+   * Dont include active pools.
    * Returns the updated filtered list.
    */
-  const filterLocked = (list: any) => {
-    return list.filter((p: BondedPool) => p.state !== 'Blocked');
+  const excludeActive = (list: AnyFilter) => {
+    if (!Object.keys(poolsNominations).length) {
+      return list;
+    }
+
+    const filteredList = list.filter((p: BondedPool) => {
+      const nominations = poolsNominations[p.id];
+      const targets = nominations?.targets || [];
+      const status = getPoolNominationStatusCode(
+        getNominationsStatusFromTargets(p.addresses.stash, targets)
+      );
+      return status !== 'active';
+    });
+    return filteredList;
   };
 
   /*
-   * filterDestroying
-   * Iterates through the supplied list and refers to the meta
-   * batch of the list to filter those list items that are
-   * being destroyed.
+   * include locked pools.
+   * Iterates through the supplied list and checks whether state is locked.
    * Returns the updated filtered list.
    */
-  const filterDestroying = (list: any) => {
-    return list.filter((p: BondedPool) => p.state !== 'Destroying');
+  const includeLocked = (list: AnyFilter) =>
+    list.filter((p: BondedPool) => p.state.toLowerCase() === 'Blocked');
+
+  /*
+   * include destroying pools.
+   * Iterates through the supplied list and checks whether state is destroying.
+   * Returns the updated filtered list.
+   */
+  const includeDestroying = (list: AnyFilter) =>
+    list.filter((p: BondedPool) => p.state === 'Destroying');
+
+  /*
+   * exclude locked pools.
+   * Iterates through the supplied list and checks whether state is locked.
+   * Returns the updated filtered list.
+   */
+  const excludeLocked = (list: AnyFilter) =>
+    list.filter((p: BondedPool) => p.state !== 'Blocked');
+
+  /*
+   * exclude destroying pools.
+   * Iterates through the supplied list and checks whether state is destroying.
+   * Returns the updated filtered list.
+   */
+  const excludeDestroying = (list: AnyFilter) =>
+    list.filter((p: BondedPool) => p.state !== 'Destroying');
+
+  // includes to be listed in filter overlay.
+  const includesToLabels: Record<string, string> = {
+    active: t('activePools'),
   };
 
-  const includesToLabels: { [key: string]: string } = {
-    active: 'Active Pools',
+  // excludes to be listed in filter overlay.
+  const excludesToLabels: Record<string, string> = {
+    locked: t('lockedPools'),
+    destroying: t('destroyingPools'),
   };
 
-  const excludesToLabels: { [key: string]: string } = {
-    locked: 'Locked Pools',
-    destroying: 'Destroying Pools',
+  // match include keys to their associated filter functions.
+  const includeToFunction: Record<string, AnyFunction> = {
+    active: includeActive,
+    locked: includeLocked,
+    destroying: includeDestroying,
   };
 
-  const filterToFunction: { [key: string]: AnyFunction } = {
-    active: filterActive,
-    locked: filterLocked,
-    destroying: filterDestroying,
+  // match exclude keys to their associated filter functions.
+  const excludeToFunction: Record<string, AnyFunction> = {
+    active: excludeActive,
+    locked: excludeLocked,
+    destroying: excludeDestroying,
   };
 
-  const getFiltersToApply = (excludes: Array<string>) => {
+  // get filter functions from keys and type of filter.
+  const getFiltersFromKey = (key: string[], type: string) => {
+    const filters = type === 'include' ? includeToFunction : excludeToFunction;
     const fns = [];
-    for (const exclude of excludes) {
-      if (filterToFunction[exclude]) {
-        fns.push(filterToFunction[exclude]);
+    for (const k of key) {
+      if (filters[k]) {
+        fns.push(filters[k]);
       }
     }
     return fns;
   };
 
+  // applies filters based on the provided include and exclude keys.
   const applyFilter = (
-    includes: Array<string> | null,
-    excludes: Array<string> | null,
-    list: AnyJson,
-    batchKey: string
+    includes: string[] | null,
+    excludes: string[] | null,
+    list: AnyJson
   ) => {
     if (!excludes && !includes) {
       return list;
     }
     if (includes) {
-      for (const fn of getFiltersToApply(includes)) {
-        list = fn(list, batchKey);
+      for (const fn of getFiltersFromKey(includes, 'include')) {
+        list = fn(list);
       }
     }
     if (excludes) {
-      for (const fn of getFiltersToApply(excludes)) {
-        list = fn(list, batchKey);
+      for (const fn of getFiltersFromKey(excludes, 'exclude')) {
+        list = fn(list);
       }
     }
     return list;
   };
 
   return {
-    filterToFunction,
     includesToLabels,
     excludesToLabels,
     applyFilter,

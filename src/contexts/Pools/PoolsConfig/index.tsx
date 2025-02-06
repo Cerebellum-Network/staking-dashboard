@@ -1,56 +1,46 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
 import { bnToU8a, u8aConcat } from '@polkadot/util';
+import { rmCommas, setStateWithRef } from '@polkadot-cloud/utils';
+import BigNumber from 'bignumber.js';
 import BN from 'bn.js';
+import type { ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { EmptyH256, ModPrefix, U32Opts } from 'consts';
-import { PoolConfigState, PoolsConfigContextState } from 'contexts/Pools/types';
-import React, { useEffect, useRef, useState } from 'react';
-import { AnyApi } from 'types';
-import { rmCommas, setStateWithRef } from 'Utils';
+import type { PoolConfigState, PoolsConfigContextState } from './types';
+import type { AnyApi } from 'types';
+import { useEffectIgnoreInitial } from '@polkadot-cloud/react/hooks';
+import { useNetwork } from 'contexts/Network';
 import { useApi } from '../../Api';
-import * as defaults from './defaults';
+import { defaultStats, defaultPoolsConfigContext } from './defaults';
 
-export const PoolsConfigContext = React.createContext<PoolsConfigContextState>(
-  defaults.defaultPoolsConfigContext
+export const PoolsConfigContext = createContext<PoolsConfigContextState>(
+  defaultPoolsConfigContext
 );
 
-export const usePoolsConfig = () => React.useContext(PoolsConfigContext);
+export const usePoolsConfig = () => useContext(PoolsConfigContext);
 
-export const PoolsConfigProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const { api, network, isReady, consts } = useApi();
+export const PoolsConfigProvider = ({ children }: { children: ReactNode }) => {
+  const { network } = useNetwork();
+  const { api, isReady, consts } = useApi();
   const { poolsPalletId } = consts;
 
   // store pool metadata
   const [poolsConfig, setPoolsConfig] = useState<PoolConfigState>({
-    stats: defaults.stats,
+    stats: defaultStats,
     unsub: null,
   });
   const poolsConfigRef = useRef(poolsConfig);
 
-  // get favorite pools from local storage
-  const getFavorites = () => {
-    const _favorites = localStorage.getItem(
-      `${network.name.toLowerCase()}_favorite_pools`
-    );
-    return _favorites !== null ? JSON.parse(_favorites) : [];
+  // get favorite pools from local storage.
+  const getLocalFavorites = () => {
+    const localFavorites = localStorage.getItem(`${network}_favorite_pools`);
+    return localFavorites !== null ? JSON.parse(localFavorites) : [];
   };
 
   // stores the user's favorite pools
-  const [favorites, setFavorites] = useState<string[]>(getFavorites());
-
-  useEffect(() => {
-    if (isReady) {
-      subscribeToPoolConfig();
-    }
-    return () => {
-      unsubscribe();
-    };
-  }, [network, isReady]);
+  const [favorites, setFavorites] = useState<string[]>(getLocalFavorites());
 
   const unsubscribe = () => {
     if (poolsConfigRef.current.unsub !== null) {
@@ -60,7 +50,9 @@ export const PoolsConfigProvider = ({
 
   // subscribe to pool chain state
   const subscribeToPoolConfig = async () => {
-    if (!api) return;
+    if (!api) {
+      return;
+    }
 
     const unsub = await api.queryMulti<AnyApi>(
       [
@@ -73,45 +65,58 @@ export const PoolsConfigProvider = ({
         api.query.nominationPools.maxPools,
         api.query.nominationPools.minCreateBond,
         api.query.nominationPools.minJoinBond,
+        api.query.nominationPools.globalMaxCommission,
       ],
       ([
-        _counterForPoolMembers,
-        _counterForBondedPools,
-        _counterForRewardPools,
-        _lastPoolId,
-        _maxPoolMembers,
-        _maxPoolMembersPerPool,
-        _maxPools,
-        _minCreateBond,
-        _minJoinBond,
+        counterForPoolMembers,
+        counterForBondedPools,
+        counterForRewardPools,
+        lastPoolId,
+        maxPoolMembers,
+        maxPoolMembersPerPool,
+        maxPools,
+        minCreateBond,
+        minJoinBond,
+        globalMaxCommission,
       ]) => {
-        // format optional configs to BN or null
-        _maxPoolMembers = _maxPoolMembers.toHuman();
-        if (_maxPoolMembers !== null) {
-          _maxPoolMembers = new BN(rmCommas(_maxPoolMembers));
+        // format optional configs to BigNumber or null
+        maxPoolMembers = maxPoolMembers.toHuman();
+        if (maxPoolMembers !== null) {
+          maxPoolMembers = new BigNumber(rmCommas(maxPoolMembers));
         }
-        _maxPoolMembersPerPool = _maxPoolMembersPerPool.toHuman();
-        if (_maxPoolMembersPerPool !== null) {
-          _maxPoolMembersPerPool = new BN(rmCommas(_maxPoolMembersPerPool));
+        maxPoolMembersPerPool = maxPoolMembersPerPool.toHuman();
+        if (maxPoolMembersPerPool !== null) {
+          maxPoolMembersPerPool = new BigNumber(
+            rmCommas(maxPoolMembersPerPool)
+          );
         }
-        _maxPools = _maxPools.toHuman();
-        if (_maxPools !== null) {
-          _maxPools = new BN(rmCommas(_maxPools));
+        maxPools = maxPools.toHuman();
+        if (maxPools !== null) {
+          maxPools = new BigNumber(rmCommas(maxPools));
         }
 
         setStateWithRef(
           {
             ...poolsConfigRef.current,
             stats: {
-              counterForPoolMembers: _counterForPoolMembers.toBn(),
-              counterForBondedPools: _counterForBondedPools.toBn(),
-              counterForRewardPools: _counterForRewardPools.toBn(),
-              lastPoolId: _lastPoolId.toBn(),
-              maxPoolMembers: _maxPoolMembers,
-              maxPoolMembersPerPool: _maxPoolMembersPerPool,
-              maxPools: _maxPools,
-              minCreateBond: _minCreateBond.toBn(),
-              minJoinBond: _minJoinBond.toBn(),
+              counterForPoolMembers: new BigNumber(
+                counterForPoolMembers.toString()
+              ),
+              counterForBondedPools: new BigNumber(
+                counterForBondedPools.toString()
+              ),
+              counterForRewardPools: new BigNumber(
+                counterForRewardPools.toString()
+              ),
+              lastPoolId: new BigNumber(lastPoolId.toString()),
+              maxPoolMembers,
+              maxPoolMembersPerPool,
+              maxPools,
+              minCreateBond: new BigNumber(minCreateBond.toString()),
+              minJoinBond: new BigNumber(minJoinBond.toString()),
+              globalMaxCommission: Number(
+                globalMaxCommission.toHuman().slice(0, -1)
+              ),
             },
           },
           setPoolsConfig,
@@ -134,44 +139,46 @@ export const PoolsConfigProvider = ({
    * Adds a favorite validator.
    */
   const addFavorite = (address: string) => {
-    const _favorites: any = Object.assign(favorites);
-    if (!_favorites.includes(address)) {
-      _favorites.push(address);
+    const newFavorites = Object.assign(favorites);
+    if (!newFavorites.includes(address)) {
+      newFavorites.push(address);
     }
 
     localStorage.setItem(
-      `${network.name.toLowerCase()}_favorite_pools`,
-      JSON.stringify(_favorites)
+      `${network}_favorite_pools`,
+      JSON.stringify(newFavorites)
     );
-    setFavorites([..._favorites]);
+    setFavorites([...newFavorites]);
   };
 
   /*
    * Removes a favorite validator if they exist.
    */
   const removeFavorite = (address: string) => {
-    let _favorites = Object.assign(favorites);
-    _favorites = _favorites.filter(
+    let newFavorites = Object.assign(favorites);
+    newFavorites = newFavorites.filter(
       (validator: string) => validator !== address
     );
     localStorage.setItem(
-      `${network.name.toLowerCase()}_favorite_pools`,
-      JSON.stringify(_favorites)
+      `${network}_favorite_pools`,
+      JSON.stringify(newFavorites)
     );
-    setFavorites([..._favorites]);
+    setFavorites([...newFavorites]);
   };
 
   // Helper: generates pool stash and reward accounts. assumes poolsPalletId is synced.
   const createAccounts = (poolId: number) => {
-    const poolIdBN = new BN(poolId);
+    const poolIdBigNumber = new BigNumber(poolId);
     return {
-      stash: createAccount(poolIdBN, 0),
-      reward: createAccount(poolIdBN, 1),
+      stash: createAccount(poolIdBigNumber, 0),
+      reward: createAccount(poolIdBigNumber, 1),
     };
   };
 
-  const createAccount = (poolId: BN, index: number): string => {
-    if (!api) return '';
+  const createAccount = (poolId: BigNumber, index: number): string => {
+    if (!api) {
+      return '';
+    }
     return api.registry
       .createType(
         'AccountId32',
@@ -179,12 +186,31 @@ export const PoolsConfigProvider = ({
           ModPrefix,
           poolsPalletId,
           new Uint8Array([index]),
-          bnToU8a(poolId, U32Opts),
+          bnToU8a(new BN(poolId.toString()), U32Opts),
           EmptyH256
         )
       )
       .toString();
   };
+
+  // Handle ready state.
+  useEffectIgnoreInitial(() => {
+    if (isReady) {
+      subscribeToPoolConfig();
+    }
+  }, [network, isReady]);
+
+  // Handle network change.
+  useEffect(() => {
+    unsubscribe();
+    setPoolsConfig({
+      stats: defaultStats,
+      unsub: null,
+    });
+  }, [network]);
+
+  // Unsubscribe on component unmount.
+  useEffect(() => () => unsubscribe());
 
   return (
     <PoolsConfigContext.Provider
@@ -193,7 +219,7 @@ export const PoolsConfigProvider = ({
         removeFavorite,
         createAccounts,
         favorites,
-        stats: poolsConfigRef.current.stats,
+        stats: poolsConfig.stats,
       }}
     >
       {children}

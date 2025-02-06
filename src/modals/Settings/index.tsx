@@ -1,51 +1,52 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { useUi } from 'contexts/UI';
+import { ModalPadding } from '@polkadot-cloud/react';
+import { useTranslation } from 'react-i18next';
+import { usePlugins } from 'contexts/Plugins';
 import { Title } from 'library/Modal/Title';
-import { StatusButton } from 'library/StatusButton';
-import { PaddingWrapper } from '../Wrappers';
+import { ContentWrapper } from '../Networks/Wrapper';
 
 export const Settings = () => {
-  const { services, toggleService } = useUi();
+  const { plugins, togglePlugin } = usePlugins();
+  const { t } = useTranslation('modals');
 
   // fetch flag to disable fiat
-  const DISABLE_FIAT = Number(process.env.REACT_APP_DISABLE_FIAT ?? 0);
+  const DISABLE_FIAT = Number(import.meta.env.VITE_DISABLE_FIAT ?? 0);
 
   return (
     <>
-      <Title title="Settings" />
-      <PaddingWrapper>
-        <h4>Toggle Services</h4>
-        <StatusButton
-          checked={services.includes('subscan')}
-          label="Subscan API"
-          onClick={() => {
-            toggleService('subscan');
-          }}
-        />
-        {!DISABLE_FIAT && (
-          <StatusButton
-            checked={services.includes('binance_spot')}
-            label="Binance Spot API"
-            onClick={() => {
-              toggleService('binance_spot');
-            }}
+      <Title title={t('settings')} />
+      <ModalPadding>
+        <ContentWrapper>
+          <h4>{t('togglePlugins')}</h4>
+          {/* <StatusButton
+            checked={plugins.includes('subscan')}
+            label="Subscan API"
+            onClick={() => togglePlugin('subscan')}
           />
-        )}
+          <StatusButton
+            checked={plugins.includes('polkawatch')}
+            label="Polkawatch API"
+            onClick={() => togglePlugin('polkawatch')}
+          />
+          {!DISABLE_FIAT && (
+            <StatusButton
+              checked={plugins.includes('binance_spot')}
+              label={t('binanceApi')}
+              onClick={() => togglePlugin('binance_spot')}
+            />
+          )} */}
 
-        <h4>Toggle Features</h4>
+          <h4>{t('toggleFeatures')}</h4>
 
-        <StatusButton
-          checked={services.includes('tips')}
-          label="Dashboard Tips"
-          onClick={() => {
-            toggleService('tips');
-          }}
-        />
-      </PaddingWrapper>
+          {/* <StatusButton
+            checked={plugins.includes('tips')}
+            label={t('dashboardTips')}
+            onClick={() => togglePlugin('tips')}
+          /> */}
+        </ContentWrapper>
+      </ModalPadding>
     </>
   );
 };
-
-export default Settings;

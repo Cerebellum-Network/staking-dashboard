@@ -1,24 +1,27 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import React, { RefObject, useState } from 'react';
+import type { ReactNode, RefObject } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { defaultMenuContext } from './defaults';
-import { MenuContextInterface } from './types';
+import type { MenuContextInterface, MenuItem } from './types';
 
 export const MenuContext =
-  React.createContext<MenuContextInterface>(defaultMenuContext);
+  createContext<MenuContextInterface>(defaultMenuContext);
 
-export const useMenu = () => React.useContext(MenuContext);
+export const useMenu = () => useContext(MenuContext);
 
-export const MenuProvider = ({ children }: { children: React.ReactNode }) => {
-  const [open, setOpen] = useState(0);
-  const [show, setShow] = useState(0);
-  const [items, setItems] = useState<React.ReactNode[]>([]);
+export const MenuProvider = ({ children }: { children: ReactNode }) => {
+  const [open, setOpen] = useState<number>(0);
+  const [show, setShow] = useState<number>(0);
+  const [items, setItems] = useState<MenuItem[]>([]);
 
   const [position, setPosition] = useState<[number, number]>([0, 0]);
 
   const openMenu = () => {
-    if (open) return;
+    if (open) {
+      return;
+    }
     setOpen(1);
   };
 
@@ -30,7 +33,9 @@ export const MenuProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const setMenuPosition = (ref: RefObject<HTMLDivElement>) => {
-    if (open || !ref?.current) return;
+    if (open || !ref?.current) {
+      return;
+    }
     const bodyRect = document.body.getBoundingClientRect();
     const elemRect = ref.current.getBoundingClientRect();
 
@@ -42,7 +47,9 @@ export const MenuProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const checkMenuPosition = (ref: RefObject<HTMLDivElement>) => {
-    if (!ref?.current) return;
+    if (!ref?.current) {
+      return;
+    }
 
     const bodyRect = document.body.getBoundingClientRect();
     const menuRect = ref.current.getBoundingClientRect();
@@ -67,7 +74,7 @@ export const MenuProvider = ({ children }: { children: React.ReactNode }) => {
     setShow(1);
   };
 
-  const setMenuItems = (_items: React.ReactNode[]) => {
+  const setMenuItems = (_items: MenuItem[]) => {
     setItems(_items);
   };
 

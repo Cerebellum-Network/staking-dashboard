@@ -1,34 +1,37 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import React, { useState } from 'react';
-import * as defaults from './defaults';
+import { createContext, useContext, useState } from 'react';
+import { defaultContext } from './defaults';
+import type { AnyJson } from 'types';
+import type { ListContextInterface, ListProviderProps } from './types';
+import type { ListFormat } from 'library/PoolList/types';
 
-export const ListContext: React.Context<any> = React.createContext(
-  defaults.defaultContext
-);
+export const ListContext = createContext<ListContextInterface>(defaultContext);
 
-export const useList = () => React.useContext(ListContext);
+export const useList = () => useContext(ListContext);
 
-export const ListProvider = (props: any) => {
-  const selectToggleable = props.selectToggleable ?? true;
+export const ListProvider = ({
+  selectToggleable = true,
+  selectActive: initialSelctActive = false,
+  children,
+}: ListProviderProps) => {
+  // Store the currently selected validators from the list.
+  const [selected, setSelected] = useState<AnyJson[]>([]);
 
-  // store the currently selected validators from the list
-  const [selected, setSelected] = useState<Array<any>>([]);
-
-  // store whether validator selection is active
-  const [selectActive, _setSelectActive] = useState(
-    props.selectActive ?? false
+  // Store whether validator selection is active.
+  const [selectActive, setSelectActiveState] = useState<boolean>(
+    initialSelctActive ?? false
   );
 
-  // store the list format of the list
-  const [listFormat, _setListFormat] = useState('col');
+  // Store the list format of the list.
+  const [listFormat, _setListFormat] = useState<ListFormat>('col');
 
-  const addToSelected = (_item: any) => {
+  const addToSelected = (_item: AnyJson) => {
     setSelected([...selected].concat(_item));
   };
 
-  const removeFromSelected = (items: Array<any>) => {
+  const removeFromSelected = (items: AnyJson[]) => {
     setSelected([...selected].filter((item) => !items.includes(item)));
   };
 
@@ -36,13 +39,13 @@ export const ListProvider = (props: any) => {
     setSelected([]);
   };
   const setSelectActive = (_selectActive: boolean) => {
-    _setSelectActive(_selectActive);
+    setSelectActiveState(_selectActive);
     if (_selectActive === false) {
       resetSelected();
     }
   };
 
-  const setListFormat = (v: string) => {
+  const setListFormat = (v: ListFormat) => {
     _setListFormat(v);
   };
 
@@ -60,7 +63,7 @@ export const ListProvider = (props: any) => {
         selectToggleable,
       }}
     >
-      {props.children}
+      {children}
     </ListContext.Provider>
   );
 };
