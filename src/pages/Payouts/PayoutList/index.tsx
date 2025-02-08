@@ -1,47 +1,50 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
 import { faBars, faGripVertical } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ListItemsPerBatch, ListItemsPerPage } from 'consts';
-import { useApi } from 'contexts/Api';
-import { useNetworkMetrics } from 'contexts/Network';
-import { useBondedPools } from 'contexts/Pools/BondedPools';
-import { BondedPool } from 'contexts/Pools/types';
-import { StakingContext } from 'contexts/Staking';
-import { useTheme } from 'contexts/Themes';
-import { useValidators } from 'contexts/Validators';
-import { Validator } from 'contexts/Validators/types';
+import { ellipsisFn, isNotZero, planckToUnit } from '@polkadot-cloud/utils';
+import BigNumber from 'bignumber.js';
 import { formatDistance, fromUnixTime } from 'date-fns';
 import { motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { DefaultLocale, ListItemsPerBatch, ListItemsPerPage } from 'consts';
+import { useApi } from 'contexts/Api';
+import { useNetworkMetrics } from 'contexts/NetworkMetrics';
+import { useBondedPools } from 'contexts/Pools/BondedPools';
+import { StakingContext } from 'contexts/Staking';
+import { useTheme } from 'contexts/Themes';
+import { useValidators } from 'contexts/Validators/ValidatorEntries';
 import { Header, List, Wrapper as ListWrapper } from 'library/List';
 import { MotionContainer } from 'library/List/MotionContainer';
 import { Pagination } from 'library/List/Pagination';
 import { Identity } from 'library/ListItem/Labels/Identity';
 import { PoolIdentity } from 'library/ListItem/Labels/PoolIdentity';
 import { locales } from 'locale';
-import React, { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { networkColors } from 'theme/default';
-import { AnySubscan } from 'types';
-import { clipAddress, planckToUnit } from 'Utils';
-import { PayoutListProps } from '../types';
+import type { AnySubscan } from 'types';
+import { useNetwork } from 'contexts/Network';
 import { ItemWrapper } from '../Wrappers';
+import type { PayoutListProps } from '../types';
 import { PayoutListProvider, usePayoutList } from './context';
 
-export const PayoutListInner = (props: PayoutListProps) => {
-  const { allowMoreCols, pagination } = props;
-
-  const { mode } = useTheme();
-  const { isReady, network } = useApi();
-  const { units } = network;
-  const { metrics } = useNetworkMetrics();
-  const { listFormat, setListFormat } = usePayoutList();
-  const { validators, meta } = useValidators();
-  const { bondedPools } = useBondedPools();
+export const PayoutListInner = ({
+  allowMoreCols,
+  pagination,
+  title,
+  payouts: initialPayouts,
+  disableThrottle = false,
+}: PayoutListProps) => {
   const { i18n, t } = useTranslation('pages');
-
-  const disableThrottle = props.disableThrottle ?? false;
+  const { mode } = useTheme();
+  const { isReady } = useApi();
+  const {
+    networkData: { units, unit, colors },
+  } = useNetwork();
+  const { activeEra } = useNetworkMetrics();
+  const { listFormat, setListFormat } = usePayoutList();
+  const { validators } = useValidators();
+  const { bondedPools } = useBondedPools();
 
   // current page
   const [page, setPage] = useState<number>(1);
@@ -50,7 +53,7 @@ export const PayoutListInner = (props: PayoutListProps) => {
   const [renderIteration, _setRenderIteration] = useState<number>(1);
 
   // manipulated list (ordering, filtering) of payouts
-  const [payouts, setPayouts] = useState(props.payouts);
+  const [payouts, setPayouts] = useState(initialPayouts);
 
   // is this the initial fetch
   const [fetched, setFetched] = useState<boolean>(false);
@@ -68,20 +71,23 @@ export const PayoutListInner = (props: PayoutListProps) => {
   const pageStart = pageEnd - (ListItemsPerPage - 1);
 
   // render batch
-  const batchEnd = renderIteration * ListItemsPerBatch - 1;
+  const batchEnd = Math.min(
+    renderIteration * ListItemsPerBatch - 1,
+    ListItemsPerPage
+  );
 
   // refetch list when list changes
   useEffect(() => {
     setFetched(false);
-  }, [props.payouts]);
+  }, [initialPayouts]);
 
   // configure list when network is ready to fetch
   useEffect(() => {
-    if (isReady && metrics.activeEra.index !== 0 && !fetched) {
-      setPayouts(props.payouts);
+    if (isReady && isNotZero(activeEra.index) && !fetched) {
+      setPayouts(initialPayouts);
       setFetched(true);
     }
-  }, [isReady, fetched, metrics.activeEra.index]);
+  }, [isReady, fetched, activeEra.index]);
 
   // render throttle
   useEffect(() => {
@@ -106,39 +112,28 @@ export const PayoutListInner = (props: PayoutListProps) => {
     return <></>;
   }
 
-  // get validator metadata
-  const batchKey = 'validators_browse';
-
   return (
     <ListWrapper>
       <Header>
         <div>
-          <h4>{props.title}</h4>
+          <h4>{title}</h4>
         </div>
         <div>
           <button type="button" onClick={() => setListFormat('row')}>
             <FontAwesomeIcon
               icon={faBars}
-              color={
-                listFormat === 'row'
-                  ? networkColors[`${network.name}-${mode}`]
-                  : 'inherit'
-              }
+              color={listFormat === 'row' ? colors.primary[mode] : 'inherit'}
             />
           </button>
           <button type="button" onClick={() => setListFormat('col')}>
             <FontAwesomeIcon
               icon={faGripVertical}
-              color={
-                listFormat === 'col'
-                  ? networkColors[`${network.name}-${mode}`]
-                  : 'inherit'
-              }
+              color={listFormat === 'col' ? colors.primary[mode] : 'inherit'}
             />
           </button>
         </div>
       </Header>
-      <List flexBasisLarge={allowMoreCols ? '33.33%' : '50%'}>
+      <List $flexBasisLarge={allowMoreCols ? '33.33%' : '50%'}>
         {pagination && (
           <Pagination page={page} total={totalPages} setter={setPage} />
         )}
@@ -146,7 +141,7 @@ export const PayoutListInner = (props: PayoutListProps) => {
           {listPayouts.map((p: AnySubscan, index: number) => {
             const label =
               p.event_id === 'PaidOut'
-                ? t('payouts.pool_claim')
+                ? t('payouts.poolClaim')
                 : p.event_id === 'Rewarded'
                 ? t('payouts.payout')
                 : p.event_id;
@@ -160,12 +155,12 @@ export const PayoutListInner = (props: PayoutListProps) => {
 
             // get validator if it exists
             const validator = validators.find(
-              (v: Validator) => v.address === p.validator_stash
+              (v) => v.address === p.validator_stash
             );
 
             // get pool if it exists
             const pool = bondedPools.find(
-              (_p: BondedPool) => String(_p.id) === String(p.pool_id)
+              ({ id }) => String(id) === String(p.pool_id)
             );
 
             const batchIndex = validator
@@ -194,13 +189,19 @@ export const PayoutListInner = (props: PayoutListProps) => {
                     <div className="row">
                       <div>
                         <div>
-                          <h4 className={`${labelClass}`}>
-                            {p.event_id === 'Slashed' ? '-' : '+'}
-                            {planckToUnit(p.amount, units)} {network.unit}
+                          <h4 className={labelClass}>
+                            <>
+                              {p.event_id === 'Slashed' ? '-' : '+'}
+                              {planckToUnit(
+                                new BigNumber(p.amount),
+                                units
+                              ).toString()}{' '}
+                              {unit}
+                            </>
                           </h4>
                         </div>
                         <div>
-                          <h5 className={`${labelClass}`}>{label}</h5>
+                          <h5 className={labelClass}>{label}</h5>
                         </div>
                       </div>
                     </div>
@@ -210,34 +211,29 @@ export const PayoutListInner = (props: PayoutListProps) => {
                           {label === t('payouts.payout') && (
                             <>
                               {batchIndex > 0 ? (
-                                <Identity
-                                  meta={meta}
-                                  address={p.validator_stash}
-                                  batchIndex={batchIndex}
-                                  batchKey={batchKey}
-                                />
+                                <Identity address={p.validator_stash} />
                               ) : (
-                                <div>{clipAddress(p.validator_stash)}</div>
+                                <div>{ellipsisFn(p.validator_stash)}</div>
                               )}
                             </>
                           )}
-                          {label === t('payouts.pool_claim') && (
+                          {label === t('payouts.poolClaim') && (
                             <>
                               {pool ? (
                                 <PoolIdentity
-                                  batchKey={batchKey}
+                                  batchKey="bonded_pools"
                                   batchIndex={batchIndex}
                                   pool={pool}
                                 />
                               ) : (
                                 <h4>
-                                  {t('payouts.from_pool')} {p.pool_id}
+                                  {t('payouts.fromPool')} {p.pool_id}
                                 </h4>
                               )}
                             </>
                           )}
                           {label === t('payouts.slashed') && (
-                            <h4>{t('payouts.deducted_from_bond')}</h4>
+                            <h4>{t('payouts.deductedFromBond')}</h4>
                           )}
                         </div>
                         <div>
@@ -247,7 +243,10 @@ export const PayoutListInner = (props: PayoutListProps) => {
                               new Date(),
                               {
                                 addSuffix: true,
-                                locale: locales[i18n.resolvedLanguage],
+                                locale:
+                                  locales[
+                                    i18n.resolvedLanguage ?? DefaultLocale
+                                  ],
                               }
                             )}
                           </h5>
@@ -265,13 +264,11 @@ export const PayoutListInner = (props: PayoutListProps) => {
   );
 };
 
-export const PayoutList = (props: PayoutListProps) => {
-  return (
-    <PayoutListProvider>
-      <PayoutListShouldUpdate {...props} />
-    </PayoutListProvider>
-  );
-};
+export const PayoutList = (props: PayoutListProps) => (
+  <PayoutListProvider>
+    <PayoutListShouldUpdate {...props} />
+  </PayoutListProvider>
+);
 
 export class PayoutListShouldUpdate extends React.Component {
   static contextType = StakingContext;
@@ -280,5 +277,3 @@ export class PayoutListShouldUpdate extends React.Component {
     return <PayoutListInner {...this.props} />;
   }
 }
-
-export default PayoutList;

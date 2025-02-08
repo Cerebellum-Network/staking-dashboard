@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useEffect, useRef, useState } from 'react';
-import { AnyApi, AnyMetaBatch } from 'types';
+import type { AnyApi, AnyMetaBatch } from 'types';
 import { setStateWithRef } from 'Utils';
 import { useApi } from '../Api';
 import { defaultAccountContext } from './defaults';
-import { AccountContextInterface } from './types';
+import type { AccountContextInterface } from './types';
 
 // context definition
 export const AccountContext = React.createContext<AccountContextInterface>(

@@ -1,63 +1,70 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import {
   faChartPie,
+  faChevronLeft,
   faCoins,
   faHeart,
   faPlus,
-  faTimes,
   faUserEdit,
 } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useApi } from 'contexts/Api';
-import { useConnect } from 'contexts/Connect';
-import { useModal } from 'contexts/Modal';
-import { useValidators } from 'contexts/Validators';
-import { LargeItem } from 'library/Filter/LargeItem';
+import { useValidators } from 'contexts/Validators/ValidatorEntries';
+import { useUnstaking } from 'library/Hooks/useUnstaking';
 import { SelectableWrapper } from 'library/List';
+import { SelectItems } from 'library/SelectItems';
+import { SelectItem } from 'library/SelectItems/Item';
 import { ValidatorList } from 'library/ValidatorList';
 import { Wrapper } from 'pages/Overview/NetworkSats/Wrappers';
-import { useEffect, useRef, useState } from 'react';
-import {
-  GenerateNominationsInnerProps,
-  Nominations,
-} from '../SetupSteps/types';
+import { useStaking } from 'contexts/Staking';
+import { useFavoriteValidators } from 'contexts/Validators/FavoriteValidators';
+import { useActiveAccounts } from 'contexts/ActiveAccounts';
+import { useImportedAccounts } from 'contexts/Connect/ImportedAccounts';
+import type { Validator } from 'contexts/Validators/types';
+import { ButtonMonoInvert, ButtonPrimaryInvert } from '@polkadot-cloud/react';
+import { Subheading } from 'pages/Nominate/Wrappers';
+import { FavoritesPrompt } from 'canvas/ManageNominations/Prompts/FavoritesPrompt';
+import { usePrompt } from 'contexts/Prompt';
 import { useFetchMehods } from './useFetchMethods';
-import { GenerateOptionsWrapper } from './Wrappers';
+import type { AddNominationsType, GenerateNominationsProps } from './types';
 
-export const GenerateNominations = (props: GenerateNominationsInnerProps) => {
-  // functional props
-  const setters = props.setters ?? [];
-  const defaultNominations = props.nominations;
-  const { batchKey } = props;
-
-  const { openModalWith } = useModal();
+export const GenerateNominations = ({
+  setters = [],
+  nominations: defaultNominations,
+  displayFor = 'default',
+}: GenerateNominationsProps) => {
+  const { t } = useTranslation('library');
   const { isReady, consts } = useApi();
-  const { activeAccount, isReadOnlyAccount } = useConnect();
-  const { removeValidatorMetaBatch, validators, meta } = useValidators();
+  const { isFastUnstaking } = useUnstaking();
+  const { stakers } = useStaking().eraStakers;
+  const { activeAccount } = useActiveAccounts();
+  const { favoritesList } = useFavoriteValidators();
+  const { openPromptWith, closePrompt } = usePrompt();
+  const { isReadOnlyAccount } = useImportedAccounts();
+  const { validators, validatorsFetched } = useValidators();
   const {
     fetch: fetchFromMethod,
     add: addNomination,
     available: availableToNominate,
   } = useFetchMehods();
   const { maxNominations } = consts;
+  const defaultNominationsCount = defaultNominations.nominations?.length || 0;
 
-  let { favoritesList } = useValidators();
-  if (favoritesList === null) {
-    favoritesList = [];
-  }
   // store the method of fetching validators
   const [method, setMethod] = useState<string | null>(
-    defaultNominations.length ? 'Manual' : null
+    defaultNominationsCount ? 'Manual' : null
   );
 
   // store whether validators are being fetched
   const [fetching, setFetching] = useState<boolean>(false);
 
   // store the currently selected set of nominations
-  const [nominations, setNominations] = useState(defaultNominations);
+  const [nominations, setNominations] = useState<Validator[]>(
+    defaultNominations.nominations
+  );
 
   // store the height of the container
   const [height, setHeight] = useState<number | null>(null);
@@ -65,34 +72,28 @@ export const GenerateNominations = (props: GenerateNominationsInnerProps) => {
   // ref for the height of the container
   const heightRef = useRef<HTMLDivElement>(null);
 
-  const rawBatchKey = 'validators_browse';
-
-  // update nominations on account switch
+  // Update nominations on account switch, or if `defaultNominations` change.
   useEffect(() => {
-    if (nominations !== defaultNominations) {
-      removeValidatorMetaBatch(batchKey);
-      setNominations([...defaultNominations]);
+    if (
+      nominations !== defaultNominations.nominations &&
+      defaultNominationsCount > 0
+    ) {
+      setNominations([...(defaultNominations?.nominations || [])]);
+      if (defaultNominationsCount) setMethod('manual');
     }
-  }, [activeAccount]);
+  }, [activeAccount, defaultNominations]);
 
   // refetch if fetching is triggered
   useEffect(() => {
-    if (!isReady || !validators.length) {
+    if (
+      !isReady ||
+      !validators.length ||
+      !stakers.length ||
+      validatorsFetched !== 'synced'
+    )
       return;
-    }
 
-    // wait for validator meta data to be fetched
-    const batch = meta[rawBatchKey];
-    if (batch === undefined) {
-      return;
-    }
-    if (batch.stake === undefined) {
-      return;
-    }
-
-    if (fetching) {
-      fetchNominationsForMethod();
-    }
+    if (fetching) fetchNominationsForMethod();
   });
 
   // reset fixed height on window size change
@@ -110,66 +111,52 @@ export const GenerateNominations = (props: GenerateNominationsInnerProps) => {
   // fetch nominations based on method
   const fetchNominationsForMethod = () => {
     if (method) {
-      const _nominations = fetchFromMethod(method);
+      const newNominations = fetchFromMethod(method);
+
       // update component state
-      setNominations([..._nominations]);
+      setNominations([...newNominations]);
       setFetching(false);
-      updateSetters(_nominations);
+      updateSetters(newNominations);
     }
   };
 
   // add nominations based on method
-  const addNominationByType = (type: string) => {
+  const addNominationByType = (type: AddNominationsType) => {
     if (method) {
-      const _nominations = addNomination(nominations, type);
-      removeValidatorMetaBatch(batchKey);
-      setNominations([..._nominations]);
-      updateSetters([..._nominations]);
+      const newNominations = addNomination(nominations, type);
+      setNominations([...newNominations]);
+      updateSetters([...newNominations]);
     }
   };
 
-  const updateSetters = (_nominations: Nominations) => {
-    for (const s of setters) {
-      const { current, set } = s;
-      const callable = current?.callable ?? false;
-      let _current;
-
-      if (!callable) {
-        _current = current;
-      } else {
-        _current = current.fn();
-      }
-      const _set = {
-        ..._current,
-        nominations: _nominations,
-      };
-      set(_set);
+  const updateSetters = (newNominations: Validator[]) => {
+    for (const { current, set } of setters) {
+      const currentValue = current?.callable ? current.fn() : current;
+      set({
+        ...currentValue,
+        nominations: newNominations,
+      });
     }
   };
 
-  // callback function for adding nominations
+  // callback function for adding nominations.
   const cbAddNominations = ({ setSelectActive }: any) => {
     setSelectActive(false);
 
-    const updateList = (_nominations: Nominations) => {
-      removeValidatorMetaBatch(batchKey);
-      setNominations([..._nominations]);
-      updateSetters(_nominations);
+    const updateList = (newNominations: Validator[]) => {
+      setNominations([...newNominations]);
+      updateSetters(newNominations);
+      closePrompt();
     };
-    openModalWith(
-      'SelectFavorites',
-      {
-        nominations,
-        callback: updateList,
-      },
-      'xl'
+
+    openPromptWith(
+      <FavoritesPrompt callback={updateList} nominations={nominations} />
     );
   };
 
   // function for clearing nomination list
   const clearNominations = () => {
     setMethod(null);
-    removeValidatorMetaBatch(batchKey);
     setNominations([]);
     updateSetters([]);
   };
@@ -180,65 +167,59 @@ export const GenerateNominations = (props: GenerateNominationsInnerProps) => {
     resetSelected,
     setSelectActive,
   }: any) => {
-    removeValidatorMetaBatch(batchKey);
-    const _nominations = [...nominations].filter((n: any) => {
-      return !selected.map((_s: any) => _s.address).includes(n.address);
-    });
-    setNominations([..._nominations]);
-    updateSetters([..._nominations]);
+    const newNominations = [...nominations].filter(
+      (n: any) => !selected.map((_s: any) => _s.address).includes(n.address)
+    );
+    setNominations([...newNominations]);
+    updateSetters([...newNominations]);
     setSelectActive(false);
     resetSelected();
   };
 
-  const disabledMaxNominations = () => {
-    return nominations.length >= maxNominations;
-  };
-  const disabledAddFavorites = () => {
-    return !favoritesList?.length || nominations.length >= maxNominations;
-  };
+  const disabledMaxNominations = () =>
+    maxNominations.isLessThanOrEqualTo(nominations.length);
+  const disabledAddFavorites = () =>
+    !favoritesList?.length ||
+    maxNominations.isLessThanOrEqualTo(nominations.length);
 
   // accumulate generation methods
   const methods = [
     {
-      title: 'Optimal Selection',
-      subtitle: 'Selects a mix of majority active and inactive validators.',
-      icon: faChartPie as IconProp,
+      title: t('optimalSelection'),
+      subtitle: t('optimalSelectionSubtitle'),
+      icon: faChartPie,
       onClick: () => {
         setMethod('Optimal Selection');
-        removeValidatorMetaBatch(batchKey);
         setNominations([]);
         setFetching(true);
       },
     },
     {
-      title: 'Active Low Commission',
-      subtitle: 'Gets a set of active validators with low commission.',
-      icon: faCoins as IconProp,
+      title: t('activeLowCommission'),
+      subtitle: t('activeLowCommissionSubtitle'),
+      icon: faCoins,
       onClick: () => {
         setMethod('Active Low Commission');
-        removeValidatorMetaBatch(batchKey);
         setNominations([]);
         setFetching(true);
       },
     },
     {
-      title: 'From Favorites',
-      subtitle: 'Gets a set of your favorite validators.',
-      icon: faHeart as IconProp,
+      title: t('fromFavorites'),
+      subtitle: t('fromFavoritesSubtitle'),
+      icon: faHeart,
       onClick: () => {
         setMethod('From Favorites');
-        removeValidatorMetaBatch(batchKey);
         setNominations([]);
         setFetching(true);
       },
     },
     {
-      title: 'Manual Selection',
-      subtitle: 'Add validators from scratch.',
-      icon: faUserEdit as IconProp,
+      title: t('manual_selection'),
+      subtitle: t('manualSelectionSubtitle'),
+      icon: faUserEdit,
       onClick: () => {
         setMethod('Manual');
-        removeValidatorMetaBatch(batchKey);
         setNominations([]);
       },
     },
@@ -247,19 +228,28 @@ export const GenerateNominations = (props: GenerateNominationsInnerProps) => {
   // accumulate actions
   const actions = [
     {
-      title: 'Add From Favorites',
+      title: t('addFromFavorites'),
       onClick: cbAddNominations,
       onSelected: false,
       isDisabled: disabledAddFavorites,
     },
     {
-      title: `Remove Selected`,
+      title: `${t('removeSelected')}`,
       onClick: cbRemoveSelected,
       onSelected: true,
       isDisabled: () => false,
     },
     {
-      title: 'Active Validator',
+      title: t('highPerformanceValidator'),
+      onClick: () => addNominationByType('High Performance Validator'),
+      onSelected: false,
+      icon: faPlus,
+      isDisabled: () =>
+        disabledMaxNominations() ||
+        !availableToNominate(nominations).highPerformance.length,
+    },
+    {
+      title: t('activeValidator'),
       onClick: () => addNominationByType('Active Validator'),
       onSelected: false,
       icon: faPlus,
@@ -268,7 +258,7 @@ export const GenerateNominations = (props: GenerateNominationsInnerProps) => {
         !availableToNominate(nominations).activeValidators.length,
     },
     {
-      title: 'Random Validator',
+      title: t('randomValidator'),
       onClick: () => addNominationByType('Random Validator'),
       onSelected: false,
       icon: faPlus,
@@ -278,30 +268,34 @@ export const GenerateNominations = (props: GenerateNominationsInnerProps) => {
     },
   ];
 
+  // Determine button style depending on in canvas.
+  const ButtonType =
+    displayFor === 'canvas' ? ButtonPrimaryInvert : ButtonMonoInvert;
+
   return (
     <>
       {method && (
         <SelectableWrapper>
-          <button type="button" onClick={() => clearNominations()}>
-            <FontAwesomeIcon icon={faTimes as IconProp} />
-            {method}
-          </button>
+          <ButtonType
+            text={t('backToMethods')}
+            iconLeft={faChevronLeft}
+            iconTransform="shrink-2"
+            onClick={() => clearNominations()}
+            marginRight
+          />
 
           {['Active Low Commission', 'Optimal Selection'].includes(
             method || ''
           ) && (
-            <button
-              type="button"
+            <ButtonType
+              text={t('reGenerate')}
               onClick={() => {
                 // set a temporary height to prevent height snapping on re-renders.
                 setHeight(heightRef?.current?.clientHeight || null);
                 setTimeout(() => setHeight(null), 200);
-                removeValidatorMetaBatch(batchKey);
                 setFetching(true);
               }}
-            >
-              Re-Generate
-            </button>
+            />
           )}
         </SelectableWrapper>
       )}
@@ -314,19 +308,30 @@ export const GenerateNominations = (props: GenerateNominationsInnerProps) => {
         <div>
           {!isReadOnlyAccount(activeAccount) && !method && (
             <>
-              <GenerateOptionsWrapper>
+              <Subheading>
+                <h4>
+                  {t('chooseValidators2', {
+                    maxNominations: maxNominations.toString(),
+                  })}
+                </h4>
+              </Subheading>
+              <SelectItems layout="three-col">
                 {methods.map((m: any, n: number) => (
-                  <LargeItem
+                  <SelectItem
                     key={`gen_method_${n}`}
                     title={m.title}
                     subtitle={m.subtitle}
                     icon={m.icon}
-                    transform="grow-2"
-                    active={false}
+                    selected={false}
                     onClick={m.onClick}
+                    disabled={isFastUnstaking}
+                    includeToggle={false}
+                    grow={false}
+                    hoverBorder
+                    layout="three-col"
                   />
                 ))}
-              </GenerateOptionsWrapper>
+              </SelectItems>
             </>
           )}
         </div>
@@ -343,13 +348,13 @@ export const GenerateNominations = (props: GenerateNominationsInnerProps) => {
                 }}
               >
                 <ValidatorList
-                  bondType="stake"
+                  bondFor="nominator"
                   validators={nominations}
-                  batchKey={batchKey}
-                  selectable
                   actions={actions}
                   allowMoreCols
                   allowListFormat={false}
+                  displayFor={displayFor}
+                  selectable
                 />
               </div>
             )}
@@ -359,5 +364,3 @@ export const GenerateNominations = (props: GenerateNominationsInnerProps) => {
     </>
   );
 };
-
-export default GenerateNominations;

@@ -1,6 +1,7 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
+import BigNumber from 'bignumber.js';
 import {
   BarElement,
   CategoryScale,
@@ -12,25 +13,20 @@ import {
   Title,
   Tooltip,
 } from 'chart.js';
-import { useApi } from 'contexts/Api';
-import { useCereStats } from 'contexts/CereStats';
-import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
-import { useStaking } from 'contexts/Staking';
-import { useTheme } from 'contexts/Themes';
-import { useUi } from 'contexts/UI';
 import { format, fromUnixTime } from 'date-fns';
-import { locales } from 'locale';
 import { Bar } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
-import {
-  defaultThemes,
-  networkColors,
-  networkColorsSecondary,
-  networkColorsTransparent,
-} from 'theme/default';
-import { AnySubscan } from 'types';
-import { humanNumber } from 'Utils';
-import { PayoutBarProps } from './types';
+import { DefaultLocale } from 'consts';
+import { usePoolMemberships } from 'contexts/Pools/PoolMemberships';
+import { useStaking } from 'contexts/Staking';
+import { useCereStats } from 'contexts/CereStats';
+import { useTheme } from 'contexts/Themes';
+import { useUi } from 'contexts/UI';
+import { locales } from 'locale';
+import { graphColors } from 'styles/graphs';
+import type { AnySubscan } from 'types';
+import { useNetwork } from 'contexts/Network';
+import type { PayoutBarProps } from './types';
 import { formatRewardsForGraphs } from './Utils';
 
 ChartJS.register(
@@ -45,61 +41,82 @@ ChartJS.register(
 );
 
 export const PayoutBar = ({ days, height }: PayoutBarProps) => {
+  const { i18n, t } = useTranslation('library');
   const { mode } = useTheme();
-  const { name, unit, units } = useApi().network;
   const { isSyncing } = useUi();
   const { inSetup } = useStaking();
   const { membership } = usePoolMemberships();
-  const { payouts, poolClaims } = useCereStats();
-  const { i18n } = useTranslation();
+  const { unit, units, colors } = useNetwork().networkData;
+  const { payouts, poolClaims, unclaimedPayouts } = useCereStats();
+  const notStaking = !isSyncing && inSetup() && !membership;
 
   // remove slashes from payouts (graph does not support negative values).
   const payoutsNoSlash = payouts.filter(
     (p: AnySubscan) => p.event_id !== 'Slashed'
   );
 
-  const notStaking = !isSyncing && inSetup() && !membership;
-  const average = 1;
-
-  const { payoutsByDay, poolClaimsByDay } = formatRewardsForGraphs(
-    days,
-    average,
-    units,
-    payoutsNoSlash,
-    poolClaims
+  // remove slashes from unclaimed payouts.
+  const unclaimedPayoutsNoSlash = unclaimedPayouts.filter(
+    (p: AnySubscan) => p.event_id !== 'Slashed'
   );
+
+  // get formatted rewards data for graph.
+  const { allPayouts, allPoolClaims, allUnclaimedPayouts } =
+    formatRewardsForGraphs(
+      new Date(),
+      days,
+      units,
+      payoutsNoSlash,
+      poolClaims,
+      unclaimedPayoutsNoSlash
+    );
+
+  const { p: graphPayouts } = allPayouts;
+  const { p: graphUnclaimedPayouts } = allUnclaimedPayouts;
+  const { p: graphPoolClaims } = allPoolClaims;
 
   // determine color for payouts
   const colorPayouts = notStaking
-    ? networkColorsTransparent[`${name}-${mode}`]
-    : networkColors[`${name}-${mode}`];
+    ? colors.transparent[mode]
+    : colors.primary[mode];
 
   // determine color for poolClaims
   const colorPoolClaims = notStaking
-    ? networkColorsTransparent[`${name}-${mode}`]
-    : networkColorsSecondary[`${name}-${mode}`];
+    ? colors.transparent[mode]
+    : colors.secondary[mode];
 
   const data = {
-    labels: payoutsByDay.map((item: AnySubscan) => {
+    labels: graphPayouts.map((item: AnySubscan) => {
       const dateObj = format(fromUnixTime(item.block_timestamp), 'do MMM', {
-        locale: locales[i18n.resolvedLanguage],
+        locale: locales[i18n.resolvedLanguage ?? DefaultLocale],
       });
       return `${dateObj}`;
     }),
     datasets: [
       {
-        label: 'Payout',
-        data: payoutsByDay.map((item: AnySubscan) => item.amount),
+        order: 1,
+        label: t('payout'),
+        data: graphPayouts.map((item: AnySubscan) => item.amount),
         borderColor: colorPayouts,
         backgroundColor: colorPayouts,
         pointRadius: 0,
         borderRadius: 3,
       },
       {
-        label: 'Pool Claim',
-        data: poolClaimsByDay.map((item: AnySubscan) => item.amount),
+        order: 2,
+        label: t('poolClaim'),
+        data: graphPoolClaims.map((item: AnySubscan) => item.amount),
         borderColor: colorPoolClaims,
         backgroundColor: colorPoolClaims,
+        pointRadius: 0,
+        borderRadius: 3,
+      },
+      {
+        order: 3,
+        data: graphUnclaimedPayouts.map((item: AnySubscan) => item.amount),
+        label: t('unclaimedPayouts'),
+        borderColor: colorPayouts,
+        backgroundColor: colors.pending[mode],
         pointRadius: 0,
         borderRadius: 3,
       },
@@ -135,7 +152,7 @@ export const PayoutBar = ({ days, height }: PayoutBarProps) => {
           display: false,
         },
         grid: {
-          color: defaultThemes.graphs.grid[mode],
+          color: graphColors.grid[mode],
         },
       },
     },
@@ -148,15 +165,20 @@ export const PayoutBar = ({ days, height }: PayoutBarProps) => {
       },
       tooltip: {
         displayColors: false,
-        backgroundColor: defaultThemes.graphs.tooltip[mode],
-        titleColor: defaultThemes.text.invert[mode],
-        bodyColor: defaultThemes.text.invert[mode],
+        backgroundColor: graphColors.tooltip[mode],
+        titleColor: graphColors.label[mode],
+        bodyColor: graphColors.label[mode],
         bodyFont: {
           weight: '600',
         },
         callbacks: {
           title: () => [],
-          label: (context: any) => `${humanNumber(context.parsed.y)} ${unit}`,
+          label: (context: any) =>
+            `${
+              context.dataset.order === 3 ? `${t('pending')}: ` : ''
+            }${new BigNumber(context.parsed.y)
+              .decimalPlaces(units)
+              .toFormat()} ${unit}`,
         },
       },
     },
@@ -172,5 +194,3 @@ export const PayoutBar = ({ days, height }: PayoutBarProps) => {
     </div>
   );
 };
-
-export default PayoutBar;

@@ -1,28 +1,28 @@
-// Copyright 2022 @paritytech/polkadot-staking-dashboard authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2023 @paritytech/polkadot-staking-dashboard authors & contributors
+// SPDX-License-Identifier: GPL-3.0-only
 
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { ButtonSecondary } from '@rossbulat/polkadot-dashboard-ui';
-import { useApi } from 'contexts/Api';
-import { useValidators } from 'contexts/Validators';
-import { CardWrapper } from 'library/Graphs/Wrappers';
-import ValidatorList from 'library/ValidatorList';
+import { ButtonSecondary, PageHeading, PageRow } from '@polkadot-cloud/react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PageRowWrapper, TopBarWrapper } from 'Wrappers';
-import { useCommunitySections } from './context';
+import { useApi } from 'contexts/Api';
+import { useValidators } from 'contexts/Validators/ValidatorEntries';
+import { CardWrapper } from 'library/Card/Wrappers';
+import { ValidatorList } from 'library/ValidatorList';
+import { useNetwork } from 'contexts/Network';
 import { Item } from './Item';
 import { ItemsWrapper } from './Wrappers';
+import { useCommunitySections } from './context';
 
 export const Entity = () => {
-  const { isReady, network } = useApi();
-  const { validators: allValidators, removeValidatorMetaBatch } =
-    useValidators();
-  const { setActiveSection, activeItem } = useCommunitySections();
   const { t } = useTranslation('pages');
+  const { isReady } = useApi();
+  const { network } = useNetwork();
+  const { validators: allValidators } = useValidators();
+  const { setActiveSection, activeItem } = useCommunitySections();
 
   const { name, validators: entityAllValidators } = activeItem;
-  const validators = entityAllValidators[network.name.toLowerCase()] ?? [];
+  const validators = entityAllValidators[network] ?? [];
 
   // include validators that exist in `erasStakers`
   const [activeValidators, setActiveValidators] = useState(
@@ -36,7 +36,6 @@ export const Entity = () => {
   }, [allValidators, network]);
 
   useEffect(() => {
-    removeValidatorMetaBatch(batchKey);
     const newValidators = [...activeValidators];
     setActiveValidators(newValidators);
   }, [name, activeItem, network]);
@@ -52,26 +51,23 @@ export const Entity = () => {
     },
   };
 
-  const batchKey = 'community_entity_validators';
-
   return (
-    <PageRowWrapper className="page-padding" noVerticalSpacer>
-      <TopBarWrapper>
+    <PageRow>
+      <PageHeading>
         <ButtonSecondary
-          lg
-          text={t('community.go_back')}
+          text={t('community.goBack')}
           iconLeft={faChevronLeft}
           iconTransform="shrink-3"
           onClick={() => setActiveSection(0)}
         />
-      </TopBarWrapper>
+      </PageHeading>
       <ItemsWrapper variants={container} initial="hidden" animate="show">
         <Item item={activeItem} actionable={false} />
       </ItemsWrapper>
       <CardWrapper>
         {!isReady ? (
           <div className="item">
-            <h3>{t('community.connecting')}</h3>
+            <h3>{t('community.connecting')}...</h3>
           </div>
         ) : (
           <>
@@ -79,17 +75,16 @@ export const Entity = () => {
               <div className="item">
                 <h3>
                   {validators.length
-                    ? t('community.fetching_validators')
-                    : t('community.no_validators')}
+                    ? `${t('community.fetchingValidators')}...`
+                    : t('community.noValidators')}
                 </h3>
               </div>
             )}
             {activeValidators.length > 0 && (
               <ValidatorList
-                bondType="stake"
+                bondFor="nominator"
                 validators={activeValidators}
-                batchKey={batchKey}
-                title={`${name} ${t('community.validators')}`}
+                allowListFormat={false}
                 selectable={false}
                 allowMoreCols
                 pagination
@@ -101,8 +96,6 @@ export const Entity = () => {
           </>
         )}
       </CardWrapper>
-    </PageRowWrapper>
+    </PageRow>
   );
 };
-
-export default Entity;
